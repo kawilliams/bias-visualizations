@@ -6,4 +6,6 @@ p {
 .vis {
 	width: 550px;
 	height: 550px;
+	border-style: solid;
+	border-width: 2px;
 }
