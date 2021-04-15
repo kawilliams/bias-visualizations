@@ -69,11 +69,27 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.attr('x1', d => x(d))
 			.attr('x2', d => x(d))
 			.attr('y1', d => y(0))
-			.attr('y2', margin.top)
+			.attr('y2', 20)
 			.attr('stroke', d => (d == 55) ? 'lightgrey' : 'black')
 			.attr('stroke-width', 2)
 			.attr('stroke-dasharray', 8);
 
+	// Add percentile cutoff lines' labels
+	svg.append('text')
+		.attr('transform', 'translate('+x(55)+', 50)')
+		.attr('text-anchor', 'end')
+		.attr('font-family', 'sans-serif')
+		.attr('font-size', 10)
+		.attr('fill', 'lightgrey')
+		.text('Referred for screen');
+	svg.append('text')
+		.attr('transform', 'translate('+x(95)+', 50)')
+		.attr('text-anchor', 'end')
+		.attr('font-family', 'sans-serif')
+		.attr('font-size', 10)
+		.text('Defaulted into program');
+
+	//Add data points
 	svg.append('g')
 		//.attr('transform', 'translate(' + margin.left + ','+ margin.top+')')
 		.selectAll('circle')
@@ -85,26 +101,34 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.attr('fill', d => (d.race == 'B') ? 'purple' : 'orange')
 			.attr('stroke', d => (d.race == 'B') ? 'purple' : 'orange');
 
-	var label = svg.append('g')
-		.attr('font-family', 'sans-serif')
-		.attr('font-size', 10)
-		.selectAll('g')
-		.data(d)
-		.join('g')
-		.attr('transform', d => 'translate(' + x(d.percentile) + ',' + y(d.score) + ')')
-		.attr('opacity', 1);
-	label.append('text')
-		.text(d => d.score + " " + d.race)
-		.each(function(d){
-			const p = d3.select(this);
-			switch(d.orient) {
-				case "top": p.attr('text-anchor', 'middle').attr('dy', '-0.7em');break;
-				case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-				case "bottom": p.attr('text-anchor', 'middle').attr('dy','1.4em');break;
-				case "left": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','end');break;
-				
-			}
-		});
+
+
+	// Vertical slider
+	var drag = d3.drag()
+			.on('start', dragstarted)
+			.on('drag', dragged)
+			.on('end', dragend);
+
+	var dragslider = svg.append('rect')
+			.attr('x', x(80))
+			.attr('y', y(5))
+			.attr('height', 420)
+			.attr('width', 5)
+			.attr('fill', 'lightsteelblue')
+			.attr('cursor', 'pointer')
+			.call(drag);
+
+	function dragstarted(event){
+		d3.select(this).raise().attr('fill', 'steelblue');
+	}
+	function dragged(event){
+		d3.select(this).attr('x', event.x);
+	}
+	function dragend(event, d){
+		d3.select(this).attr('fill', 'lightsteelblue');
+	}
+
+
 
 })
 .catch(function(error){
