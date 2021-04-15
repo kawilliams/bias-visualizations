@@ -1,6 +1,6 @@
 var height = 500,
 	width = 500;
-
+var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 30, left: 50});
 
 //Load the data and run the graph
@@ -95,34 +95,125 @@ d3.csv("script/dummy-data.csv").then(function(d){
 		.selectAll('circle')
 			.data(d)
 			.join('circle')
+			.attr('id', (d,i)=>{ return i+'circle'; })
 			.attr('cx', d => x(d.percentile))
 			.attr('cy', d => y(d.score))
-			.attr('r', 3)
+			.attr('r', radius)
 			.attr('fill', d => (d.race == 'B') ? 'purple' : 'orange')
-			.attr('stroke', d => (d.race == 'B') ? 'purple' : 'orange');
+			.attr('stroke', d => (d.race == 'B') ? 'purple' : 'orange')
+			.append('text');
 
-
+	var label = svg.append('g')
+		.attr('font-family', 'sans-serif')
+		.attr('font-size', 10)
+		.selectAll('g')
+		.data(d)
+		.join('g')
+		.attr('transform', d => 'translate(' + x(d.percentile) + ',' + y(d.score) + ')')
+		.attr('opacity', 1);
+	label.append('text')
+		.attr('class', 'labels')
+		.attr('id', (d,i)=> {
+			return i+"label";
+		})
+		.text(d => d.score + " " + d.race)
+		.each(function(d){
+			const p = d3.select(this);
+			switch(d.orient) {
+				case "top": p.attr('text-anchor', 'middle').attr('dy', '-0.7em');break;
+				case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
+				case "bottom": p.attr('text-anchor', 'middle').attr('dy','1.4em');break;
+				case "left": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','end');break;	
+			}
+		});
 
 	// Vertical slider
-	var drag = d3.drag()
+	var dragVert = d3.drag()
 			.on('start', dragstarted)
-			.on('drag', dragged)
+			.on('drag', draggedVert)
 			.on('end', dragend);
 
-	var dragslider = svg.append('rect')
+	var dragVertSlider = svg.append('rect')
 			.attr('x', x(80))
 			.attr('y', y(5))
 			.attr('height', 420)
 			.attr('width', 5)
 			.attr('fill', 'lightsteelblue')
+			.attr('opacity', 0.7)
 			.attr('cursor', 'pointer')
-			.call(drag);
+			.call(dragVert);
+
+	// Horizontal slider
+	var dragHoriz = d3.drag()
+			.on('start', dragstarted)
+			.on('drag', draggedHoriz)
+			.on('end', dragend);
+
+	var dragHorizSlider = svg.append('rect')
+			.attr('x', x(0))
+			.attr('y', y(2))
+			.attr('height', 5)
+			.attr('width', 420)
+			.attr('fill', 'lightsteelblue')
+			.attr('opacity', 0.7)
+			.attr('cursor', 'pointer')
+			.call(dragHoriz);
 
 	function dragstarted(event){
 		d3.select(this).raise().attr('fill', 'steelblue');
 	}
-	function dragged(event){
+	function draggedVert(event,d){
 		d3.select(this).attr('x', event.x);
+		const circles = d3.selectAll('circle').nodes();
+		var circleIds = [];
+		circles.forEach(element => {
+			curr_x = element.cx.baseVal.value;
+			if ((curr_x >= event.x) && (curr_x <= (event.x+5))) {
+				element.setAttribute('r', radius * 2);
+				curr_id = parseInt(element.id.split('circle')[0]);
+				circleIds.push(curr_id);
+			}
+			else {
+				element.setAttribute('r', radius);
+			}
+		});
+		const labels = d3.selectAll('.labels').nodes();
+		labels.forEach(element => {
+			
+			curr_id = parseInt(element.id.split('label')[0]);
+			if (circleIds.includes(curr_id)) {				element.setAttribute('opacity', 1);
+			}
+			else {
+				element.setAttribute('opacity', 0);
+			}
+		})
+	}
+	function draggedHoriz(event){
+		d3.select(this).attr('y', event.y);
+		const circles = d3.selectAll('circle').nodes();
+		var circleIds = [];
+		circles.forEach(element => {
+			curr_y = element.cy.baseVal.value;
+			if ((curr_y >= event.y) && (curr_y <= (event.y+5))) {
+				element.setAttribute('r', radius * 2);
+				curr_id = parseInt(element.id.split('circle')[0]);
+				circleIds.push(curr_id);
+			}
+			else {
+				element.setAttribute('r', radius);
+			}
+		});
+		const labels = d3.selectAll('.labels').nodes();
+		labels.forEach(element => {
+			
+			curr_id = parseInt(element.id.split('label')[0]);
+			if (circleIds.includes(curr_id)) {				
+				element.setAttribute('opacity', 1);
+			}
+			else {
+				element.setAttribute('opacity', 0);
+			}
+		})
 	}
 	function dragend(event, d){
 		d3.select(this).attr('fill', 'lightsteelblue');
