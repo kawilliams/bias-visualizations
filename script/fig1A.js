@@ -4,7 +4,7 @@ var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 30, left: 50});
 
 //Load the data and run the graph
-d3.csv("script/dummy-data.csv").then(function(d){
+d3.csv("data_bias-vis.csv").then(function(d){
 
 	// x: Percentile of Algorithm Risk Score
 	var x = d3.scaleLinear()
@@ -60,8 +60,8 @@ d3.csv("script/dummy-data.csv").then(function(d){
 	svg.append('g')
 		.call(yAxis);
 
-	// Add percentile lines marking "defaulted" (95%) and "referred" (55%)
-	var cutoffLines = [55, 95];
+	// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
+	var cutoffLines = [97];//[55, 97];
 	svg.append('g')
 		.selectAll('line')
 		.data(cutoffLines)
@@ -72,21 +72,17 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.attr('y2', 20)
 			.attr('stroke', d => (d == 55) ? 'lightgrey' : 'black')
 			.attr('stroke-width', 2)
-			.attr('stroke-dasharray', 8);
+			.attr('stroke-dasharray', d => (d == 55) ? 5 : 0);
 
 	// Add percentile cutoff lines' labels
-	svg.append('text')
-		.attr('transform', 'translate('+x(55)+', 50)')
-		.attr('text-anchor', 'end')
-		.attr('font-family', 'sans-serif')
-		.attr('font-size', 10)
-		.attr('fill', 'lightgrey')
-		.text('Referred for screen');
+	// svg.append('text')
+	// 	.attr('transform', 'translate('+x(55)+', 50)')
+	// 	.attr('text-anchor', 'end')
+	// 	.attr('fill', 'lightgrey')
+	// 	.text('Referred for screen');
 	svg.append('text')
 		.attr('transform', 'translate('+x(95)+', 50)')
 		.attr('text-anchor', 'end')
-		.attr('font-family', 'sans-serif')
-		.attr('font-size', 10)
 		.text('Defaulted into program');
 
 	//Add data points
@@ -99,33 +95,32 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.attr('cx', d => x(d.percentile))
 			.attr('cy', d => y(d.score))
 			.attr('r', radius)
-			.attr('fill', d => (d.race == 'B') ? 'purple' : 'orange')
-			.attr('stroke', d => (d.race == 'B') ? 'purple' : 'orange')
-			.append('text');
+			.attr('fill', d => (d.race == 'B') ? '#764885' : '#ffa600')
+			.attr('stroke', d => (d.race == 'B') ? '#764885' : '#ffa600');
 
 	var label = svg.append('g')
-		.attr('font-family', 'sans-serif')
-		.attr('font-size', 10)
 		.selectAll('g')
 		.data(d)
 		.join('g')
-		.attr('transform', d => 'translate(' + x(d.percentile) + ',' + y(d.score) + ')')
-		.attr('opacity', 1);
+		.attr('transform', d => 'translate(' + x(d.percentile) + ',' + y(d.score) + ')');
 	label.append('text')
 		.attr('class', 'labels')
 		.attr('id', (d,i)=> {
 			return i+"label";
 		})
 		.text(d => d.score + " " + d.race)
+		.attr('opacity', 0)
 		.each(function(d){
 			const p = d3.select(this);
 			switch(d.orient) {
-				case "top": p.attr('text-anchor', 'middle').attr('dy', '-0.7em');break;
-				case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
+				case "top": p.attr('text-anchor', 'middle').attr('dy', '-1.4em');break;
+				case "right": p.attr('dx', '0.9em').attr('dy', '0.42em').attr('text-anchor','start');break;
 				case "bottom": p.attr('text-anchor', 'middle').attr('dy','1.4em');break;
-				case "left": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','end');break;	
+				case "left": p.attr('dx', '-0.9em').attr('dy', '0.42em').attr('text-anchor','end');break;	
 			}
 		});
+
+
 
 	// Vertical slider
 	var dragVert = d3.drag()
@@ -134,7 +129,7 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.on('end', dragend);
 
 	var dragVertSlider = svg.append('rect')
-			.attr('x', x(80))
+			.attr('x', x(95))
 			.attr('y', y(5))
 			.attr('height', 420)
 			.attr('width', 5)
@@ -142,6 +137,19 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.attr('opacity', 0.7)
 			.attr('cursor', 'pointer')
 			.call(dragVert);
+
+	var vertToolTip = svg.append('rect')
+			.attr('id', 'verttooltip')
+			.attr('height', 120)
+			.attr('width', 150)
+			.attr('fill', 'lightsteelblue')
+			.attr('opacity', 0);
+	vertToolTip.append('text')
+			.attr('opacity', 1)
+			.text('Katy')
+			.attr('fill', 'black')
+			.attr('font-size', 12)
+
 
 	// Horizontal slider
 	var dragHoriz = d3.drag()
@@ -151,7 +159,7 @@ d3.csv("script/dummy-data.csv").then(function(d){
 
 	var dragHorizSlider = svg.append('rect')
 			.attr('x', x(0))
-			.attr('y', y(2))
+			.attr('y', y(0))
 			.attr('height', 5)
 			.attr('width', 420)
 			.attr('fill', 'lightsteelblue')
@@ -181,14 +189,16 @@ d3.csv("script/dummy-data.csv").then(function(d){
 		labels.forEach(element => {
 			
 			curr_id = parseInt(element.id.split('label')[0]);
-			if (circleIds.includes(curr_id)) {				element.setAttribute('opacity', 1);
+			if (circleIds.includes(curr_id)) {	
+				element.setAttribute('opacity', 1);
 			}
 			else {
 				element.setAttribute('opacity', 0);
 			}
-		})
+		});
+		toolTipAppear(event, d);
 	}
-	function draggedHoriz(event){
+	function draggedHoriz(event,d){
 		d3.select(this).attr('y', event.y);
 		const circles = d3.selectAll('circle').nodes();
 		var circleIds = [];
@@ -213,10 +223,21 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			else {
 				element.setAttribute('opacity', 0);
 			}
-		})
+		});
+		
 	}
 	function dragend(event, d){
 		d3.select(this).attr('fill', 'lightsteelblue');
+	}
+
+	function toolTipAppear(event, d){
+		
+		var t = d3.select("#verttooltip")
+			.transition()
+			.attr('opacity', 1)
+			.attr('x', (event.x - 170))
+			.attr('y', (500 - event.x));
+
 	}
 
 

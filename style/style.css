@@ -1,6 +1,10 @@
 p {
 	font-family: sans-serif;
 }
+text {
+	font-family: sans-serif;
+	font-size: 10px;
+}
 
 .vis {
 	width: 550px;
@@ -8,3 +12,4 @@ p {
 	border-style: solid;
 	border-width: 2px;
 }
+
