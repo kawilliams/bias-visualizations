@@ -55,9 +55,27 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	.attr('height', height)
 	.attr('width', width);
 
+	var curve = d3.line()
+		.curve(d3.curveBasis);
+
+	var blackPoints = [];
+	var whitePoints = [];
+	for (var i=0; i<d.length; i++){
+		var t = [x(d[i].risk_score_quantile), y(d[i].num_chronic_conds_mean)];
+		(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
+	}
+   	svg.append('path')
+   		.attr('d', curve(blackPoints))
+   		.attr('stroke', 'purple')
+   		.attr('fill', 'none');
+	svg.append('path')
+   		.attr('d', curve(whitePoints))
+   		.attr('stroke', 'orange')
+   		.attr('fill', 'none');
 	svg.append('g')
 		.attr('id', 'xAxisGroup')
 		.call(xAxis);
+
 	//xAxis label
 	d3.select('#xAxisGroup')
 		.append('text')
@@ -66,7 +84,6 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.attr('y', 30)
 		.attr('fill', 'black')
 		.text('Percentile of Algorithm Risk Score');
-
 
 	svg.append('g')
 		.attr('id', 'yAxisGroup')
