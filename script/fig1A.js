@@ -4,7 +4,7 @@ var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 30, left: 50});
 
 //Load the data and run the graph
-d3.csv("data_bias-vis.csv").then(function(d){
+d3.csv("script/dummy-data.csv").then(function(d){
 
 	// x: Percentile of Algorithm Risk Score
 	var x = d3.scaleLinear()
