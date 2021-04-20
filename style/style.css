@@ -6,10 +6,19 @@ text {
 	font-size: 10px;
 }
 
-.vis {
-	width: 550px;
-	height: 550px;
-	border-style: solid;
-	border-width: 2px;
+.svg-container {
+	display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.svg-content {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 

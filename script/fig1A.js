@@ -55,6 +55,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	.attr('height', height)
 	.attr('width', width);
 
+	// Add lines of best fit
 	var curve = d3.line()
 		.curve(d3.curveBasis);
 
@@ -188,20 +189,27 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('cursor', 'pointer')
 			.call(dragVert);
 
-	// var vertToolTipG = svg.append('g');
-	// var vertToolTip = vertToolTipG.append('rect')
-	// 		.attr('id', 'verttooltip')
-	// 		.attr('height', 120)
-	// 		.attr('width', 150)
-	// 		.attr('fill', 'lightsteelblue')
-	// 		.attr('border-radius', 5)
-	// 		.attr('opacity', 0);
-	// var vertToolTipText = vertToolTipG.append('text')
-	// 		.attr('id', 'verttooltiptext')
-	// 		.attr('opacity', 0)
-	// 		.text('Move the light blue bars to learn about how ...')
-	// 		.attr('fill', 'black')
-	// 		.attr('font-size', 12);
+	var toolTipG = svg.append('g')
+
+	var toolTip = toolTipG.append('rect')
+			.attr('id', 'tooltip')
+			.attr('height', 120)
+			.attr('width', 150)
+			.attr('x', 100) //(event.x - 170)
+			.attr('y', 100) //(500 - event.x)
+			.attr('visibility', 'hidden')
+			.attr('fill', 'lightsteelblue')
+			.attr('rx', 5)
+			.attr('opacity', '0.8');
+
+	var toolTipText = toolTipG.append('text')
+			.attr('id', 'tooltiptext')
+			.attr('x', 110) //(event.x - 170)
+			.attr('y', 110) //(500 - event.x)
+			.attr('visibility', 'hidden')
+			.attr('font-size', 12)
+			.text('Move the vertical or horizontal bars.');
+			
 
 
 	// Horizontal slider
@@ -213,8 +221,8 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	var dragHorizSlider = svg.append('rect')
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderBar')
-			.attr('x', x(0))
-			.attr('y', y(0))
+			.attr('x', x(-1.5))
+			.attr('y', y(1.4))
 			.attr('rx', 5)
 			.attr('height', 10)
 			.attr('width', 450)
@@ -225,7 +233,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderHandle')
 			.attr('x', x(50)-25)
-			.attr('y', y(0)-2)
+			.attr('y', y(1.4)-2)
 			.attr('rx', 8)
 			.attr('height', 14)
 			.attr('width', 50)
@@ -245,7 +253,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		var circleIds = [];
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
-			if ((curr_x >= event.x-6) && (curr_x <= (event.x+6))) {
+			if ((curr_x >= event.x-13) && (curr_x <= (event.x+13))) {
 				element.setAttribute('r', radius * 2);
 				curr_id = parseInt(element.id.split('circle')[0]);
 				circleIds.push(curr_id);
@@ -264,7 +272,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		var circleIds = [];
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
-			if ((curr_y >= event.y-6) && (curr_y <= (event.y+6))) {
+			if ((curr_y >= event.y-13) && (curr_y <= (event.y+13))) {
 				element.setAttribute('r', radius * 2);
 				curr_id = parseInt(element.id.split('circle')[0]);
 				circleIds.push(curr_id);
@@ -289,20 +297,17 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	function dragend(event, d){
 		var whichSlider = "." + d3.select(this).attr('class');
 		d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
-		//toolTipAppear(event, d);
+		toolTipAppear(event, d);
 	}
 
 	function toolTipAppear(event, d){
 		
-		var t = d3.select("#verttooltip")
+		var t = d3.select("#tooltip")
 			.transition(1)
-			.attr('x', (event.x - 170))
-			.attr('y', (500 - event.x))
-			.attr('opacity', 1);
-		var tText = d3.select('#verttooltiptext')
-			.attr('x', (event.x - 170))
-			.attr('y', (500 - event.x))
-			.attr('opacity', 1);
+			.attr('visibility', 'inline');
+		var tText = d3.select('#tooltiptext')
+			.transition(1)
+			.attr('visibility', 'inline');
 
 	}
 
