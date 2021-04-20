@@ -3,8 +3,9 @@ var height = 500,
 var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 30, left: 50});
 
-//Load the data and run the graph
-d3.csv("script/dummy-data.csv").then(function(d){
+// Load the data and run the graph
+// Data: race, risk_score_quantile, num_chronic_conds_mean, ci
+d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 
 	// x: Percentile of Algorithm Risk Score
 	var x = d3.scaleLinear()
@@ -30,7 +31,7 @@ d3.csv("script/dummy-data.csv").then(function(d){
 
 	// // y: Number of active chronic conditions
 	var y = d3.scaleLinear()
-		.domain([0, Math.ceil(d3.max(d, function(d){ return d.score; }))])
+		.domain([0, Math.ceil(d3.max(d, function(d){ return d.num_chronic_conds_mean; }))])
 		.range([height - margin.bottom, margin.top]);
 
 	var yAxis = g => g
@@ -92,23 +93,23 @@ d3.csv("script/dummy-data.csv").then(function(d){
 			.data(d)
 			.join('circle')
 			.attr('id', (d,i)=>{ return i+'circle'; })
-			.attr('cx', d => x(d.percentile))
-			.attr('cy', d => y(d.score))
+			.attr('cx', d => x(d.risk_score_quantile))
+			.attr('cy', d => y(d.num_chronic_conds_mean))
 			.attr('r', radius)
-			.attr('fill', d => (d.race == 'B') ? '#764885' : '#ffa600')
-			.attr('stroke', d => (d.race == 'B') ? '#764885' : '#ffa600');
+			.attr('fill', d => (d.race == 'black') ? '#764885' : '#ffa600')
+			.attr('stroke', d => (d.race == 'black') ? '#764885' : '#ffa600');
 
 	var label = svg.append('g')
 		.selectAll('g')
 		.data(d)
 		.join('g')
-		.attr('transform', d => 'translate(' + x(d.percentile) + ',' + y(d.score) + ')');
+		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
 	label.append('text')
 		.attr('class', 'labels')
 		.attr('id', (d,i)=> {
 			return i+"label";
 		})
-		.text(d => d.score + " " + d.race)
+		.text(d => d.num_chronic_conds_mean + " " + d.race)
 		.attr('opacity', 0)
 		.each(function(d){
 			const p = d3.select(this);

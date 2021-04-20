@@ -6,7 +6,7 @@ var algBoxSize = {height: 30, width: 60};
 var radius = 4;
 
 
-d3.csv('script/patient-dot-data.csv').then(function(d){
+d3.csv('data/patient-dot-data.csv').then(function(d){
 	var svg = d3.select('div#container')
 		.append('svg')
 		.attr('preserveAspectRatio', 'xMidYMid meet')
