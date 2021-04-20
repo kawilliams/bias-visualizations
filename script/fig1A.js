@@ -15,7 +15,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	var xAxis = g => g
 		.attr('transform', 'translate(0, ' + (height - margin.bottom) + ' )')
 		.attr('class', 'xAxis')
-		.call(d3.axisBottom(x).ticks(width/80))
+		.call(d3.axisBottom(x).ticks(10))
 		//.call(g => g.select(".domain").remove()) //removes the bottom axis
 		.call(g => g.selectAll(".tick line").clone()
 			.attr("y2", -height+margin.top)
@@ -56,13 +56,34 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	.attr('width', width);
 
 	svg.append('g')
+		.attr('id', 'xAxisGroup')
 		.call(xAxis);
+	//xAxis label
+	d3.select('#xAxisGroup')
+		.append('text')
+		.attr('id', 'xAxisLabel')
+		.attr('x', 270)
+		.attr('y', 30)
+		.attr('fill', 'black')
+		.text('Percentile of Algorithm Risk Score');
+
 
 	svg.append('g')
+		.attr('id', 'yAxisGroup')
 		.call(yAxis);
+	//yAxis label
+	d3.select('#yAxisGroup')
+		.append('text')
+		.attr('id', 'yAxisLabel')
+		.attr('transform', 'rotate(-90)')
+		.attr('x', -180)
+		.attr('y', -30)
+		.attr('fill', 'black')
+		.text('Number of Active Chronic Conditions');
+
 
 	// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
-	var cutoffLines = [97];//[55, 97];
+	var cutoffLines = [55, 97];
 	svg.append('g')
 		.selectAll('line')
 		.data(cutoffLines)
@@ -76,15 +97,36 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('stroke-dasharray', d => (d == 55) ? 5 : 0);
 
 	// Add percentile cutoff lines' labels
-	// svg.append('text')
-	// 	.attr('transform', 'translate('+x(55)+', 50)')
-	// 	.attr('text-anchor', 'end')
-	// 	.attr('fill', 'lightgrey')
-	// 	.text('Referred for screen');
+	svg.append('text')
+		.attr('transform', 'translate('+x(55)+', 50)')
+		.attr('text-anchor', 'end')
+		.attr('fill', 'lightgrey')
+		.text('Referred for screen');
 	svg.append('text')
 		.attr('transform', 'translate('+x(95)+', 50)')
 		.attr('text-anchor', 'end')
 		.text('Defaulted into program');
+
+	var confInterval = svg.append('g')
+		.selectAll('g')
+		.data(d)
+		.join('g');
+
+	confInterval.append('line')
+		.attr('class', 'ci')
+		.attr('id', (d,i)=> {
+			return i+"ci";
+		})
+		.attr('x1', d => x(d.risk_score_quantile))
+		.attr('y1', d => {
+			d.ci = +d.ci;
+			d.num_chronic_conds_mean = +d.num_chronic_conds_mean;
+			return y(d.num_chronic_conds_mean + d.ci)
+		})
+		.attr('x2', d => x(d.risk_score_quantile))
+		.attr('y2', d => y(d.num_chronic_conds_mean - d.ci))
+		.attr('stroke', 'black')
+		.attr('stroke-width', 1);
 
 	//Add data points
 	svg.append('g')
@@ -93,34 +135,11 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.data(d)
 			.join('circle')
 			.attr('id', (d,i)=>{ return i+'circle'; })
-			.attr('cx', d => x(d.risk_score_quantile))
-			.attr('cy', d => y(d.num_chronic_conds_mean))
+			.attr('cx', d => x(+d.risk_score_quantile))
+			.attr('cy', d => y(+d.num_chronic_conds_mean))
 			.attr('r', radius)
 			.attr('fill', d => (d.race == 'black') ? '#764885' : '#ffa600')
 			.attr('stroke', d => (d.race == 'black') ? '#764885' : '#ffa600');
-
-	var label = svg.append('g')
-		.selectAll('g')
-		.data(d)
-		.join('g')
-		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
-	label.append('text')
-		.attr('class', 'labels')
-		.attr('id', (d,i)=> {
-			return i+"label";
-		})
-		.text(d => d.num_chronic_conds_mean + " " + d.race)
-		.attr('opacity', 0)
-		.each(function(d){
-			const p = d3.select(this);
-			switch(d.orient) {
-				case "top": p.attr('text-anchor', 'middle').attr('dy', '-1.4em');break;
-				case "right": p.attr('dx', '0.9em').attr('dy', '0.42em').attr('text-anchor','start');break;
-				case "bottom": p.attr('text-anchor', 'middle').attr('dy','1.4em');break;
-				case "left": p.attr('dx', '-0.9em').attr('dy', '0.42em').attr('text-anchor','end');break;	
-			}
-		});
-
 
 
 	// Vertical slider
@@ -130,26 +149,42 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.on('end', dragend);
 
 	var dragVertSlider = svg.append('rect')
+			.attr('class', 'vertSlider')
+			.attr('id', 'vertSliderBar')
 			.attr('x', x(95))
-			.attr('y', y(5))
-			.attr('height', 420)
-			.attr('width', 5)
+			.attr('y', y(5.3))
+			.attr('rx', 5)
+			.attr('height', 460)
+			.attr('width', 10)
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
 			.attr('cursor', 'pointer')
+		svg.append('rect')
+			.attr('class', 'vertSlider')
+			.attr('id', 'vertSliderHandle')
+			.attr('x', x(95)-2)
+			.attr('y', y(2.5)-25)
+			.attr('rx', 8)
+			.attr('height', 50)
+			.attr('width', 14)
+			.attr('fill', 'lightsteelblue')
+			.attr('cursor', 'pointer')
 			.call(dragVert);
 
-	var vertToolTip = svg.append('rect')
-			.attr('id', 'verttooltip')
-			.attr('height', 120)
-			.attr('width', 150)
-			.attr('fill', 'lightsteelblue')
-			.attr('opacity', 0);
-	vertToolTip.append('text')
-			.attr('opacity', 1)
-			.text('Katy')
-			.attr('fill', 'black')
-			.attr('font-size', 12)
+	// var vertToolTipG = svg.append('g');
+	// var vertToolTip = vertToolTipG.append('rect')
+	// 		.attr('id', 'verttooltip')
+	// 		.attr('height', 120)
+	// 		.attr('width', 150)
+	// 		.attr('fill', 'lightsteelblue')
+	// 		.attr('border-radius', 5)
+	// 		.attr('opacity', 0);
+	// var vertToolTipText = vertToolTipG.append('text')
+	// 		.attr('id', 'verttooltiptext')
+	// 		.attr('opacity', 0)
+	// 		.text('Move the light blue bars to learn about how ...')
+	// 		.attr('fill', 'black')
+	// 		.attr('font-size', 12);
 
 
 	// Horizontal slider
@@ -159,25 +194,41 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.on('end', dragend);
 
 	var dragHorizSlider = svg.append('rect')
+			.attr('class', 'horizSlider')
+			.attr('id', 'horizSliderBar')
 			.attr('x', x(0))
 			.attr('y', y(0))
-			.attr('height', 5)
-			.attr('width', 420)
+			.attr('rx', 5)
+			.attr('height', 10)
+			.attr('width', 450)
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
+			.attr('cursor', 'pointer');
+		svg.append('rect')
+			.attr('class', 'horizSlider')
+			.attr('id', 'horizSliderHandle')
+			.attr('x', x(50)-25)
+			.attr('y', y(0)-2)
+			.attr('rx', 8)
+			.attr('height', 14)
+			.attr('width', 50)
+			.attr('fill', 'lightsteelblue')
 			.attr('cursor', 'pointer')
 			.call(dragHoriz);
 
 	function dragstarted(event){
-		d3.select(this).raise().attr('fill', 'steelblue');
+		var whichSlider = "." + d3.select(this).attr('class');
+		d3.selectAll(whichSlider).raise().attr('fill', 'steelblue');
 	}
 	function draggedVert(event,d){
-		d3.select(this).attr('x', event.x);
+		var whichSlider = d3.select(this).attr('class');
+		d3.select("#" + whichSlider + "Bar").attr('x', event.x);
+		d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
 		const circles = d3.selectAll('circle').nodes();
 		var circleIds = [];
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
-			if ((curr_x >= event.x) && (curr_x <= (event.x+5))) {
+			if ((curr_x >= event.x-6) && (curr_x <= (event.x+6))) {
 				element.setAttribute('r', radius * 2);
 				curr_id = parseInt(element.id.split('circle')[0]);
 				circleIds.push(curr_id);
@@ -186,26 +237,17 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 				element.setAttribute('r', radius);
 			}
 		});
-		const labels = d3.selectAll('.labels').nodes();
-		labels.forEach(element => {
-			
-			curr_id = parseInt(element.id.split('label')[0]);
-			if (circleIds.includes(curr_id)) {	
-				element.setAttribute('opacity', 1);
-			}
-			else {
-				element.setAttribute('opacity', 0);
-			}
-		});
-		toolTipAppear(event, d);
+		
 	}
 	function draggedHoriz(event,d){
-		d3.select(this).attr('y', event.y);
+		var whichSlider = d3.select(this).attr('class');
+		d3.select("#" + whichSlider + "Bar").attr('y', event.y);
+		d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
 		const circles = d3.selectAll('circle').nodes();
 		var circleIds = [];
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
-			if ((curr_y >= event.y) && (curr_y <= (event.y+5))) {
+			if ((curr_y >= event.y-6) && (curr_y <= (event.y+6))) {
 				element.setAttribute('r', radius * 2);
 				curr_id = parseInt(element.id.split('circle')[0]);
 				circleIds.push(curr_id);
@@ -228,16 +270,22 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		
 	}
 	function dragend(event, d){
-		d3.select(this).attr('fill', 'lightsteelblue');
+		var whichSlider = "." + d3.select(this).attr('class');
+		d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
+		//toolTipAppear(event, d);
 	}
 
 	function toolTipAppear(event, d){
 		
 		var t = d3.select("#verttooltip")
-			.transition()
-			.attr('opacity', 1)
+			.transition(1)
 			.attr('x', (event.x - 170))
-			.attr('y', (500 - event.x));
+			.attr('y', (500 - event.x))
+			.attr('opacity', 1);
+		var tText = d3.select('#verttooltiptext')
+			.attr('x', (event.x - 170))
+			.attr('y', (500 - event.x))
+			.attr('opacity', 1);
 
 	}
 
