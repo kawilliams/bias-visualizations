@@ -47,8 +47,8 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	patients.append('text')
 		.attr('class', 'label')
 		.attr('transform', d => {
-			var x = d.x * circleBox + margin.left;
-			var y = d.y * circleBox + margin.top;
+			var x = d.x * circleBox + margin.left - 1.5;
+			var y = d.y * circleBox + margin.top + 1.5;
 			return "translate("+ x +","+ y +")";
 		})
 		.text(d => d.race)
@@ -86,28 +86,56 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	var inputBoxRect = inputBoxG.append('rect')
 		.attr('x', 10)
 		.attr('y', 10)
+		.attr('rx', 3)
 		.attr('height', 100)
 		.attr('width', 50)
 		.attr('fill', 'lightsteelblue');
-	var inputBoxText = inputBoxG.append('text')
-		.text('Insurance claims info')
-		.attr('x', 10)
+
+	var inputTextList = [{'input': "initial", 
+			"value":" Insurance claims info\n\
+			Age\n\
+			Number of doctors' visits\n\
+			..." },
+			{'input':'revised',
+			"value":"Insurance claims info:\n\
+			Age\n\
+			Number of doctors' visits\n\
+			...\n\
+			Health info:\n\
+			Diagnoses\n\
+			Metrics\n\
+			..."}];
+
+	var inputBoxText = inputBoxG.selectAll('text')
+		.data(inputTextList)
+		.enter()
+		.append('text')
+		.attr('x', 14)
 		.attr('y', 30);
+		inputBoxText.selectAll('tspan')
+		.data(inputTextList => inputTextList.value.split("\n"))
+		.enter()
+		.append('tspan')
+		.attr('class', 'text')
+		.text(d => d)
+		.attr('x', 14)
+		.attr('dy',6)
+		.attr('dx',0);
 
 	var nextBoxG = svg.append('g');
 	var nextBox = nextBoxG.append('rect')
 		.attr('class', 'next')
-		.attr('x', 93)
-		.attr('y', 115)
-		.attr('height', 15)
-		.attr('display', 'none')
+		.attr('x', 110)
+		.attr('y', 85)
+		.attr('height', 5)
+		.attr('display', 'visible')
 		.on('click', showPopUp);
 	var nextBoxText = nextBoxG.append('text')
 		.attr('class', 'next')
 		.text('NEXT')
-		.attr('x', 97)
-		.attr('y', 130)
-		.attr('opacity', 0)
+		.attr('x', 112)
+		.attr('y', 90)
+		.attr('opacity', 1)
 		.attr('cursor', 'pointer')
 		.on('click', showPopUp);
 		
@@ -140,8 +168,9 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		d3.select('rect.next')
 			.transition()
-			.attr('height', 25)
-			.attr('width', 50)
+			.attr('height', 7)
+			.attr('width', 15)
+			.attr('rx', 3)
 			.attr('display', 'inline')
 			.attr('fill', 'lightsteelblue');
 		d3.select('text.next')
