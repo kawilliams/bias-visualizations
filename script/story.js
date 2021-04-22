@@ -3,7 +3,9 @@ var margin = ({top: 50, right: 10, bottom: 30, left: 50});
 
 var circleBox = 12;
 var algBoxSize = {height: 30, width: 60};
-var radius = 4;
+var radius = 5;
+var viewBoxSize = {height: 150, width: 300};
+var padding = {text: 20};
 
 
 d3.csv('data/patient-dot-data.csv').then(function(d){
@@ -47,18 +49,18 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	patients.append('text')
 		.attr('class', 'label')
 		.attr('transform', d => {
-			var x = d.x * circleBox + margin.left - 1.5;
-			var y = d.y * circleBox + margin.top + 1.5;
+			var x = d.x * circleBox + margin.left - 2;
+			var y = d.y * circleBox + margin.top + 2;
 			return "translate("+ x +","+ y +")";
 		})
 		.text(d => d.race)
 		.attr('fill', d => d.race == 'B' ? 'black' : 'white')
 		.attr('font-weight', d => d.race == 'B' ? 'bolder' : 'normal')
-		.attr('font-size', '4px')
+		// .attr('font-size', '8px')
 		.attr('opacity', 0);
 
 	// Move the patients to the right side
-	patients.attr('transform', 'translate(120,-8)');
+	patients.attr('transform', 'translate('+ (viewBoxSize.width * 0.6) +',0)');
 
 
 	var algorithmG = svg.append('g');
@@ -66,8 +68,8 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	var algorithmBox = algorithmG
 		.append('rect')
 		.attr('class', 'alg')
-		.attr('x', 90)
-		.attr('y', 45)
+		.attr('x', viewBoxSize.width * 0.35)
+		.attr('y', viewBoxSize.height * 0.28)
 		.attr('height', algBoxSize.height)
 		.attr('width', algBoxSize.width)
 		.attr('fill', 'lightgrey')
@@ -77,8 +79,8 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	var algorithmText = algorithmG
 		.append('text')
 		.text('Algorithm')
-		.attr('x', 95)
-		.attr('y', 65)
+		.attr('x', viewBoxSize.width * 0.35 + padding.text)
+		.attr('y', viewBoxSize.height * 0.28 + padding.text)
 		.on('click', initialSickFilter)
 		.attr('cursor', 'pointer');
 
@@ -135,7 +137,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.text('NEXT')
 		.attr('x', 112)
 		.attr('y', 90)
-		.attr('opacity', 1)
+		.attr('opacity', 0)
 		.attr('cursor', 'pointer')
 		.on('click', showPopUp);
 		
@@ -203,7 +205,53 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		d3.selectAll('.popup')
 			.transition()
 			.attr('display', 'none');
+		d3.select('#popuptext').remove();
 		recolorPatients();
+
+		d3.select('#popupbox')
+			.transition()
+			.attr('display','inline')
+			.attr('x', viewBoxSize.width * 0.72)
+			.attr('y', 10)
+			.attr('fill', 'white')
+			.attr('stroke', 'lightsteelblue')
+			.attr('height', 30)
+			.attr('width', 60)
+			.attr('opacity', 0.9);
+		var text1 = "Uh oh - some sick folks didn't make it into\n\
+					the program. And if we look closer, we see most\n\
+					of the patients who didn't make it are Black. \n\
+					On the flip side, most of the healthy people who\n\
+					got into the program are White.\n\nThis isn't fair."
+		
+		var popUpText = d3.select('#popupbox')
+		.append('text')
+		.attr('id', 'popuptext')
+		.attr('class', 'popup')
+		.attr('x', viewBoxSize.width * 0.72)
+		.attr('y', 20)
+		.attr('fill', 'black');
+		// var instructions = popup.select('text')
+		// 	.data(text1)
+		// 	.enter()
+		// 	.append('text')
+		// 	.attr('x', viewBoxSize.width * 0.72)
+		// 	.attr('y', 20);
+		popUpText.selectAll('tspan')
+			.data(d => text1.split('\n'))
+			.enter()
+			.append('tspan')
+			.attr('class', 'popup')
+			.text(d => d)
+			.attr('x', viewBoxSize.width * 0.72)
+			.attr('y', 30)
+			.attr('opacity', 1)
+			.attr('fill', 'black');
+
+		d3.selectAll('.next')
+			.transition()
+			.attr('display', 'none');
+
 	}
 
 	function recolorPatients() {
