@@ -68,6 +68,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
    	svg.append('path')
    		.attr('d', curve(blackPoints))
    		.attr('stroke', 'purple')
+   		.attr('stroke-dasharray', 5)
    		.attr('fill', 'none');
 	svg.append('path')
    		.attr('d', curve(whitePoints))
@@ -101,30 +102,56 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 
 
 	// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
-	var cutoffLines = [55, 97];
+	var cutoffLines = [{percentile: 55, text: 'Referred for screen'},
+						{percentile: 97, text: 'Defaulted into program'}];
 	svg.append('g')
 		.selectAll('line')
 		.data(cutoffLines)
 		.join('line')
-			.attr('x1', d => x(d))
-			.attr('x2', d => x(d))
+			.attr('x1', d => x(d.percentile))
+			.attr('x2', d => x(d.percentile))
 			.attr('y1', d => y(0))
 			.attr('y2', 20)
-			.attr('stroke', d => (d == 55) ? 'lightgrey' : 'black')
+			.attr('stroke', d => (d.percentile == 55) ? 'lightgrey' : 'black')
 			.attr('stroke-width', 2)
-			.attr('stroke-dasharray', d => (d == 55) ? 5 : 0);
+			.attr('stroke-dasharray', d => (d.percentile == 55) ? 5 : 0);
 
 	// Add percentile cutoff lines' labels
-	svg.append('text')
-		.attr('transform', 'translate('+x(55)+', 50)')
-		.attr('text-anchor', 'end')
-		.attr('fill', 'lightgrey')
-		.text('Referred for screen');
-	svg.append('text')
-		.attr('transform', 'translate('+x(95)+', 50)')
-		.attr('text-anchor', 'end')
-		.text('Defaulted into program');
+	svg.append('g')
+		.selectAll('text')
+		.data(cutoffLines)
+		.enter()
+		.append('text')
+			.attr('transform', d => 'translate('+(x(d.percentile)-3)+', 50)')
+			.attr('fill', d => (d.percentile == 55) ? 'lightgrey' : 'black')
+			.text(d => d.text)
+			.attr('text-anchor', 'end');
+		
+	// Add legend (Black: purple, White; orange)
+	var legendColors = [{color: "orange" , path: "M60,55 l45,0" , 
+						dasharray: "0", race: "White"},
+						{color: "purple" , path: "M60,70 l50,0" , 
+						dasharray: "5 5", race: "Black"}];
+	// Add legend 
+	svg.append('g')
+		.selectAll('path')
+		.data(legendColors)
+		.join('path')
+		.attr('d', d => d.path)
+		.attr('stroke', d => d.color)
+		.attr('stroke-dasharray', d => d.dasharray)
+		.attr('stroke-width', 2)
+		.attr('fill', 'none');
+	svg.append('g')
+		.selectAll('text')
+		.data(legendColors)
+		.enter()
+		.append('text')
+		.attr('x', 110)
+		.attr('y', d => (d.race == 'Black') ? 72 : 57)
+		.text(d => d.race);
 
+	// Add confidence intervals at dots
 	var confInterval = svg.append('g')
 		.selectAll('g')
 		.data(d)
@@ -169,7 +196,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	var dragVertSlider = svg.append('rect')
 			.attr('class', 'vertSlider')
 			.attr('id', 'vertSliderBar')
-			.attr('x', x(95))
+			.attr('x', x(82))
 			.attr('y', y(5.3))
 			.attr('rx', 5)
 			.attr('height', 460)
@@ -180,7 +207,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		svg.append('rect')
 			.attr('class', 'vertSlider')
 			.attr('id', 'vertSliderHandle')
-			.attr('x', x(95)-2)
+			.attr('x', x(82)-2)
 			.attr('y', y(2.5)-25)
 			.attr('rx', 8)
 			.attr('height', 50)
