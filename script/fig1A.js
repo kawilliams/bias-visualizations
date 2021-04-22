@@ -194,21 +194,40 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	var toolTip = toolTipG.append('rect')
 			.attr('id', 'tooltip')
 			.attr('height', 120)
-			.attr('width', 150)
+			.attr('width', 170)
 			.attr('x', 100) //(event.x - 170)
 			.attr('y', 100) //(500 - event.x)
-			.attr('visibility', 'hidden')
 			.attr('fill', 'lightsteelblue')
 			.attr('rx', 5)
 			.attr('opacity', '0.8');
 
-	var toolTipText = toolTipG.append('text')
-			.attr('id', 'tooltiptext')
-			.attr('x', 110) //(event.x - 170)
+	var toolTipText = { instructions: "Move the horizontal or vertical slider.",
+				horizText: "Both the Black patient and the \n\
+					White patient have X chronic \n\
+					conditions, but the Black patient\n\
+					is Y percentile farther back than\n\
+					the White patient in the line to \n\
+					be admitted to the health \nprogram.",
+				vertText: "Each patient received an \n\
+					algorithm score at the Xth percentile,\n\
+					however, the Black patient has on\n\
+					average Y chronic conditions while\n\
+					the White patient has on average \n\
+					Z chronic conditions."};
+	var toolTipTextElement = toolTipG.selectAll('text')
+			.data(d => toolTipText.instructions.split("\n"))
+			.enter()
+			.append("text")
+			.attr('class', 'tiptext')
+			.attr('x', 105) //(event.x - 170)
 			.attr('y', 110) //(500 - event.x)
-			.attr('visibility', 'hidden')
-			.attr('font-size', 12)
-			.text('Move the vertical or horizontal bars.');
+			.attr('font-size', 12);
+		toolTipTextElement
+			.append('tspan')
+			.attr('class', 'tiptext')
+			.text(d => d)
+			.attr('x',105)
+			.attr('y', (d,i) => i * 15 + 120);
 			
 
 
@@ -281,34 +300,35 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 				element.setAttribute('r', radius);
 			}
 		});
-		const labels = d3.selectAll('.labels').nodes();
-		labels.forEach(element => {
-			
-			curr_id = parseInt(element.id.split('label')[0]);
-			if (circleIds.includes(curr_id)) {				
-				element.setAttribute('opacity', 1);
-			}
-			else {
-				element.setAttribute('opacity', 0);
-			}
-		});
 		
 	}
 	function dragend(event, d){
 		var whichSlider = "." + d3.select(this).attr('class');
 		d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
-		toolTipAppear(event, d);
+		toolTipAppear(event, d, whichSlider);
 	}
 
-	function toolTipAppear(event, d){
+	function toolTipAppear(event, d, whichSlider){
 		
-		var t = d3.select("#tooltip")
-			.transition(1)
-			.attr('visibility', 'inline');
-		var tText = d3.select('#tooltiptext')
-			.transition(1)
-			.attr('visibility', 'inline');
+		var text = whichSlider.includes("horiz") ? toolTipText.horizText : toolTipText.vertText;
 
+		toolTipG.selectAll('text').remove()
+	
+
+	var toolTipTextElement = toolTipG.selectAll('text')
+			.data(d => text.split("\n"))
+			.enter()
+			.append("text")
+			.attr('class', 'tiptext')
+			.attr('x', 105) //(event.x - 170)
+			.attr('y', 110) //(500 - event.x)
+			.attr('font-size', 12);
+		toolTipTextElement
+			.append('tspan')
+			.attr('class', 'tiptext')
+			.text(d => d)
+			.attr('x',105)
+			.attr('y', (d,i) => i * 15 + 120);
 	}
 
 
