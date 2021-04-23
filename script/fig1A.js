@@ -203,7 +203,8 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('width', 10)
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
-			.attr('cursor', 'pointer')
+			.attr('cursor', 'pointer');
+		var circleVertIds = [];
 		svg.append('rect')
 			.attr('class', 'vertSlider')
 			.attr('id', 'vertSliderHandle')
@@ -275,6 +276,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
 			.attr('cursor', 'pointer');
+		var circleHorizIds = [];
 		svg.append('rect')
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderHandle')
@@ -296,14 +298,11 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		d3.select("#" + whichSlider + "Bar").attr('x', event.x);
 		d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
 		const circles = d3.selectAll('circle').nodes();
-		var circleIds = [];
 
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
 			if ((curr_x >= event.x-radius) && (curr_x <= (event.x+radius+10))) {
 				element.setAttribute('r', radius * 2);
-				curr_id = parseInt(element.id.split('circle')[0]);
-				circleIds.push(curr_id);
 			}
 			else {
 				element.setAttribute('r', radius);
@@ -315,48 +314,80 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		var whichSlider = d3.select(this).attr('class');
 		d3.select("#" + whichSlider + "Bar").attr('y', event.y);
 		d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
-		const circles = d3.selectAll('circle').nodes();
-		var circleIds = [];
+				const circles = d3.selectAll('circle').nodes();
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
 			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
 				element.setAttribute('r', radius * 2);
-				curr_id = parseInt(element.id.split('circle')[0]);
-				circleIds.push(curr_id);
 			}
 			else {
 				element.setAttribute('r', radius);
 			}
 		});
+
 		
 	}
 	function dragend(event, d){
 		var whichSlider = "." + d3.select(this).attr('class');
 		d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
-		toolTipAppear(event, d, whichSlider);
+
+		const circles = d3.selectAll('circle').nodes();
+		var circleDataArray = [];
+		circles.forEach(element => {
+			curr_y = element.cy.baseVal.value;
+			curr_x = element.cx.baseVal.value;
+			if ((whichSlider.includes('horiz')) && 
+				(curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
+				var circleData = d3.select(element).datum();
+				console.log("Added due to y", circleData);
+				circleDataArray.push(circleData);
+			}
+			else if ((whichSlider.includes('vert')) && 
+				(curr_x >= event.x-radius) && (curr_x <= (event.x+radius+10))){
+				var circleData = d3.select(element).datum();
+				circleDataArray.push(circleData);
+				console.log("Added due to x", circleData);
+			}
+		});
+
+		toolTipAppear(event, d, whichSlider, circleDataArray);
 	}
 
-	function toolTipAppear(event, d, whichSlider){
-		
+	function toolTipAppear(event, d, whichSlider, selectedCircles){
 		var text = whichSlider.includes("horiz") ? toolTipText.horizText : toolTipText.vertText;
 
-		toolTipG.selectAll('text').remove()
+		toolTipG.selectAll('text').remove();
 	
+		//Get the selected circles' data
+		if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
+			var X = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
+			var Y = selectedCircles[1].risk_score_quantile - selectedCircles[0].risk_score_quantile;
+			text = text.replace("X", X);
+			text = text.replace("Y", Y);
+		}
+		if (selectedCircles.length == 2 && whichSlider.includes("vert")){
+			var X = selectedCircles[1].risk_score_quantile;
+			var Y = selectedCircles[0].num_chronic_conds_mean.toFixed(2);
+			var Z = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
+			text = text.replace("X", X);
+			text = text.replace("Y", Y);
+			text = text.replace("Z", Z);
+		}
 
-	var toolTipTextElement = toolTipG.selectAll('text')
-			.data(d => text.split("\n"))
-			.enter()
-			.append("text")
-			.attr('class', 'tiptext')
-			.attr('x', 105) //(event.x - 170)
-			.attr('y', 110) //(500 - event.x)
-			.attr('font-size', 12);
-		toolTipTextElement
-			.append('tspan')
-			.attr('class', 'tiptext')
-			.text(d => d)
-			.attr('x',105)
-			.attr('y', (d,i) => i * 15 + 120);
+		var toolTipTextElement = toolTipG.selectAll('text')
+				.data(d => text.split("\n"))
+				.enter()
+				.append("text")
+				.attr('class', 'tiptext')
+				.attr('x', 105) //(event.x - 170)
+				.attr('y', 110) //(500 - event.x)
+				.attr('font-size', 12);
+			toolTipTextElement
+				.append('tspan')
+				.attr('class', 'tiptext')
+				.text(d => d)
+				.attr('x',105)
+				.attr('y', (d,i) => i * 15 + 120);
 	}
 
 
