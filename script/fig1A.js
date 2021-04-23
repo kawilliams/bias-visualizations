@@ -297,9 +297,10 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
 		const circles = d3.selectAll('circle').nodes();
 		var circleIds = [];
+
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
-			if ((curr_x >= event.x-13) && (curr_x <= (event.x+13))) {
+			if ((curr_x >= event.x-radius) && (curr_x <= (event.x+radius+10))) {
 				element.setAttribute('r', radius * 2);
 				curr_id = parseInt(element.id.split('circle')[0]);
 				circleIds.push(curr_id);
@@ -318,7 +319,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		var circleIds = [];
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
-			if ((curr_y >= event.y-13) && (curr_y <= (event.y+13))) {
+			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
 				element.setAttribute('r', radius * 2);
 				curr_id = parseInt(element.id.split('circle')[0]);
 				circleIds.push(curr_id);
