@@ -26,7 +26,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 
 	filter.append("feGaussianBlur")
 		.attr("class", "blur")
-		.attr("stdDeviation","4")
+		.attr("stdDeviation","2")
 		.attr("result","coloredBlur");
 
 	var feMerge = filter.append("feMerge");
@@ -93,7 +93,8 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.attr('width', 50)
 		.attr('fill', 'lightsteelblue');
 
-	var inputText = "Insurance claims info\n\
+	var inputText = "Inputs:\n\
+				Insurance claims info\n\
 				Age\n\
 				Number of doctors' visits\n\
 				...\n\
@@ -114,7 +115,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.text((d,i) => d)
 		.attr('x', viewBoxSize.width * 0.1)
 		.attr('y', (d,i) => i * 6 + margin.top)
-		.attr('display', (d,i) => (i < 4) ? 'inline' : 'none')
+		.attr('display', (d,i) => (i < 5) ? 'inline' : 'none')
 		.attr('dy',6)
 		.attr('dx',3);
 
@@ -136,7 +137,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.on('click', showPopUp);
 		
 
-	var popUpBoxG = svg.append('g');
+	var popUpBoxG = svg.append('g').attr('id', 'popupboxg');
 	var popUpBox = popUpBoxG.append('rect')
 		.attr('id', 'popupbox')
 		.attr('class', 'popup')
@@ -167,14 +168,12 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.attr('display', 'none');
 
 
-
-
 	function initialSickFilter(d){
 		d3.selectAll('.dots')
 			.transition()
 			.attr('fill', d => (d.x >= 2) ? '#84b046' : 'lightgrey'); //green
-		d3.selectAll(".exampleGlow")
-			.style('filter', 'url(#glow)');
+		// d3.selectAll(".exampleGlow")
+		// 	.style('filter', 'url(#glow)');
 
 		d3.select('rect.next')
 			.transition()
@@ -187,6 +186,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 			.transition()
 			.attr('opacity', 1);
 	}
+
 	function showPopUp() {
 		d3.select('#popupbox')
 			.transition()
@@ -210,14 +210,13 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	}
 
 	function closePopUp() {
-		// d3.selectAll('.popup')
-		// 	.transition()
-		// 	.attr('display', 'none');
-		//d3.select('#popuptext').remove();
+
+		d3.selectAll('.popuptext').remove();
 
 		recolorPatients();
 
 		d3.select('#popupbox')
+			.transition()
 			.attr('display','inline')
 			.attr('x', viewBoxSize.width * 0.72)
 			.attr('y', 0)
@@ -232,27 +231,20 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 					of the patients who didn't make it are Black. \n\
 					On the flip side, most of the healthy people who\n\
 					got into the program are White.\n\nThis isn't fair."
-
-		d3.select('#popuptext')
-		.attr('display', 'inline')
-		.attr('x', viewBoxSize.width * 0.72)
-		.attr('y', 20)
-		.text('');
-
-		var popUpText = d3.select('#popuptext')
-		.data(d => text1.split('\n'));
-		// .enter()
-		// .append('text')
-		// .attr('class', 'popup');
-		popUpText.append('tspan')
-			.attr('class', 'popup')
-			.text(d => d)
+		var popUpBoxG = d3.select("#popupboxg");
+		var popUpBoxText = popUpBoxG.selectAll('text')
+			.data(d => text1.split('\n'))
+			.enter()
+			.append('text')
+			.attr('class', 'popuptext')
 			.attr('x', viewBoxSize.width * 0.72)
-			.attr('y', (d,i) => i * 4 + 10);
-
-		// d3.selectAll('.next')
-		// 	.transition()
-		// 	.attr('display', 'none');
+			.attr('y', 10);
+		popUpBoxText.append('tspan')
+			.attr('class', 'popuptext')
+			.text(d => d)
+			.attr("x", viewBoxSize.width * 0.72)
+			.attr('y', (d,i) => i * 6 + 10)
+			.attr('display', 'inline');
 
 	}
 
@@ -264,8 +256,6 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		d3.selectAll('.label')
 		.attr('opacity', 1);
 	}
-	// d3.selectAll('.alg')
-	// 	.style('filter', 'url(#glow)');
 		
 }) 
 .catch(function(error){
