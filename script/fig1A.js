@@ -295,8 +295,16 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	}
 	function draggedVert(event,d){
 		var whichSlider = d3.select(this).attr('class');
-		d3.select("#" + whichSlider + "Bar").attr('x', event.x);
-		d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
+		if (event.x < margin.left){
+			d3.select("#" + whichSlider + "Bar").attr('x', margin.left);
+			d3.select("#" + whichSlider + "Handle").attr('x', margin.left-2);	
+		} else if (event.x > width-margin.right) {
+			d3.select("#" + whichSlider + "Bar").attr('x', width-margin.right);
+			d3.select("#" + whichSlider + "Handle").attr('x', width-margin.right-2);
+		} else{
+			d3.select("#" + whichSlider + "Bar").attr('x', event.x);
+			d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
+		}
 		const circles = d3.selectAll('circle').nodes();
 
 		circles.forEach(element => {
@@ -312,9 +320,22 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	}
 	function draggedHoriz(event,d){
 		var whichSlider = d3.select(this).attr('class');
-		d3.select("#" + whichSlider + "Bar").attr('y', event.y);
-		d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
-				const circles = d3.selectAll('circle').nodes();
+		
+		//Prevent slider from going off the bottom
+		if (event.y > (height - margin.bottom)) {
+			d3.select("#" + whichSlider + "Bar").attr('y', height-margin.bottom);
+			d3.select("#" + whichSlider + "Handle").attr('y', height-margin.bottom-2);
+		} 
+		//Prevent slider from going off the top
+		else if (event.y < margin.top){
+			d3.select("#" + whichSlider + "Bar").attr('y', margin.top);
+			d3.select("#" + whichSlider + "Handle").attr('y', margin.top-2);
+		}
+		else {		
+			d3.select("#" + whichSlider + "Bar").attr('y', event.y);
+			d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
+		}
+		const circles = d3.selectAll('circle').nodes();
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
 			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
@@ -339,14 +360,12 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			if ((whichSlider.includes('horiz')) && 
 				(curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
 				var circleData = d3.select(element).datum();
-				console.log("Added due to y", circleData);
 				circleDataArray.push(circleData);
 			}
 			else if ((whichSlider.includes('vert')) && 
 				(curr_x >= event.x-radius) && (curr_x <= (event.x+radius+10))){
 				var circleData = d3.select(element).datum();
 				circleDataArray.push(circleData);
-				console.log("Added due to x", circleData);
 			}
 		});
 
