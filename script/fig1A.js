@@ -65,15 +65,18 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		var t = [x(d[i].risk_score_quantile), y(d[i].num_chronic_conds_mean)];
 		(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
 	}
+	// Black line of best fit
    	svg.append('path')
    		.attr('d', curve(blackPoints))
    		.attr('stroke', 'purple')
    		.attr('stroke-dasharray', 5)
    		.attr('fill', 'none');
+   	// White line of best fit
 	svg.append('path')
    		.attr('d', curve(whitePoints))
    		.attr('stroke', 'orange')
    		.attr('fill', 'none');
+
 	svg.append('g')
 		.attr('id', 'xAxisGroup')
 		.call(xAxis);

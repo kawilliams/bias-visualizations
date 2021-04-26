@@ -2,7 +2,7 @@
 var margin = ({top: 30, right: 30, bottom: 30, left: 30});
 
 var circleBox = 12;
-var algBoxSize = {height: 30, width: 60};
+var algBoxSize = {height: 30, width: 90};
 var radius = 5;
 var viewBoxSize = {height: 150, width: 300};
 var padding = {text: 20};
@@ -68,7 +68,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 	var algorithmBox = algorithmG
 		.append('rect')
 		.attr('class', 'alg')
-		.attr('x', viewBoxSize.width * 0.37)
+		.attr('x', viewBoxSize.width * 0.35)
 		.attr('y', viewBoxSize.height * 0.28)
 		.attr('height', algBoxSize.height)
 		.attr('width', algBoxSize.width)
@@ -78,9 +78,10 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 
 	var algorithmText = algorithmG
 		.append('text')
-		.text('Algorithm')
-		.attr('x', viewBoxSize.width * 0.35 + padding.text)
+		.text('Health Algorithm')
+		.attr('x', viewBoxSize.width * 0.30 + padding.text)
 		.attr('y', viewBoxSize.height * 0.28 + padding.text)
+		.style("font-size", "11px")
 		.on('click', initialSickFilter)
 		.attr('cursor', 'pointer');
 
@@ -90,17 +91,20 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.attr('y', viewBoxSize.height * 0.1)
 		.attr('rx', 3)
 		.attr('height', 90)
-		.attr('width', 50)
+		.attr('width', 60)
 		.attr('fill', 'lightsteelblue');
 
-	var inputText = "Inputs:\n\
-				Insurance claims info\n\
-				Age\n\
-				Number of doctors' visits\n\
+	var inputText = "Insurance claims data:\n\
+				- Number of doctors' visits\n\
+				- Total amount of healthcare\n\
+				costs they incurred\n\
+				- Number of medications\n\
+				- Young/Old\n\
 				...\n\
 				Health info:\n\
-				Diagnoses\n\
-				Metrics\n\
+				- Prior diagnoses\n\
+				- Untreated conditions\n\
+				- Access to care\n\
 				...";
 
 	var inputBoxText = inputBoxG.selectAll('text')
@@ -115,7 +119,7 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		.text((d,i) => d)
 		.attr('x', viewBoxSize.width * 0.1)
 		.attr('y', (d,i) => i * 6 + margin.top)
-		.attr('display', (d,i) => (i < 5) ? 'inline' : 'none')
+		.attr('display', (d,i) => (i < 7) ? 'inline' : 'none')
 		.attr('dy',6)
 		.attr('dx',3);
 
