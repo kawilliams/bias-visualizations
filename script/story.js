@@ -218,31 +218,33 @@ d3.csv('data/patient-dot-data.csv').then(function(d){
 		d3.select('#popupbox')
 			.transition()
 			.attr('display','inline')
-			.attr('x', viewBoxSize.width * 0.72)
-			.attr('y', 0)
+			.attr('x', viewBoxSize.width * 0.62)
+			.attr('y', 5)
+			.attr('rx', 3)
 			.attr('fill', 'white')
 			.attr('stroke', 'lightsteelblue')
 			.attr('height', 50)
-			.attr('width', 80)
+			.attr('width', 100)
 			.attr('opacity', 0.9);
 		
-		var text1 = "Uh oh - some sick folks didn't make it into\n\
-					the program. And if we look closer, we see most\n\
-					of the patients who didn't make it are Black. \n\
+		var text1 = "Uh oh - some sick folks didn't make it into the\n\
+					program. And if we look closer, we see most of \n\
+					the patients who didn't make it are Black.\n\
 					On the flip side, most of the healthy people who\n\
-					got into the program are White.\n\nThis isn't fair."
+					got into the program are White.\n\n\
+					This isn't fair."
 		var popUpBoxG = d3.select("#popupboxg");
 		var popUpBoxText = popUpBoxG.selectAll('text')
 			.data(d => text1.split('\n'))
 			.enter()
 			.append('text')
 			.attr('class', 'popuptext')
-			.attr('x', viewBoxSize.width * 0.72)
+			.attr('x', viewBoxSize.width * 0.62)
 			.attr('y', 10);
 		popUpBoxText.append('tspan')
 			.attr('class', 'popuptext')
 			.text(d => d)
-			.attr("x", viewBoxSize.width * 0.72)
+			.attr("x", viewBoxSize.width * 0.62 + 4)
 			.attr('y', (d,i) => i * 6 + 10)
 			.attr('display', 'inline');
 
