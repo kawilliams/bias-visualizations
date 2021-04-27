@@ -177,8 +177,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.attr('stroke-width', 1);
 
 	//Add data points
-	svg.append('g')
-		//.attr('transform', 'translate(' + margin.left + ','+ margin.top+')')
+	var dataCircles = svg.append('g')
 		.selectAll('circle')
 			.data(d)
 			.join('circle')
@@ -188,7 +187,41 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('r', radius)
 			.attr('fill', d => (d.race == 'black') ? '#764885' : '#ffa600')
 			.attr('stroke', d => (d.race == 'black') ? '#764885' : '#ffa600');
+			
+	var label = svg.append('g')
+		.attr('font-family', 'sans-serif')
+		.attr('font-size', 10)
+		.selectAll('g')
+		.data(d)
+		.join('g')
+		.attr('class', 'labels')
+		.attr('id', (d,i)=> {
+			return i+"label";
+		})
+		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
 
+	var labelText = label.selectAll('text')
+		.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
+		.enter()
+		.append('text')
+		.each(function(d){
+			const p = d3.select(this);
+			switch(d.orient) {
+				case "top": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
+				case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
+				case "bottom": p.attr('dx', '0.5em').attr('dy', '0.7em').attr('text-anchor','start');break;
+				case "left": p.attr('dx', '-0.5em').attr('dy', '-0.22em').attr('text-anchor','end');break;	
+			}
+		});
+
+		labelText.append('tspan')	
+			.text(d => d)
+			.attr('y', (d,i) => i * 12)
+			.style('opacity', 1);
+
+	dataCircles
+		.on('mouseover', showDotToolTip)
+		.on('mouseout', hideDotToolTip);
 
 	// Vertical slider
 	var dragVert = d3.drag()
@@ -261,7 +294,6 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('y', (d,i) => i * 15 + 120);
 			
 
-
 	// Horizontal slider
 	var dragHoriz = d3.drag()
 			.on('start', dragstarted)
@@ -279,8 +311,8 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
 			.attr('cursor', 'pointer');
-		var circleHorizIds = [];
-		svg.append('rect')
+	var circleHorizIds = [];
+	svg.append('rect')
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderHandle')
 			.attr('x', x(50)-25)
@@ -412,6 +444,18 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 				.attr('y', (d,i) => i * 15 + 120);
 	}
 
+	function showDotToolTip(event, d) {
+
+		var dot = d3.select(this).attr('id').split('circle')[0] + "label";
+		
+
+		var label = document.getElementById(dot);
+		console.log(dot, label);
+		label.style.opacity = 1;
+	}
+	function hideDotToolTip(event, d) {
+		d3.selectAll('.labels').style('opacity', 0);
+	}
 
 
 })
