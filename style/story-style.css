@@ -18,10 +18,11 @@ circle {
 	stroke: none;
 }
 
-#next {
+#nextButton {
 	fill: lightsteelblue;
 	stroke: none;
 	rx: 5;
+
 }
 
 text {
