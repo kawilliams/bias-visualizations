@@ -65,6 +65,17 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		var t = [x(d[i].risk_score_quantile), y(d[i].num_chronic_conds_mean)];
 		(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
 	}
+
+	// Add rect to show shading past the 55%ile threshold
+	svg.append('rect')
+		.attr('x', x(55))
+		.attr('y', y(5.5))
+		.attr('width', x(100) - x(55) + 10)
+		.attr('height', height - margin.top + 12)
+		.attr('fill', 'lightgrey')
+		.attr('opacity', 0.4);
+
+
 	// Black line of best fit
    	svg.append('path')
    		.attr('d', curve(blackPoints))
@@ -115,9 +126,9 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('x2', d => x(d.percentile))
 			.attr('y1', d => y(0))
 			.attr('y2', 20)
-			.attr('stroke', d => (d.percentile == 55) ? 'lightgrey' : 'black')
+			.attr('stroke', d => 'black')
 			.attr('stroke-width', 2)
-			.attr('stroke-dasharray', d => (d.percentile == 55) ? 5 : 0);
+			.attr('stroke-dasharray', 5);
 
 	// Add percentile cutoff lines' labels
 	svg.append('g')
@@ -126,7 +137,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.enter()
 		.append('text')
 			.attr('transform', d => 'translate('+(x(d.percentile)-3)+', 50)')
-			.attr('fill', d => (d.percentile == 55) ? 'lightgrey' : 'black')
+			.attr('fill', d => 'black')
 			.text(d => d.text)
 			.attr('text-anchor', 'end');
 		
