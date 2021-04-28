@@ -181,43 +181,69 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.selectAll('circle')
 			.data(d)
 			.join('circle')
-			.attr('id', (d,i)=>{ return i+'circle'; })
+			.attr('id', (d,i)=>{ return "circle"+i; })
 			.attr('cx', d => x(+d.risk_score_quantile))
 			.attr('cy', d => y(+d.num_chronic_conds_mean))
 			.attr('r', radius)
-			.attr('fill', d => (d.race == 'black') ? '#764885' : '#ffa600')
-			.attr('stroke', d => (d.race == 'black') ? '#764885' : '#ffa600');
-			
-	var label = svg.append('g')
-		.attr('font-family', 'sans-serif')
-		.attr('font-size', 10)
-		.selectAll('g')
+			.attr('fill', d => (d.race == 'Black') ? '#764885' : '#ffa600')
+			.attr('stroke', d => (d.race == 'Black') ? '#764885' : '#ffa600');
+
+	var allLabelsG = svg.append('g');
+	var label = allLabelsG.selectAll('rect')
 		.data(d)
-		.join('g')
-		.attr('class', 'labels')
-		.attr('id', (d,i)=> {
-			return i+"label";
-		})
+		.enter()
+		.append('rect')
+		.attr('class', d =>  "labels label"+d.id)
+		.attr('width', 80)
+		.attr('height', 40)
+		.attr('fill', 'lightgrey')
+		.attr('rx', 2)
+		.attr('display', 'none')
 		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
 
-	var labelText = label.selectAll('text')
-		.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
+	var labelText = allLabelsG.selectAll('text')
+		.data(d)
 		.enter()
 		.append('text')
-		.each(function(d){
-			const p = d3.select(this);
-			switch(d.orient) {
-				case "top": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-				case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-				case "bottom": p.attr('dx', '0.5em').attr('dy', '0.7em').attr('text-anchor','start');break;
-				case "left": p.attr('dx', '-0.5em').attr('dy', '-0.22em').attr('text-anchor','end');break;	
-			}
-		});
+		.attr('class', d =>  "labels label"+d.id)
+		.attr('display', 'none')
+		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
 
-		labelText.append('tspan')	
-			.text(d => d)
-			.attr('y', (d,i) => i * 12)
-			.style('opacity', 1);
+
+		labelText.selectAll('tspan')
+		.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
+		.enter()
+		.append('tspan')
+		.attr('class', function(d){
+			return this.parentElement.className.baseVal;
+		})
+		.text(function(d){
+			if (d == "Black" | d == "White") {
+				return "Race: " + d;
+			}
+			if (+d >= 10) {
+				return "Percentile: " + d;
+			}
+			if (d < 5) {
+				return "Conditions: " + d.toFixed(2);
+			}
+			return d;
+		})
+		.attr('display', 'none')
+		.attr('x', 2)
+		.attr('dy', '1.2em'); // (d,i) => i * 7 + 5);
+
+	
+		// .each(function(d){
+		// 	console.log(d);
+		// 	const p = d3.select(this);
+		// 	switch(d.orient) {
+		// 		case "top": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
+		// 		case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
+		// 		case "bottom": p.attr('dx', '0.5em').attr('dy', '0.7em').attr('text-anchor','start');break;
+		// 		case "left": p.attr('dx', '-0.5em').attr('dy', '-0.22em').attr('text-anchor','end');break;	
+		// 	}
+		// });
 
 	dataCircles
 		.on('mouseover', showDotToolTip)
@@ -445,16 +471,16 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	}
 
 	function showDotToolTip(event, d) {
-
-		var dot = d3.select(this).attr('id').split('circle')[0] + "label";
+		var whichLabel = "label" + d3.select(this).attr('id').split('circle')[1];
 		
+		var allPartsOfDotToolTip = document.getElementsByClassName(whichLabel);
 
-		var label = document.getElementById(dot);
-		console.log(dot, label);
-		label.style.opacity = 1;
+		for (var i = 0; i<allPartsOfDotToolTip.length; i++) {
+			allPartsOfDotToolTip[i].setAttribute("display", "inline");
+		}
 	}
 	function hideDotToolTip(event, d) {
-		d3.selectAll('.labels').style('opacity', 0);
+		d3.selectAll('.labels').attr('display', 'none');
 	}
 
 
