@@ -312,26 +312,30 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	var toolTip = toolTipG.append('rect')
 			.attr('id', 'tooltip')
 			.attr('height', 120)
-			.attr('width', 170)
+			.attr('width', 260)
 			.attr('x', 100) //(event.x - 170)
 			.attr('y', 100) //(500 - event.x)
 			.attr('fill', 'lightsteelblue')
 			.attr('rx', 5)
 			.attr('opacity', '0.8');
 
-	var toolTipText = { instructions: "Move the horizontal or vertical slider.",
-				horizText: "Both the Black patient and the \n\
-					White patient have X chronic \n\
-					conditions, but the Black patient\n\
-					is Y percentile farther back than\n\
-					the White patient in the line to \n\
-					be admitted to the health \nprogram.",
-				vertText: "Each patient received an \n\
-					algorithm score at the Xth percentile,\n\
-					however, the Black patient has on\n\
-					average Y chronic conditions while\n\
-					the White patient has on average \n\
-					Z chronic conditions."};
+	var toolTipText = { instructions: "Health providers used an algorithm\n\
+										to determine which patients would get accepted into \n\
+										an extra care program. The x-axis shows how a patient's\n\
+										health score compared to others, and the y-axis shows \n\
+										how healthy the patient is, based on number of chronic\n\
+										conditions. Move the sliders to explore.",
+				horizText: "These two patients are equally sick\n\
+				(X conditions), but only the White \n\
+				patient was chosen for screening.",
+				vertText: "Both patients received the same \n\
+						   health score from the algorithm \n\
+						   (X percentile); however, the Black \n\
+						   patient has more chronic conditions, \n\
+						   like diabetes and heart disease, \n\
+						   than the White patient (Y, \n\
+						    compared to Z, respectively)."
+				};
 	var toolTipTextElement = toolTipG.selectAll('text')
 			.data(d => toolTipText.instructions.split("\n"))
 			.enter()
@@ -492,13 +496,9 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 				}
 			});
 			var X = blackCurve[blackApproxIndex][1].toFixed(2);
-			var Y = whiteCurve[whiteApproxIndex][0].toFixed(0);
-			var Z = blackCurve[blackApproxIndex][0].toFixed(0);
-			text = "Both the Black patient and White\n\
-			would have "+X+" chronic conditions, \n\
-			but the White patient would be at the \n\
-			"+Y+" percentile and the Black patient \n\
-			would be at the "+Z+" percentile."
+			// var Y = whiteCurve[whiteApproxIndex][0].toFixed(0);
+			// var Z = blackCurve[blackApproxIndex][0].toFixed(0);
+			text = text.replace("X", X);
 		}
 		if (selectedCircles.length == 2 && whichSlider.includes("vert")){
 			var X = selectedCircles[1].risk_score_quantile;
@@ -529,12 +529,9 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			var X = blackCurve[blackApproxIndex][0].toFixed(0);
 			var Y = whiteCurve[whiteApproxIndex][1].toFixed(2);
 			var Z = blackCurve[blackApproxIndex][1].toFixed(2);
-			text = "Both the Black patient and White\n\
-			would be at the "+X+" percentile, \n\
-			but the White patient would have  \n\
-			"+Y+" chronic conditions and the \n\
-			Black patient would have "+Z+" chronic\n\
-			conditions."
+			text = text.replace("X", X);
+			text = text.replace("Y", Y);
+			text = text.replace("Z", Z);
 		}
 
 
