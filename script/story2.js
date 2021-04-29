@@ -36,19 +36,21 @@ var makeModel = function(data) {
 	//Make observers that can be notified
 	var _observers = makeObservers();
 
-	// The storyboard step (0 - 8)
-	var _step = 0;
+	// The storyboard step (0 - 7)
+	var _step = -1;
 
 	var _data = data;
 
 	var _text = [
 		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the health program.\n\
 		We want to line them up from sickest to healthiest. We'll use an algorithm to determine the level of health.",
-		"text 1 \n more text",
-		"text 2 \n more text",
-		"text 3 \n more text",
-		"text 4 \n more text",
-		"text 5 \n more text",
+		"We have insurance information, like number of doctor's visits. Let's select these data for our inputs\n\
+		to our algorithm.",
+		"We apply the algorithm and align the circles from sickest to healiest, with the sickest on the left.",
+		"Let's see how accurate our algorithm was at predicting health. Since we input insurance costs into our algorithm\n\
+		it should accurately predict costs.",
+		"But we care more about predicting patient health then predicting costs. How well did the algorithm predict health?",
+		"If we look at the patients, we notice a bad trend. ",
 		"text 6 \n more text",
 		"text 7 \n more text"
 	];
@@ -96,28 +98,25 @@ var makeSVGView = function(model, data, svgID) {
 			_svg.removeChild(_svg.firstChild);
 		}
 	}
-	var _makeCircles = function(step, data) {
-		var circles = _svg.selectAll('circle')
-		.data(data)
-		.enter()
-		.append('circle');
+	
+	var circles = _svg.selectAll('circle')
+	.data(data)
+	.enter()
+	.append('circle');
 
-		circles.attr('cx', d => d.x0 * circleBox )
-			.attr('cy', d => d.y0 * circleBox )
-			.attr('r', radius)
-			.attr('fill', '#EDC951');
+	circles.attr('cx', d => d.x0 * circleBox )
+		.attr('cy', d => d.y0 * circleBox )
+		.attr('r', radius)
+		.attr('fill', '#EDC951');
 
-			// Move the patients to the right side
-		circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
+		// Move the patients to the right side
+	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
 
-	}
+
 
 	var _makeTopText = function(step, text) {
 		_svg.selectAll('.toptext').remove();
 		var topText = _svg
-			// .selectAll('text')
-			// .data(d => text)
-			// .enter()
 			.append('text')
 			// .attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
 			.attr('x', viewBoxSize.width * 0.5)
@@ -142,7 +141,7 @@ var makeSVGView = function(model, data, svgID) {
 			var step = model.get();
 			var data = model.data();
 			var text = model.text();
-			_makeCircles(step, data);
+			//_makeCircles(step, data);
 			_makeTopText(step, text);
 		},
 		register: function(fxn) {
