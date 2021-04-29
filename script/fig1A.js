@@ -2,6 +2,7 @@ var height = 500,
 	width = 500;
 var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 30, left: 50});
+var slider = {handle: 8, bar: 4};
 
 // Load the data and run the graph
 // Data: race, risk_score_quantile, num_chronic_conds_mean, ci
@@ -273,7 +274,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('y', y(5.3))
 			.attr('rx', 5)
 			.attr('height', 460)
-			.attr('width', 10)
+			.attr('width', slider.bar)
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
 			.attr('cursor', 'pointer');
@@ -285,7 +286,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('y', y(2.5)-25)
 			.attr('rx', 8)
 			.attr('height', 50)
-			.attr('width', 14)
+			.attr('width', slider.handle)
 			.attr('fill', 'lightsteelblue')
 			.attr('cursor', 'pointer')
 			.call(dragVert);
@@ -343,7 +344,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('x', x(-1.5))
 			.attr('y', y(1.4))
 			.attr('rx', 5)
-			.attr('height', 10)
+			.attr('height', slider.bar)
 			.attr('width', 450)
 			.attr('fill', 'lightsteelblue')
 			.attr('opacity', 0.7)
@@ -355,7 +356,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('x', x(50)-25)
 			.attr('y', y(1.4)-2)
 			.attr('rx', 8)
-			.attr('height', 14)
+			.attr('height', slider.handle)
 			.attr('width', 50)
 			.attr('fill', 'lightsteelblue')
 			.attr('cursor', 'pointer')
@@ -381,7 +382,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
-			if ((curr_x >= event.x-radius) && (curr_x <= (event.x+radius+10))) {
+			if ((curr_x >= event.x-radius) && (curr_x <= (event.x+radius+slider.bar))) {
 				element.setAttribute('r', radius * 2);
 			}
 			else {
@@ -410,7 +411,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		const circles = d3.selectAll('circle').nodes();
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
-			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
+			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+slider.bar))) {
 				element.setAttribute('r', radius * 2);
 			}
 			else {
@@ -430,12 +431,12 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			curr_y = element.cy.baseVal.value;
 			curr_x = element.cx.baseVal.value;
 			if ((whichSlider.includes('horiz')) && 
-				(curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+10))) {
+				(curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+slider.bar))) {
 				var circleData = d3.select(element).datum();
 				circleDataArray.push(circleData);
 			}
 			else if ((whichSlider.includes('vert')) && 
-				(curr_x >= event.x-radius) && (curr_x <= (event.x+radius+10))){
+				(curr_x >= event.x-radius) && (curr_x <= (event.x+radius+slider.bar))){
 				var circleData = d3.select(element).datum();
 				circleDataArray.push(circleData);
 			}
