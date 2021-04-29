@@ -1,7 +1,7 @@
 
 var margin = ({top: 20, right: 30, bottom: 30, left: 30});
 
-var circleBox = 12;
+var circleBox = 14;
 var algBoxSize = {height: 30, width: 90};
 var radius = 5;
 var viewBoxSize = {height: 150, width: 300};
@@ -54,6 +54,17 @@ var makeModel = function(data) {
 		"text 6 \n more text",
 		"text 7 \n more text"
 	];
+
+	var _inputLabels = [
+		"Input 1",
+		"Input 2",
+		"Input 3",
+		"Input 4",
+		"Input 5",
+		"Input 6",
+		"Input 7",
+		"Input 8"
+	]
 
 	return {
 		//Increment the step & tell everyone
@@ -134,6 +145,34 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('y', (d,i) => i * 7 + margin.top);
 
 	}
+
+	var _moveCircles = function(step) {
+		
+		var circles = _svg.selectAll('circle')
+			.transition()
+			.duration(750)
+			.attr('cx', d => {
+				var _x = d.x0;
+				if (step == 1) _x = d.x1;
+				// if (step == 2) _x = d.x2;
+		
+				return _x * circleBox;
+			})
+			.attr('cy', d => {
+				var _y = d.y0;
+				if (step == 1) _y= d.y1;
+				// if (step == 2) _y = d.y2;
+		
+				return _y * circleBox;
+			});
+		var threshold = _svg.append('rect')
+			.attr('x', 4 * circleBox + radius + 1)
+			.attr('y', 3 * circleBox)
+			.attr('width', 1)
+			.attr('height', 1.5 * circleBox)
+			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
+	}
+
 	return {
 		render: function() {
 			
@@ -141,7 +180,10 @@ var makeSVGView = function(model, data, svgID) {
 			var step = model.get();
 			var data = model.data();
 			var text = model.text();
-			//_makeCircles(step, data);
+			
+			if (step > 0) {
+				_moveCircles(step, data);
+			}
 			_makeTopText(step, text);
 		},
 		register: function(fxn) {
@@ -183,6 +225,8 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 
 	_btn.on('click', _fireIncrementEvent);
 	_btnText.on('click', _fireIncrementEvent);
+
+
 
 
 	return {
