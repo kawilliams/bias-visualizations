@@ -56,17 +56,6 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	.attr('height', height)
 	.attr('width', width);
 
-	// Add lines of best fit
-	var curve = d3.line()
-		.curve(d3.curveBasis);
-
-	var blackPoints = [];
-	var whitePoints = [];
-	for (var i=0; i<d.length; i++){
-		var t = [x(d[i].risk_score_quantile), y(d[i].num_chronic_conds_mean)];
-		(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
-	}
-
 	// Add rect to show shading past the 55%ile threshold
 	svg.append('rect')
 		.attr('x', x(55))
@@ -74,20 +63,47 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.attr('width', x(100) - x(55) + 10)
 		.attr('height', height - margin.top + 12)
 		.attr('fill', 'lightgrey')
-		.attr('opacity', 0.4);
+		.attr('opacity', 0.6);
 
+	// Add lines of best fit
+	// var curve = d3.line()
+	// 	.curve(d3.curveBasis);
 
-	// Black line of best fit
-   	svg.append('path')
-   		.attr('d', curve(blackPoints))
-   		.attr('stroke', 'purple')
-   		.attr('stroke-dasharray', 5)
-   		.attr('fill', 'none');
-   	// White line of best fit
-	svg.append('path')
-   		.attr('d', curve(whitePoints))
-   		.attr('stroke', 'orange')
-   		.attr('fill', 'none');
+	var blackPoints = [];
+	var whitePoints = [];
+	for (var i=0; i<d.length; i++){
+		var t = [d[i].risk_score_quantile, d[i].num_chronic_conds_mean];
+		(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
+	}
+
+	var exponentialRegression = d3.regressionExp()
+			.x(d => d[0])
+			.y(d => d[1])
+			.domain([0, 100]);
+	var blackCurve = exponentialRegression(blackPoints);
+	var whiteCurve = exponentialRegression(whitePoints);
+
+	var lineGenerator = d3.line()
+		.x(d => x(d[0]))
+		.y(d => y(d[1]));
+
+	// purple/Black line of best fit
+	svg.append("path")
+		.data(blackCurve)
+		.attr("d", lineGenerator(blackCurve))
+		.style("stroke", "purple")
+		.style("fill", "none")
+		.style('stroke-width', "1px")
+		.style('stroke-dasharray', '5')
+	
+ 	// orange/White line of best fit
+	svg.append("path")
+		.data(whiteCurve)
+		.attr("d", lineGenerator(whiteCurve))
+		.style("stroke", "orange")
+		.style("fill", "none")
+		.style('stroke-width', "1px")
+		.style('stroke-dasharray', '0')
 
 	svg.append('g')
 		.attr('id', 'xAxisGroup')
@@ -456,6 +472,33 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			var Y = selectedCircles[1].risk_score_quantile - selectedCircles[0].risk_score_quantile;
 			text = text.replace("X", X);
 			text = text.replace("Y", Y);
+		} 
+		else if (whichSlider.includes("horiz")){
+			//Need to use a LoBF point
+			var blackApproxY = 0;
+			var blackApproxIndex = -1;
+			blackCurve.forEach((element,i) => {
+				if (y(element[1]) > event.y) {
+					blackApproxY = y(element[1]);
+					blackApproxIndex = i;
+				}
+			});
+			var whiteApproxY = 0;
+			var whiteApproxIndex = -1;
+			whiteCurve.forEach((element,i) => {
+				if (y(element[1]) > event.y) {
+					whiteApproxY = y(element[1]);
+					whiteApproxIndex = i;
+				}
+			});
+			var X = blackCurve[blackApproxIndex][1].toFixed(2);
+			var Y = whiteCurve[whiteApproxIndex][0].toFixed(0);
+			var Z = blackCurve[blackApproxIndex][0].toFixed(0);
+			text = "Both the Black patient and White\n\
+			would have "+X+" chronic conditions, \n\
+			but the White patient would be at the \n\
+			"+Y+" percentile and the Black patient \n\
+			would be at the "+Z+" percentile."
 		}
 		if (selectedCircles.length == 2 && whichSlider.includes("vert")){
 			var X = selectedCircles[1].risk_score_quantile;
@@ -465,6 +508,35 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			text = text.replace("Y", Y);
 			text = text.replace("Z", Z);
 		}
+		else if (whichSlider.includes("vert")){
+			//Need to use a LoBF point
+			var blackApproxX = 0;
+			var blackApproxIndex = -1;
+			blackCurve.forEach((element,i) => {
+				if (x(element[0]) < event.x) {
+					blackApproxX = x(element[0]);
+					blackApproxIndex = i;
+				}
+			});
+			var whiteApproxX = 0;
+			var whiteApproxIndex = -1;
+			whiteCurve.forEach((element,i) => {
+				if (x(element[0]) < event.x) {
+					whiteApproxX = x(element[0]);
+					whiteApproxIndex = i;
+				}
+			});
+			var X = blackCurve[blackApproxIndex][0].toFixed(0);
+			var Y = whiteCurve[whiteApproxIndex][1].toFixed(2);
+			var Z = blackCurve[blackApproxIndex][1].toFixed(2);
+			text = "Both the Black patient and White\n\
+			would be at the "+X+" percentile, \n\
+			but the White patient would have  \n\
+			"+Y+" chronic conditions and the \n\
+			Black patient would have "+Z+" chronic\n\
+			conditions."
+		}
+
 
 		var toolTipTextElement = toolTipG.selectAll('text')
 				.data(d => text.split("\n"))
