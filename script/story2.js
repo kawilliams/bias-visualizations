@@ -37,7 +37,7 @@ var makeModel = function(data) {
 	var _observers = makeObservers();
 
 	// The storyboard step (0 - 7)
-	var _step = -1;
+	var _step = 0;
 
 	var _data = data;
 
@@ -123,28 +123,40 @@ var makeSVGView = function(model, data, svgID) {
 		// Move the patients to the right side
 	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
 
+	// var topText = _svg
+	// 	.append('text')
+	// 	// .attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
+	// 	.attr('x', viewBoxSize.width * 0.5)
+	// 	.attr('y', margin.top)
+	// 	.attr('class', 'toptext')
+	// 	.attr('font-size', '12px')
+	// 	.attr('text-align', 'center');
 
+	// var text = model.text();
+	// topText.selectAll('tspan')
+	// 	.data(d => text[0].split('\n'))
+	// 	.enter()
+	// 	.append('tspan')
+	// 	.text(d => d)
+	// 	.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
+	// 	.attr('y', (d,i) => i * 7 + margin.top);
 
-	var _makeTopText = function(step, text) {
-		_svg.selectAll('.toptext').remove();
-		var topText = _svg
-			.append('text')
-			// .attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-			.attr('x', viewBoxSize.width * 0.5)
-			.attr('y', margin.top)
-			.attr('class', 'toptext')
-			.attr('font-size', '12px')
-			.attr('text-align', 'center');
-
-		topText.selectAll('tspan')
-			.data(d => text[step].split('\n'))
-			.enter()
-			.append('tspan')
-			.text(d => d)
-			.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-			.attr('y', (d,i) => i * 7 + margin.top);
-
-	}
+	// var _makeTopText = function(step, text) {
+	// 	_svg.selectAll('tspan.toptext').remove();
+	// 	console.log(step, text[step]);
+	// 	topText.selectAll('tspan')
+	// 		.data(d => {
+	// 			console.log(step, text[step]);
+	// 			return text[step].split('\n');
+	// 		})
+	// 		.enter()
+	// 		.append('tspan')
+	// 		.text(d => {
+	// 			d
+	// 		})
+	// 		.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
+	// 		.attr('y', (d,i) => i * 7 + margin.top);
+	// }
 
 	var _moveCircles = function(step) {
 		
@@ -179,12 +191,10 @@ var makeSVGView = function(model, data, svgID) {
 			_cleanSVG();
 			var step = model.get();
 			var data = model.data();
-			var text = model.text();
-			
-			if (step > 0) {
-				_moveCircles(step, data);
-			}
-			_makeTopText(step, text);
+			//var text = model.text();
+	
+			_moveCircles(step, data);
+			//_makeTopText(step, text);
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
@@ -192,7 +202,53 @@ var makeSVGView = function(model, data, svgID) {
 	}
 }
 
+var makeTextView = function(model, data, textID) {
+	var _observers = makeObservers();
 
+	var topText = d3.select('svg')
+		.append('text')
+		.attr('x', viewBoxSize.width * 0.5)
+		.attr('y', margin.top)
+		.attr('class', 'toptext')
+		.attr('id', 'textHome')
+		.attr('font-size', '12px')
+		.attr('text-align', 'center');
+
+	var text = model.text();
+
+	topText.selectAll('tspan')
+		.data(d => text[0].split('\n'))
+		.enter()
+		.append('tspan')
+		.attr('class', 'toptext')
+		.text(d => d)
+		.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
+		.attr('y', (d,i) => i * 7 + margin.top);
+
+	var _changeTopText = function(step, text) {
+		
+		d3.select('#textHome').selectAll('tspan.toptext').remove();
+		d3.select('#textHome').selectAll('tspan.toptext')
+			.data(d => text[step].split('\n'))
+			.enter()
+			.append('tspan')
+			.attr('class', 'toptext')
+			.text(d => d)
+			.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
+			.attr('y', (d,i) => i * 7 + margin.top);
+	}
+
+	return {
+		render: function() {
+			var _step = model.get();
+			var _text = model.text();
+			_changeTopText(_step, _text);
+		},
+		register: function(fxn) {
+			_observers.add(fxn);
+		}
+	}
+}
 var makeButtonView = function(model, data, buttonID, svgID) {
 	var _observers = makeObservers();
 
@@ -225,9 +281,6 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 
 	_btn.on('click', _fireIncrementEvent);
 	_btnText.on('click', _fireIncrementEvent);
-
-
-
 
 	return {
 		render: function() {
@@ -270,9 +323,10 @@ document.addEventListener("DOMContentLoaded", function(event){
 	d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		story.model = makeModel(d);
-
+		story.views.push(makeTextView(story.model, d, '#textView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
+		
 		story.controller = makeController(story.model);
 		
 		for (var i=0; i < story.views.length; i++) {
