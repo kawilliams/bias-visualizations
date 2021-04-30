@@ -1,7 +1,7 @@
 var height = 500,
 	width = 500;
 var radius = 3;
-var margin = ({top: 50, right: 10, bottom: 30, left: 50});
+var margin = ({top: 50, right: 10, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
 
 // Load the data and run the graph
@@ -226,7 +226,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.attr('height', 40)
 		.attr('fill', 'lightgrey')
 		.attr('rx', 2)
-		.attr('display', 'none')
+		.attr('display', 'none') 
 		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
 
 	var labelText = allLabelsG.selectAll('text')
@@ -259,19 +259,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		})
 		.attr('display', 'none')
 		.attr('x', 2)
-		.attr('dy', '1.2em'); // (d,i) => i * 7 + 5);
-
-	
-		// .each(function(d){
-		// 	console.log(d);
-		// 	const p = d3.select(this);
-		// 	switch(d.orient) {
-		// 		case "top": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-		// 		case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-		// 		case "bottom": p.attr('dx', '0.5em').attr('dy', '0.7em').attr('text-anchor','start');break;
-		// 		case "left": p.attr('dx', '-0.5em').attr('dy', '-0.22em').attr('text-anchor','end');break;	
-		// 	}
-		// });
+		.attr('dy', '1.2em'); 	
 
 	dataCircles
 		.on('mouseover', showDotToolTip)
@@ -317,7 +305,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('y', 100) //(500 - event.x)
 			.attr('fill', 'lightsteelblue')
 			.attr('rx', 5)
-			.attr('opacity', '0.8');
+			.attr('opacity', '1');
 
 	var toolTipText = { instructions: "Health providers used an algorithm\n\
 										to determine which patients would get accepted into \n\
@@ -399,17 +387,19 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
 		}
 		const circles = d3.selectAll('circle').nodes();
-
+		var circleDataArray = [];
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
 			if ((curr_x >= event.x-radius) && (curr_x <= (event.x+radius+slider.bar))) {
 				element.setAttribute('r', radius * 2);
+				var circleData = d3.select(element).datum();
+				circleDataArray.push(circleData);
 			}
 			else {
 				element.setAttribute('r', radius);
 			}
 		});
-		
+		toolTipAppear(event, d, whichSlider, circleDataArray);
 	}
 	function draggedHoriz(event,d){
 		var whichSlider = d3.select(this).attr('class');
@@ -429,46 +419,35 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
 		}
 		const circles = d3.selectAll('circle').nodes();
+		var circleDataArray = [];
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
 			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+slider.bar))) {
 				element.setAttribute('r', radius * 2);
+				var circleData = d3.select(element).datum();
+				circleDataArray.push(circleData);
 			}
 			else {
 				element.setAttribute('r', radius);
 			}
 		});
-
+		toolTipAppear(event, d, whichSlider, circleDataArray);
 		
 	}
 	function dragend(event, d){
 		var whichSlider = "." + d3.select(this).attr('class');
 		d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
-
-		const circles = d3.selectAll('circle').nodes();
-		var circleDataArray = [];
-		circles.forEach(element => {
-			curr_y = element.cy.baseVal.value;
-			curr_x = element.cx.baseVal.value;
-			if ((whichSlider.includes('horiz')) && 
-				(curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+slider.bar))) {
-				var circleData = d3.select(element).datum();
-				circleDataArray.push(circleData);
-			}
-			else if ((whichSlider.includes('vert')) && 
-				(curr_x >= event.x-radius) && (curr_x <= (event.x+radius+slider.bar))){
-				var circleData = d3.select(element).datum();
-				circleDataArray.push(circleData);
-			}
-		});
-
-		toolTipAppear(event, d, whichSlider, circleDataArray);
 	}
 
 	function toolTipAppear(event, d, whichSlider, selectedCircles){
 		var text = whichSlider.includes("horiz") ? toolTipText.horizText : toolTipText.vertText;
 
 		toolTipG.selectAll('text').remove();
+		toolTipG.select("rect")
+		.transition()
+		.duration(35)
+		.attr('width', 170)
+		.attr('height', whichSlider.includes("horiz") ? 60 : 120)
 	
 		//Get the selected circles' data
 		if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
@@ -496,8 +475,6 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 				}
 			});
 			var X = blackCurve[blackApproxIndex][1].toFixed(2);
-			// var Y = whiteCurve[whiteApproxIndex][0].toFixed(0);
-			// var Z = blackCurve[blackApproxIndex][0].toFixed(0);
 			text = text.replace("X", X);
 		}
 		if (selectedCircles.length == 2 && whichSlider.includes("vert")){
@@ -553,7 +530,6 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 
 	function showDotToolTip(event, d) {
 		var whichLabel = "label" + d3.select(this).attr('id').split('circle')[1];
-		
 		var allPartsOfDotToolTip = document.getElementsByClassName(whichLabel);
 
 		for (var i = 0; i<allPartsOfDotToolTip.length; i++) {
