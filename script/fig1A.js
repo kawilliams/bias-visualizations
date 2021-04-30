@@ -1,7 +1,7 @@
 var height = 500,
 	width = 500;
 var radius = 3;
-var margin = ({top: 50, right: 10, bottom: 30, left: 50});
+var margin = ({top: 50, right: 10, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
 
 // Load the data and run the graph
@@ -226,8 +226,9 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.attr('height', 40)
 		.attr('fill', 'lightgrey')
 		.attr('rx', 2)
-		.attr('display', 'none')
-		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
+		.attr('display', 'none') 
+		.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 80 : x(d.risk_score_quantile))
+		.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 40 : y(d.num_chronic_conds_mean));
 
 	var labelText = allLabelsG.selectAll('text')
 		.data(d)
@@ -235,43 +236,23 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.append('text')
 		.attr('class', d =>  "labels label"+d.id)
 		.attr('display', 'none')
-		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
-
+		.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 80 : x(d.risk_score_quantile))
+		.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 40 : y(d.num_chronic_conds_mean));
 
 		labelText.selectAll('tspan')
 		.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
 		.enter()
 		.append('tspan')
-		.attr('class', function(d){
-			return this.parentElement.className.baseVal;
-		})
+		.attr('class', function(d){ return this.parentElement.className.baseVal; })
 		.text(function(d){
-			if (d == "Black" | d == "White") {
-				return "Race: " + d;
-			}
-			if (+d >= 10) {
-				return "Percentile: " + d;
-			}
-			if (d < 5) {
-				return "Conditions: " + d.toFixed(2);
-			}
+			if (d == "Black" | d == "White") { return "Race: " + d; }
+			if (+d >= 10) { return "Percentile: " + d; }
+			if (d < 5) { return "Conditions: " + d.toFixed(2); }
 			return d;
 		})
 		.attr('display', 'none')
-		.attr('x', 2)
-		.attr('dy', '1.2em'); // (d,i) => i * 7 + 5);
-
-	
-		// .each(function(d){
-		// 	console.log(d);
-		// 	const p = d3.select(this);
-		// 	switch(d.orient) {
-		// 		case "top": p.attr('dx', '-0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-		// 		case "right": p.attr('dx', '0.5em').attr('dy', '0.32em').attr('text-anchor','start');break;
-		// 		case "bottom": p.attr('dx', '0.5em').attr('dy', '0.7em').attr('text-anchor','start');break;
-		// 		case "left": p.attr('dx', '-0.5em').attr('dy', '-0.22em').attr('text-anchor','end');break;	
-		// 	}
-		// });
+		.attr('x', function() { return this.parentElement.x.baseVal[0].value; })
+		.attr('dy', '1.2em')
 
 	dataCircles
 		.on('mouseover', showDotToolTip)
@@ -312,26 +293,30 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 	var toolTip = toolTipG.append('rect')
 			.attr('id', 'tooltip')
 			.attr('height', 120)
-			.attr('width', 170)
+			.attr('width', 260)
 			.attr('x', 100) //(event.x - 170)
 			.attr('y', 100) //(500 - event.x)
 			.attr('fill', 'lightsteelblue')
 			.attr('rx', 5)
-			.attr('opacity', '0.8');
+			.attr('opacity', '1');
 
-	var toolTipText = { instructions: "Move the horizontal or vertical slider.",
-				horizText: "Both the Black patient and the \n\
-					White patient have X chronic \n\
-					conditions, but the Black patient\n\
-					is Y percentile farther back than\n\
-					the White patient in the line to \n\
-					be admitted to the health \nprogram.",
-				vertText: "Each patient received an \n\
-					algorithm score at the Xth percentile,\n\
-					however, the Black patient has on\n\
-					average Y chronic conditions while\n\
-					the White patient has on average \n\
-					Z chronic conditions."};
+	var toolTipText = { instructions: "Health providers used an algorithm\n\
+										to determine which patients would get accepted into \n\
+										an extra care program. The x-axis shows how a patient's\n\
+										health score compared to others, and the y-axis shows \n\
+										how healthy the patient is, based on number of chronic\n\
+										conditions. Move the sliders to explore.",
+				horizText: "These two patients are equally sick\n\
+				(X conditions), but only the White \n\
+				patient was referred for screening.",
+				vertText: "Both patients received the same \n\
+						   health score from the algorithm \n\
+						   (X percentile); however, the Black \n\
+						   patient has more chronic conditions, \n\
+						   like diabetes and heart disease, \n\
+						   than the White patient (Y, \n\
+						    compared to Z, respectively)."
+				};
 	var toolTipTextElement = toolTipG.selectAll('text')
 			.data(d => toolTipText.instructions.split("\n"))
 			.enter()
@@ -358,7 +343,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderBar')
 			.attr('x', x(-1.5))
-			.attr('y', y(1.4))
+			.attr('y', y(1.2))
 			.attr('rx', 5)
 			.attr('height', slider.bar)
 			.attr('width', 450)
@@ -370,7 +355,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderHandle')
 			.attr('x', x(50)-25)
-			.attr('y', y(1.4)-2)
+			.attr('y', y(1.2)-2)
 			.attr('rx', 8)
 			.attr('height', slider.handle)
 			.attr('width', 50)
@@ -395,17 +380,19 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
 		}
 		const circles = d3.selectAll('circle').nodes();
-
+		var circleDataArray = [];
 		circles.forEach(element => {
 			curr_x = element.cx.baseVal.value;
 			if ((curr_x >= event.x-radius) && (curr_x <= (event.x+radius+slider.bar))) {
 				element.setAttribute('r', radius * 2);
+				var circleData = d3.select(element).datum();
+				circleDataArray.push(circleData);
 			}
 			else {
 				element.setAttribute('r', radius);
 			}
 		});
-		
+		toolTipAppear(event, d, whichSlider, circleDataArray);
 	}
 	function draggedHoriz(event,d){
 		var whichSlider = d3.select(this).attr('class');
@@ -425,46 +412,35 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
 		}
 		const circles = d3.selectAll('circle').nodes();
+		var circleDataArray = [];
 		circles.forEach(element => {
 			curr_y = element.cy.baseVal.value;
 			if ((curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+slider.bar))) {
 				element.setAttribute('r', radius * 2);
+				var circleData = d3.select(element).datum();
+				circleDataArray.push(circleData);
 			}
 			else {
 				element.setAttribute('r', radius);
 			}
 		});
-
+		toolTipAppear(event, d, whichSlider, circleDataArray);
 		
 	}
 	function dragend(event, d){
 		var whichSlider = "." + d3.select(this).attr('class');
 		d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
-
-		const circles = d3.selectAll('circle').nodes();
-		var circleDataArray = [];
-		circles.forEach(element => {
-			curr_y = element.cy.baseVal.value;
-			curr_x = element.cx.baseVal.value;
-			if ((whichSlider.includes('horiz')) && 
-				(curr_y >= (event.y-radius)) && (curr_y <= (event.y+radius+slider.bar))) {
-				var circleData = d3.select(element).datum();
-				circleDataArray.push(circleData);
-			}
-			else if ((whichSlider.includes('vert')) && 
-				(curr_x >= event.x-radius) && (curr_x <= (event.x+radius+slider.bar))){
-				var circleData = d3.select(element).datum();
-				circleDataArray.push(circleData);
-			}
-		});
-
-		toolTipAppear(event, d, whichSlider, circleDataArray);
 	}
 
 	function toolTipAppear(event, d, whichSlider, selectedCircles){
 		var text = whichSlider.includes("horiz") ? toolTipText.horizText : toolTipText.vertText;
 
 		toolTipG.selectAll('text').remove();
+		toolTipG.select("rect")
+		.transition()
+		.duration(35)
+		.attr('width', 170)
+		.attr('height', whichSlider.includes("horiz") ? 60 : 120)
 	
 		//Get the selected circles' data
 		if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
@@ -492,13 +468,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 				}
 			});
 			var X = blackCurve[blackApproxIndex][1].toFixed(2);
-			var Y = whiteCurve[whiteApproxIndex][0].toFixed(0);
-			var Z = blackCurve[blackApproxIndex][0].toFixed(0);
-			text = "Both the Black patient and White\n\
-			would have "+X+" chronic conditions, \n\
-			but the White patient would be at the \n\
-			"+Y+" percentile and the Black patient \n\
-			would be at the "+Z+" percentile."
+			text = text.replace("X", X);
 		}
 		if (selectedCircles.length == 2 && whichSlider.includes("vert")){
 			var X = selectedCircles[1].risk_score_quantile;
@@ -529,12 +499,9 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			var X = blackCurve[blackApproxIndex][0].toFixed(0);
 			var Y = whiteCurve[whiteApproxIndex][1].toFixed(2);
 			var Z = blackCurve[blackApproxIndex][1].toFixed(2);
-			text = "Both the Black patient and White\n\
-			would be at the "+X+" percentile, \n\
-			but the White patient would have  \n\
-			"+Y+" chronic conditions and the \n\
-			Black patient would have "+Z+" chronic\n\
-			conditions."
+			text = text.replace("X", X);
+			text = text.replace("Y", Y);
+			text = text.replace("Z", Z);
 		}
 
 
@@ -556,7 +523,6 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 
 	function showDotToolTip(event, d) {
 		var whichLabel = "label" + d3.select(this).attr('id').split('circle')[1];
-		
 		var allPartsOfDotToolTip = document.getElementsByClassName(whichLabel);
 
 		for (var i = 0; i<allPartsOfDotToolTip.length; i++) {
