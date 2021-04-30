@@ -227,7 +227,8 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.attr('fill', 'lightgrey')
 		.attr('rx', 2)
 		.attr('display', 'none') 
-		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
+		.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 80 : x(d.risk_score_quantile))
+		.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 40 : y(d.num_chronic_conds_mean));
 
 	var labelText = allLabelsG.selectAll('text')
 		.data(d)
@@ -235,31 +236,23 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 		.append('text')
 		.attr('class', d =>  "labels label"+d.id)
 		.attr('display', 'none')
-		.attr('transform', d => 'translate(' + x(d.risk_score_quantile) + ',' + y(d.num_chronic_conds_mean) + ')');
-
+		.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 80 : x(d.risk_score_quantile))
+		.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 40 : y(d.num_chronic_conds_mean));
 
 		labelText.selectAll('tspan')
 		.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
 		.enter()
 		.append('tspan')
-		.attr('class', function(d){
-			return this.parentElement.className.baseVal;
-		})
+		.attr('class', function(d){ return this.parentElement.className.baseVal; })
 		.text(function(d){
-			if (d == "Black" | d == "White") {
-				return "Race: " + d;
-			}
-			if (+d >= 10) {
-				return "Percentile: " + d;
-			}
-			if (d < 5) {
-				return "Conditions: " + d.toFixed(2);
-			}
+			if (d == "Black" | d == "White") { return "Race: " + d; }
+			if (+d >= 10) { return "Percentile: " + d; }
+			if (d < 5) { return "Conditions: " + d.toFixed(2); }
 			return d;
 		})
 		.attr('display', 'none')
-		.attr('x', 2)
-		.attr('dy', '1.2em'); 	
+		.attr('x', function() { return this.parentElement.x.baseVal[0].value; })
+		.attr('dy', '1.2em')
 
 	dataCircles
 		.on('mouseover', showDotToolTip)
@@ -315,7 +308,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 										conditions. Move the sliders to explore.",
 				horizText: "These two patients are equally sick\n\
 				(X conditions), but only the White \n\
-				patient was chosen for screening.",
+				patient was referred for screening.",
 				vertText: "Both patients received the same \n\
 						   health score from the algorithm \n\
 						   (X percentile); however, the Black \n\
@@ -350,7 +343,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderBar')
 			.attr('x', x(-1.5))
-			.attr('y', y(1.4))
+			.attr('y', y(1.2))
 			.attr('rx', 5)
 			.attr('height', slider.bar)
 			.attr('width', 450)
@@ -362,7 +355,7 @@ d3.csv("data/figure1a_replicate_request.csv").then(function(d){
 			.attr('class', 'horizSlider')
 			.attr('id', 'horizSliderHandle')
 			.attr('x', x(50)-25)
-			.attr('y', y(1.4)-2)
+			.attr('y', y(1.2)-2)
 			.attr('rx', 8)
 			.attr('height', slider.handle)
 			.attr('width', 50)
