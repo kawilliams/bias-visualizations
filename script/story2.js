@@ -46,7 +46,7 @@ var makeModel = function(data) {
 		We want to line them up from sickest to healthiest. We'll use an algorithm to determine the level of health.",
 		"We have insurance information, like number of doctor's visits. Let's select these data for our inputs\n\
 		to our algorithm.",
-		"We apply the algorithm and align the circles from sickest to healiest, with the sickest on the left.",
+		"We apply the algorithm and align the circles from sickest to healthiest, with the sickest on the left.",
 		"Let's see how accurate our algorithm was at predicting health. Since we input insurance costs into our algorithm\n\
 		it should accurately predict costs.",
 		"But we care more about predicting patient health then predicting costs. How well did the algorithm predict health?",
@@ -85,6 +85,10 @@ var makeModel = function(data) {
 		text: function() {
 			return _text;
 		},
+		//Get the algorithm inputs
+		inputs: function() {
+			return _inputLabels;
+		},
 		//Add an observer to the model
 		register: function(fxn) {
 			_observers.add(fxn);
@@ -118,71 +122,63 @@ var makeSVGView = function(model, data, svgID) {
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
-		.attr('fill', '#EDC951');
+		.attr('fill', 'orange');
 
-		// Move the patients to the right side
+	// Move the patients to the right side
 	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
 
-	// var topText = _svg
-	// 	.append('text')
-	// 	// .attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-	// 	.attr('x', viewBoxSize.width * 0.5)
-	// 	.attr('y', margin.top)
-	// 	.attr('class', 'toptext')
-	// 	.attr('font-size', '12px')
-	// 	.attr('text-align', 'center');
-
-	// var text = model.text();
-	// topText.selectAll('tspan')
-	// 	.data(d => text[0].split('\n'))
-	// 	.enter()
-	// 	.append('tspan')
-	// 	.text(d => d)
-	// 	.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-	// 	.attr('y', (d,i) => i * 7 + margin.top);
-
-	// var _makeTopText = function(step, text) {
-	// 	_svg.selectAll('tspan.toptext').remove();
-	// 	console.log(step, text[step]);
-	// 	topText.selectAll('tspan')
-	// 		.data(d => {
-	// 			console.log(step, text[step]);
-	// 			return text[step].split('\n');
-	// 		})
-	// 		.enter()
-	// 		.append('tspan')
-	// 		.text(d => {
-	// 			d
-	// 		})
-	// 		.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-	// 		.attr('y', (d,i) => i * 7 + margin.top);
-	// }
+	var threshold = _svg.append('rect')
+			.attr('id', "threshold")
+			.attr('x', 4 * circleBox + radius + 1)
+			.attr('y', 3 * circleBox)
+			.attr('width', 1)
+			.attr('height', 1.5 * circleBox)
+			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
+			.attr('display', 'none');
 
 	var _moveCircles = function(step) {
-		
+		var sickColorScale = d3.scaleLinear().domain([0,1])
+			.range(["orange", "purple"]);
 		var circles = _svg.selectAll('circle')
 			.transition()
 			.duration(750)
 			.attr('cx', d => {
 				var _x = d.x0;
 				if (step == 1) _x = d.x1;
-				// if (step == 2) _x = d.x2;
+				if (step == 2) _x = d.x2;
 		
 				return _x * circleBox;
 			})
 			.attr('cy', d => {
 				var _y = d.y0;
 				if (step == 1) _y= d.y1;
-				// if (step == 2) _y = d.y2;
+				if (step == 2) _y = d.y2;
 		
 				return _y * circleBox;
-			});
-		var threshold = _svg.append('rect')
-			.attr('x', 4 * circleBox + radius + 1)
-			.attr('y', 3 * circleBox)
-			.attr('width', 1)
-			.attr('height', 1.5 * circleBox)
-			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
+			})
+			.attr('fill', function(d) {
+				console.log(sickColorScale(d.pred_health));
+				return sickColorScale(d.pred_health);
+			})
+
+	}
+
+	function _moveThreshold(step) {
+		console.log("move threshold", step);
+		if (step == 2) {
+			_svg.select("#threshold")
+			.transition()
+			.attr('display', 'inline');
+		} 
+		else {
+			_svg.select("#threshold")
+			.transition()
+			.attr('display', 'none');
+
+		}
+		
+
+		
 	}
 
 	return {
@@ -195,6 +191,7 @@ var makeSVGView = function(model, data, svgID) {
 	
 			_moveCircles(step, data);
 			//_makeTopText(step, text);
+			_moveThreshold(step);
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
@@ -205,7 +202,7 @@ var makeSVGView = function(model, data, svgID) {
 var makeTextView = function(model, data, textID) {
 	var _observers = makeObservers();
 
-	var topText = d3.select('svg')
+	var topText = d3.select('#mySVG')
 		.append('text')
 		.attr('x', viewBoxSize.width * 0.5)
 		.attr('y', margin.top)
@@ -249,6 +246,32 @@ var makeTextView = function(model, data, textID) {
 		}
 	}
 }
+
+var makeInputView = function(model, inputID) {
+	var _observers = makeObservers();
+
+	var inputG = d3.select('#mySVG').append('g');
+
+	var inputLabels = model.inputs();
+	
+	var inputs = inputG.selectAll('input')
+		.data(inputLabels)
+		.enter()
+		.append('input')
+		.attr('type', 'checkbox');
+
+
+
+	return {
+		render: function() {
+
+		},
+		register: function(fxn) {
+			_observers.add(fxn);
+		}
+	}
+}
+
 var makeButtonView = function(model, data, buttonID, svgID) {
 	var _observers = makeObservers();
 
@@ -326,7 +349,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.views.push(makeTextView(story.model, d, '#textView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
-		
+		story.views.push(makeInputView(story.model, '#inputs'))
 		story.controller = makeController(story.model);
 		
 		for (var i=0; i < story.views.length; i++) {
