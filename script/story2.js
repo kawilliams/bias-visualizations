@@ -56,14 +56,14 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		"Input 1",
-		"Input 2",
-		"Input 3",
-		"Input 4",
-		"Input 5",
-		"Input 6",
-		"Input 7",
-		"Input 8"
+		{text: "Input 1", clicked: false},
+		{text: "Input 2", clicked: false}, 
+		{text: "Input 3", clicked: false},
+		{text: "Input 4", clicked: false},
+		{text: "Input 5", clicked: false},
+		{text: "Input 6", clicked: false},
+		{text: "Input 7", clicked: false},
+		{text: "Input 8", clicked: false}
 	]
 
 	return {
@@ -156,15 +156,12 @@ var makeSVGView = function(model, data, svgID) {
 		
 				return _y * circleBox;
 			})
-			.attr('fill', function(d) {
-				console.log(sickColorScale(d.pred_health));
-				return sickColorScale(d.pred_health);
-			})
+			.attr('fill', d => sickColorScale(d.pred_health));
 
 	}
 
 	function _moveThreshold(step) {
-		console.log("move threshold", step);
+
 		if (step == 2) {
 			_svg.select("#threshold")
 			.transition()
@@ -248,23 +245,68 @@ var makeTextView = function(model, data, textID) {
 }
 
 var makeInputView = function(model, inputID) {
+	var _svg = d3.select('#mySVG');
 	var _observers = makeObservers();
 
-	var inputG = d3.select('#mySVG').append('g');
+	var _inputG = _svg.append('g');
 
-	var inputLabels = model.inputs();
+	var _inputLabels = model.inputs();
 	
-	var inputs = inputG.selectAll('input')
-		.data(inputLabels)
+	var _inputs = _inputG.selectAll('rect')
+		.data(_inputLabels)
 		.enter()
-		.append('input')
-		.attr('type', 'checkbox');
+		.append('rect')
+		.attr('class', 'algInputs')
+		.attr("x", margin.left + 10)
+		.attr("y", (d,i) => i * 14 + margin.top + 10)
+		.attr('width', 50)
+		.attr('height', 8)
+		.attr('fill', 'lightsteelblue')
+		.attr('cursor', 'pointer')
+		.attr('display', 'none')
+		.on('click', _changeColor);
 
+	var _inputText = _inputG.selectAll('text')
+		.data(_inputLabels)
+		.enter()
+		.append('text')
+		.attr('class', 'algInputs')
+		.attr('x', margin.left + 10 + padding.text)
+		.attr('y', (d,i) => i * 14 + margin.top + 15)
+		.text(d => d.text)
+		.attr('cursor', 'pointer')
+		.attr('display', 'none');
 
+	function _changeColor() {
+		d3.select(this).transition().attr('fill', (d) => {
+			if (d.clicked) {
+				d.clicked = false;
+				return 'lightsteelblue';
+			}
+			else {
+				d.clicked = true;
+				return '#33bbbb';
+			}
+		});
+		
+	}
+
+	function _moveInputs(step) {
+		var _allInputRects = _svg.selectAll("rect.algInputs");
+		var _allInputText = _svg.selectAll("text.algInputs");
+
+		if (step == 1) {
+			_allInputRects.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
+			_allInputText.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
+		} else {
+			_svg.selectAll(".algInputs").attr('display', 'none');
+		}
+	}
 
 	return {
 		render: function() {
-
+			var step = model.get();
+			_moveInputs(step);
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
