@@ -146,7 +146,7 @@ var makeSVGView = function(model, data, svgID) {
 			.attr("width", thresholdShadeSize.width)
 			.attr('height', thresholdShadeSize.height)
 			.attr('fill', 'purple')
-			.style('opacity', 0.3)
+			.attr('opacity', 0)
 			.attr('display', 'none');
 	var _thresholdText = _svg.append('text')
 			.attr('id', 'thresholdText')
@@ -184,19 +184,30 @@ var makeSVGView = function(model, data, svgID) {
 	function _moveThreshold(step) {
 
 		if (step == 2) {
+			_svg.select('#thresholdShade')
+				.attr('opacity', 0.2);
 			_svg.selectAll('.threshold')//("#threshold")
-			.transition()
-			.duration(duration)
-			.attr('display', 'inline');
+				.attr('display', 'inline')
+				.transition()
+				.duration(duration)
+				.attr('opacity', function(){
+					if (this.id == "thresholdShade") {
+						return 0.2;
+					}
+					return 1;
+				});
+
 			// _svg.select("#thresholdShade")
 			// .transition()
 			// .attr('display','inline');
 		} 
 		else {
 			_svg.selectAll('.threshold') //("#threshold")
-			.transition()
-			.duration(duration)
-			.attr('display', 'none');
+				.transition()
+				.duration(duration)
+				.attr('opacity', 0);
+			_svg.selectAll('.threshold')
+				.attr('display', 'none');
 			// _svg.select("#thresholdShade")
 			// .transition()
 			// .attr('display','none');
