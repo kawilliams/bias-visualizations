@@ -51,9 +51,12 @@ var makeModel = function(data) {
 		"Let's see how accurate our algorithm was at predicting health. Since we input insurance costs into our algorithm\n\
 		it should accurately predict costs.",
 		"But we care more about predicting patient health then predicting costs. How well did the algorithm predict health?",
-		"If we look at the patients, we notice a bad trend. ",
-		"text 6 \n more text",
-		"text 7 \n more text"
+		"If we look at information about the patients, we notice a bad trend: Black patients get excluded from the program\n\
+		even though they have worse health than White patients.",
+		"Let's try adding more health information into our inputs, instead of relying only on cost-based insurance\n\
+		data. ",
+		"Now we can see that our algorithm is better at predicting health when it uses health-based inputs, rather\n\
+		than cost-based inputs."
 	];
 
 	var _inputLabels = [
@@ -66,6 +69,30 @@ var makeModel = function(data) {
 		{text: "Input 7", clicked: false},
 		{text: "Input 8", clicked: false}
 	]
+
+	var _circleText = [
+	{ text: ["Patients\n"], 
+		x: [margin.left], 
+		y: [2 * circleBox] },
+	{ text: ["Inputs to the Algorithm\n"], 
+		x: [margin.left], 
+		y: [2 * circleBox] },
+	{ text: ["Algorithm-predicted health\n (based on insurance costs)"],
+		x: [margin.left],
+		y: [2 * circleBox] },
+	{ text: ["Algorithm-predicted health\n (based on insurance costs)", "Actual insurance costs\n"],
+		x: [margin.left],
+		y: [2 * circleBox, 3 * circleBox] },
+	{ text: ["Algorithm-predicted health\n (based on insurance costs)", "Actual health\n"],
+		x: [margin.left],
+		y: [2 * circleBox, 3 * circleBox] },
+	{ text: ["Inputs to the Algorithm\n"],
+		x: [margin.left],
+		y: [margin.top] },
+	{ text: ["Algorithm-predicted health\n (based on health metrics\n and insurance costs)", "Actual health\n"],
+		x: [margin.left],
+		y: [2 * circleBox, 3 * circleBox] }
+	];
 
 	return {
 		//Increment the step & tell everyone
@@ -89,6 +116,10 @@ var makeModel = function(data) {
 		//Get the algorithm inputs
 		inputs: function() {
 			return _inputLabels;
+		},
+		//Get the circle labels
+		circleText: function() {
+			return _circleText;
 		},
 		//Add an observer to the model
 		register: function(fxn) {
@@ -174,15 +205,17 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 1) _x = d.x1;
 				if (step == 2) _x = d.x2;
 				if (step == 3) _x = d.x3;
-		
+				if (step == 4) _x = d.x4;
+				if (step == 5) _x = d.x5;
 				return _x * circleBox;
 			})
 			.attr('cy', d => {
 				var _y = d.y0;
-				if (step == 1) _y= d.y1;
+				if (step == 1) _y = d.y1;
 				if (step == 2) _y = d.y2;
 				if (step == 3) _y = d.y3;
-		
+				if (step == 4) _y = d.y4;
+				if (step == 5) _y = d.y5;
 				return _y * circleBox;
 			})
 			.attr('fill', d => {
@@ -190,13 +223,24 @@ var makeSVGView = function(model, data, svgID) {
 				return sickColorScale(d.health);
 			});
 		var circleShadows = _svg.selectAll('.shadows')
-			.attr('r', (step == 3) ? radius : 0);
-			
+			.attr('r', d => {
+				if (step == 3 || step ==4 ) return radius;
+				return 0;
+			});
+		var _circleText = model.circleText();
+		var circleLabels = _svg.selectAll('text')
+			.data(_circleText)
+			.enter()
+			.append('text')
+			.attr('x', d => d.x)
+			.attr('y', d => d.y)
+			.text(d => d);
+
 	}
 
 	function _moveThreshold(step) {
 
-		if (step == 2 || step == 3) {
+		if (step == 2 || step == 3 || step == 4) {
 			_svg.select('#thresholdShade')
 				.attr('opacity', 0.2);
 			_svg.selectAll('.threshold')//("#threshold")
@@ -242,7 +286,7 @@ var makeSVGView = function(model, data, svgID) {
 	}
 }
 
-var makeTextView = function(model, data, textID) {
+var makeTopTextView = function(model, data, textID) {
 	var _observers = makeObservers();
 
 	var topText = d3.select('#mySVG')
@@ -250,7 +294,7 @@ var makeTextView = function(model, data, textID) {
 		.attr('x', viewBoxSize.width * 0.5)
 		.attr('y', margin.top)
 		.attr('class', 'toptext')
-		.attr('id', 'textHome')
+		.attr('id', textID)
 		.attr('font-size', '12px')
 		.attr('text-align', 'center');
 
@@ -267,8 +311,8 @@ var makeTextView = function(model, data, textID) {
 
 	var _changeTopText = function(step, text) {
 		
-		d3.select('#textHome').selectAll('tspan.toptext').remove();
-		d3.select('#textHome').selectAll('tspan.toptext')
+		d3.select(textID).selectAll('tspan.toptext').remove();
+		d3.select(textID).selectAll('tspan.toptext')
 			.data(d => text[step].split('\n'))
 			.enter()
 			.append('tspan')
@@ -283,6 +327,58 @@ var makeTextView = function(model, data, textID) {
 			var _step = model.get();
 			var _text = model.text();
 			_changeTopText(_step, _text);
+		},
+		register: function(fxn) {
+			_observers.add(fxn);
+		}
+	}
+}
+
+var makeCircleTextView = function(model, textID) {
+	var _observers = makeObservers();
+	var _svg = d3.select("#mySVG")
+	var circleText = _svg
+		.append('text')
+		.attr('x', margin.left)
+		.attr('y', margin.top)
+		.attr('class', 'circletext')
+		.attr('id', textID)
+		.attr('font-size', '12px')
+		.attr('text-align', 'center');
+
+	var allCircleText = model.circleText();
+	
+	circleText.selectAll('tspan')
+		.data(d => allCircleText[0].text)
+		.enter()
+		.append('tspan')
+		.attr('class', 'circletext')
+		.text(d => d)
+		.attr('x', d =>  viewBoxSize.width * 0.1 + margin.top + circleBox)
+		.attr('y', (d,i) => i * 7 + circleBox + margin.top + 15);
+
+	var _changeCircleText = function(step, circleTextData) {
+
+		circleText.selectAll('tspan.circletext').remove();
+		circleText.attr('x', circleTextData[step].x)
+		circleText.attr('y', circleTextData[step].y)
+		circleText.selectAll('tspan.circletext')
+			.data(d => {
+				return circleTextData[step];
+			})
+			.enter()
+			.append('tspan')
+			.attr('class', 'circletext')
+			.text(d => d.text)
+			.attr('x', d => d.x + 30)
+			.attr('y', d => d.y + 40);
+	}
+
+	return {
+		render: function() {
+			var _step = model.get();
+			var _text = model.circleText();
+			_changeCircleText(_step, _text);
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
@@ -439,7 +535,8 @@ document.addEventListener("DOMContentLoaded", function(event){
 	d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		story.model = makeModel(d);
-		story.views.push(makeTextView(story.model, d, '#textView'));
+		story.views.push(makeTopTextView(story.model, d, '#textView'));
+		story.views.push(makeCircleTextView(story.model, '#circleTextView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
 		story.views.push(makeInputView(story.model, '#inputs'))
