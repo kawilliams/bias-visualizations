@@ -6,7 +6,8 @@ var algBoxSize = {height: 30, width: 90};
 var radius = 5;
 var viewBoxSize = {height: 150, width: 300};
 var padding = {text: 20};
-
+var duration = 750;
+var thresholdShadeSize = {height: 19, width: 73 };
 
 var story = {
 	model: undefined,
@@ -127,21 +128,41 @@ var makeSVGView = function(model, data, svgID) {
 	// Move the patients to the right side
 	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
 
-	var threshold = _svg.append('rect')
+	var _threshold = _svg.append('rect')
 			.attr('id', "threshold")
+			.attr('class', 'threshold')
 			.attr('x', 4 * circleBox + radius + 1)
-			.attr('y', 3 * circleBox)
+			.attr('y', circleBox + radius)
 			.attr('width', 1)
 			.attr('height', 1.5 * circleBox)
 			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
 			.attr('display', 'none');
+	var _thresholdShade = _svg.append('rect')
+			.attr('id', 'thresholdShade')
+			.attr('class', 'threshold')
+			.attr('x', -2 * radius)
+			.attr('y', circleBox + radius)
+			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
+			.attr("width", thresholdShadeSize.width)
+			.attr('height', thresholdShadeSize.height)
+			.attr('fill', 'purple')
+			.style('opacity', 0.3)
+			.attr('display', 'none');
+	var _thresholdText = _svg.append('text')
+			.attr('id', 'thresholdText')
+			.attr('class', 'threshold')
+			.attr('x', -radius)
+			.attr('y', 2 * thresholdShadeSize.height + 5)
+			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
+			.text('Accepted into program')
+			.attr('display', 'none')
 
 	var _moveCircles = function(step) {
 		var sickColorScale = d3.scaleLinear().domain([0,1])
 			.range(["orange", "purple"]);
 		var circles = _svg.selectAll('circle')
 			.transition()
-			.duration(750)
+			.duration(duration)
 			.attr('cx', d => {
 				var _x = d.x0;
 				if (step == 1) _x = d.x1;
@@ -163,14 +184,22 @@ var makeSVGView = function(model, data, svgID) {
 	function _moveThreshold(step) {
 
 		if (step == 2) {
-			_svg.select("#threshold")
+			_svg.selectAll('.threshold')//("#threshold")
 			.transition()
+			.duration(duration)
 			.attr('display', 'inline');
+			// _svg.select("#thresholdShade")
+			// .transition()
+			// .attr('display','inline');
 		} 
 		else {
-			_svg.select("#threshold")
+			_svg.selectAll('.threshold') //("#threshold")
 			.transition()
+			.duration(duration)
 			.attr('display', 'none');
+			// _svg.select("#thresholdShade")
+			// .transition()
+			// .attr('display','none');
 
 		}
 		
@@ -278,7 +307,7 @@ var makeInputView = function(model, inputID) {
 		.attr('display', 'none');
 
 	function _changeColor() {
-		d3.select(this).transition().attr('fill', (d) => {
+		d3.select(this).attr('fill', (d) => {
 			if (d.clicked) {
 				d.clicked = false;
 				return 'lightsteelblue';
@@ -299,7 +328,9 @@ var makeInputView = function(model, inputID) {
 			_allInputRects.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
 			_allInputText.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
 		} else {
-			_svg.selectAll(".algInputs").attr('display', 'none');
+			_svg.selectAll(".algInputs").transition()
+				.duration(duration)
+				.attr('display', 'none');
 		}
 	}
 
