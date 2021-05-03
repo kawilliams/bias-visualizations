@@ -116,9 +116,14 @@ var makeSVGView = function(model, data, svgID) {
 	}
 	
 	var circles = _svg.selectAll('circle')
-	.data(data)
-	.enter()
-	.append('circle');
+		.data(data)
+		.enter()
+		.append('circle')
+		.attr('class', d => (d.id < 10) ? "patients" : "shadows");
+	
+	var circleShadows = _svg.selectAll('.shadows')
+		.attr('r', 0);
+
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
@@ -160,6 +165,7 @@ var makeSVGView = function(model, data, svgID) {
 	var _moveCircles = function(step) {
 		var sickColorScale = d3.scaleLinear().domain([0,1])
 			.range(["orange", "purple"]);
+
 		var circles = _svg.selectAll('circle')
 			.transition()
 			.duration(duration)
@@ -167,6 +173,7 @@ var makeSVGView = function(model, data, svgID) {
 				var _x = d.x0;
 				if (step == 1) _x = d.x1;
 				if (step == 2) _x = d.x2;
+				if (step == 3) _x = d.x3;
 		
 				return _x * circleBox;
 			})
@@ -174,16 +181,22 @@ var makeSVGView = function(model, data, svgID) {
 				var _y = d.y0;
 				if (step == 1) _y= d.y1;
 				if (step == 2) _y = d.y2;
+				if (step == 3) _y = d.y3;
 		
 				return _y * circleBox;
 			})
-			.attr('fill', d => sickColorScale(d.pred_health));
-
+			.attr('fill', d => {
+				if (step < 4) return sickColorScale(d.cost);
+				return sickColorScale(d.health);
+			});
+		var circleShadows = _svg.selectAll('.shadows')
+			.attr('r', (step == 3) ? radius : 0);
+			
 	}
 
 	function _moveThreshold(step) {
 
-		if (step == 2) {
+		if (step == 2 || step == 3) {
 			_svg.select('#thresholdShade')
 				.attr('opacity', 0.2);
 			_svg.selectAll('.threshold')//("#threshold")
@@ -196,10 +209,6 @@ var makeSVGView = function(model, data, svgID) {
 					}
 					return 1;
 				});
-
-			// _svg.select("#thresholdShade")
-			// .transition()
-			// .attr('display','inline');
 		} 
 		else {
 			_svg.selectAll('.threshold') //("#threshold")
@@ -208,9 +217,6 @@ var makeSVGView = function(model, data, svgID) {
 				.attr('opacity', 0);
 			_svg.selectAll('.threshold')
 				.attr('display', 'none');
-			// _svg.select("#thresholdShade")
-			// .transition()
-			// .attr('display','none');
 
 		}
 		
@@ -338,10 +344,13 @@ var makeInputView = function(model, inputID) {
 		if (step == 1) {
 			_allInputRects.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
 			_allInputText.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
+			_svg.selectAll(".algInputs")
+				.attr('opacity', 1);
 		} else {
-			_svg.selectAll(".algInputs").transition()
-				.duration(duration)
+			_svg.selectAll(".algInputs")
 				.attr('display', 'none');
+			_svg.selectAll(".algInputs")
+				.attr('opacity', 0);
 		}
 	}
 
