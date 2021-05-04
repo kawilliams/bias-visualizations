@@ -70,29 +70,60 @@ var makeModel = function(data) {
 		{text: "Input 8", clicked: false}
 	]
 
-	var _circleText = [
-	{ text: ["Patients\n"], 
-		x: [margin.left], 
-		y: [2 * circleBox] },
-	{ text: ["Inputs to the Algorithm\n"], 
-		x: [margin.left], 
-		y: [2 * circleBox] },
-	{ text: ["Algorithm-predicted health\n (based on insurance costs)"],
-		x: [margin.left],
-		y: [2 * circleBox] },
-	{ text: ["Algorithm-predicted health\n (based on insurance costs)", "Actual insurance costs\n"],
-		x: [margin.left],
-		y: [2 * circleBox, 3 * circleBox] },
-	{ text: ["Algorithm-predicted health\n (based on insurance costs)", "Actual health\n"],
-		x: [margin.left],
-		y: [2 * circleBox, 3 * circleBox] },
-	{ text: ["Inputs to the Algorithm\n"],
-		x: [margin.left],
-		y: [margin.top] },
-	{ text: ["Algorithm-predicted health\n (based on health metrics\n and insurance costs)", "Actual health\n"],
-		x: [margin.left],
-		y: [2 * circleBox, 3 * circleBox] }
+	var _circleCaption = [
+	{ text: "Patients0\n", 
+		x: margin.left, 
+		y: viewBoxSize.height * 0.3 },
+	{ text: "Patients1\n", 
+		x: viewBoxSize.width * 0.7, 
+		y: viewBoxSize.height * 0.3 },
+	{ text: "2Algorithm-predicted health\n (based on insurance costs)",
+		x: viewBoxSize.width * 0.2 - 36,
+		y: viewBoxSize.height * 0.4 + radius},
+	{ text: "3Algorithm-predicted health\n (based on insurance costs)",
+		x: viewBoxSize.width * 0.2 - 36,
+		y: viewBoxSize.height * 0.4 + radius},
+	{ text: "4Algorithm-predicted health\n (based on insurance costs)",
+		x: viewBoxSize.width * 0.2 - 36,
+		y: viewBoxSize.height * 0.4 + radius},
+	{ text: ["5katy\n"],
+		x: margin.left,
+		y: margin.top },
+	{ text: "6Algorithm-predicted health\n (based on health metrics\n and insurance costs)",
+		x: viewBoxSize.width * 0.2 - 36,
+		y: viewBoxSize.height * 0.4 + radius},
 	];
+
+	var _shadowCaption = [
+	{text: "Shadows0",
+		x: margin.left,
+		y: 2 * circleBox
+	},
+	{text: "Shadows1",
+		x: margin.left,
+		y: 2 * circleBox
+	},
+	{text: "Shadows2",
+		x: margin.left,
+		y: 2 * circleBox
+	},
+	{text: "3Actual insurance costs\n",
+		x: viewBoxSize.width * 0.2 - 30,
+		y: viewBoxSize.height * 0.6 + radius
+	},
+	{text: "4Actual health\n",
+		x: viewBoxSize.width * 0.2 - 24,
+		y: viewBoxSize.height * 0.6 + radius
+	},
+	{text: "5kt",
+		x: margin.left,
+		y: 3 * circleBox
+	},
+	{text: "6Actual health\n",
+		x: viewBoxSize.width * 0.2 - 24,
+		y: viewBoxSize.height * 0.6 + radius
+	}
+	]
 
 	return {
 		//Increment the step & tell everyone
@@ -118,8 +149,12 @@ var makeModel = function(data) {
 			return _inputLabels;
 		},
 		//Get the circle labels
-		circleText: function() {
-			return _circleText;
+		circleCaption: function() {
+			return _circleCaption;
+		},
+		//Get the circle labels
+		shadowCaption: function() {
+			return _shadowCaption;
 		},
 		//Add an observer to the model
 		register: function(fxn) {
@@ -163,6 +198,19 @@ var makeSVGView = function(model, data, svgID) {
 
 	// Move the patients to the right side
 	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
+
+	var _circleCaption = _svg.append('text')
+		.attr('id', 'circleCaption')
+		.text('Patients')
+		.attr('x', viewBoxSize.width * 0.5)
+		.attr('y', 40)
+		.attr('font-weight', "bold");
+
+	var _shadowCaption = _svg.append('text')
+		.attr('id', 'shadowCaption')
+		.text('Shadows')
+		.attr('font-weight', "bold");
+
 
 	var _threshold = _svg.append('rect')
 			.attr('id', "threshold")
@@ -227,15 +275,38 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3 || step ==4 ) return radius;
 				return 0;
 			});
-		var _circleText = model.circleText();
-		var circleLabels = _svg.selectAll('text')
-			.data(_circleText)
-			.enter()
-			.append('text')
-			.attr('x', d => d.x)
-			.attr('y', d => d.y)
-			.text(d => d);
-
+		var circleCaption = d3.select("#circleCaption")
+			.text(function() {
+				var step = model.get();
+				var text = model.circleCaption();
+				return text[step].text;
+			})
+			.attr('x', function(){
+				var step = model.get();
+				var text = model.circleCaption();
+				return text[step].x;
+			})
+			.attr('y', function(){
+				var step = model.get();
+				var text = model.circleCaption();
+				return text[step].y;
+			});
+		var shadowCaption = d3.select("#shadowCaption")
+			.text(function() {
+				var step = model.get();
+				var text = model.shadowCaption();
+				return text[step].text;
+			})
+			.attr('x', function(){
+				var step = model.get();
+				var text = model.shadowCaption();
+				return text[step].x;
+			})
+			.attr('y', function(){
+				var step = model.get();
+				var text = model.shadowCaption();
+				return text[step].y;
+			});
 	}
 
 	function _moveThreshold(step) {
@@ -261,11 +332,7 @@ var makeSVGView = function(model, data, svgID) {
 				.attr('opacity', 0);
 			_svg.selectAll('.threshold')
 				.attr('display', 'none');
-
 		}
-		
-
-		
 	}
 
 	return {
@@ -334,57 +401,6 @@ var makeTopTextView = function(model, data, textID) {
 	}
 }
 
-var makeCircleTextView = function(model, textID) {
-	var _observers = makeObservers();
-	var _svg = d3.select("#mySVG")
-	var circleText = _svg
-		.append('text')
-		.attr('x', margin.left)
-		.attr('y', margin.top)
-		.attr('class', 'circletext')
-		.attr('id', textID)
-		.attr('font-size', '12px')
-		.attr('text-align', 'center');
-
-	var allCircleText = model.circleText();
-	
-	circleText.selectAll('tspan')
-		.data(d => allCircleText[0].text)
-		.enter()
-		.append('tspan')
-		.attr('class', 'circletext')
-		.text(d => d)
-		.attr('x', d =>  viewBoxSize.width * 0.1 + margin.top + circleBox)
-		.attr('y', (d,i) => i * 7 + circleBox + margin.top + 15);
-
-	var _changeCircleText = function(step, circleTextData) {
-
-		circleText.selectAll('tspan.circletext').remove();
-		circleText.attr('x', circleTextData[step].x)
-		circleText.attr('y', circleTextData[step].y)
-		circleText.selectAll('tspan.circletext')
-			.data(d => {
-				return circleTextData[step];
-			})
-			.enter()
-			.append('tspan')
-			.attr('class', 'circletext')
-			.text(d => d.text)
-			.attr('x', d => d.x + 30)
-			.attr('y', d => d.y + 40);
-	}
-
-	return {
-		render: function() {
-			var _step = model.get();
-			var _text = model.circleText();
-			_changeCircleText(_step, _text);
-		},
-		register: function(fxn) {
-			_observers.add(fxn);
-		}
-	}
-}
 
 var makeInputView = function(model, inputID) {
 	var _svg = d3.select('#mySVG');
@@ -400,7 +416,7 @@ var makeInputView = function(model, inputID) {
 		.append('rect')
 		.attr('class', 'algInputs')
 		.attr("x", margin.left + 10)
-		.attr("y", (d,i) => i * 14 + margin.top + 10)
+		.attr("y", (d,i) => i * 14 + margin.top + 30)
 		.attr('width', 50)
 		.attr('height', 8)
 		.attr('fill', 'lightsteelblue')
@@ -414,9 +430,18 @@ var makeInputView = function(model, inputID) {
 		.append('text')
 		.attr('class', 'algInputs')
 		.attr('x', margin.left + 10 + padding.text)
-		.attr('y', (d,i) => i * 14 + margin.top + 15)
+		.attr('y', (d,i) => i * 14 + margin.top + 35)
 		.text(d => d.text)
 		.attr('cursor', 'pointer')
+		.attr('display', 'none');
+
+	var _inputTitle = _inputG.append('text')
+		.attr('class', 'algInputs')
+		.attr('id', 'algInputsTitle')
+		.text('Algorithm Inputs')
+		.attr('x', margin.left + 10)
+		.attr('y', margin.top + 20)
+		.style('font-weight', 'bold')
 		.attr('display', 'none');
 
 	function _changeColor() {
@@ -440,6 +465,7 @@ var makeInputView = function(model, inputID) {
 		if (step == 1) {
 			_allInputRects.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
 			_allInputText.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
+			_svg.select('#algInputsTitle').attr('display', 'inline');
 			_svg.selectAll(".algInputs")
 				.attr('opacity', 1);
 		} else {
@@ -536,7 +562,6 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 		story.model = makeModel(d);
 		story.views.push(makeTopTextView(story.model, d, '#textView'));
-		story.views.push(makeCircleTextView(story.model, '#circleTextView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
 		story.views.push(makeInputView(story.model, '#inputs'))
