@@ -59,12 +59,13 @@ function drawMySVG(mySVGID, mySVGClass){
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
 			.attr('class', mySVGClass)
+			.attr('id', "katy")
 			.attr('x', x(55))
 			.attr('y', y(5.5))
 			.attr('width', x(100) - x(55) + 10)
 			.attr('height', height - margin.top + 12)
-			.attr('fill', 'lightgrey')
-			.attr('opacity', 0.6);
+			.attr('fill', 'lightsteelblue')
+			.attr('opacity', 0.3); //0.6
 
 		var blackPoints = [];
 		var whitePoints = [];
@@ -265,7 +266,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		dataCircles
 			.on('mouseover', showDotToolTip)
 			.on('mouseout', hideDotToolTip);
-			
+
 		var toolTipG = svg.append('g')
 				.attr('class', mySVGClass);
 
@@ -312,7 +313,6 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('x',105)
 				.attr('y', (d,i) => i * 15 + 120);
 				
-
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
 		var sliderId = (mySVGClass.includes('vert')) ? 'vertSliderBar' : 'horizSliderBar';
@@ -533,7 +533,6 @@ function drawMySVG(mySVGID, mySVGClass){
 		function hideDotToolTip(event, d) {
 			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 		}
-
 
 	})
 	.catch(function(error){
