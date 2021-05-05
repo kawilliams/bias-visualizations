@@ -43,31 +43,32 @@ var makeModel = function(data) {
 	var _data = data;
 
 	var _text = [
-		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the health program.\n\
-		We want to line them up from sickest to healthiest. We'll use an algorithm to determine the level of health.",
-		"We have insurance information, like number of doctor's visits. Let's select these data for our inputs\n\
-		to our algorithm.",
-		"We apply the algorithm and align the circles from sickest to healthiest, with the sickest on the left.",
-		"Let's see how accurate our algorithm was at predicting health. Since we input insurance costs into our algorithm\n\
+		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
+		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll line\n\
+		them up from sickest to healthiest. We'll use an algorithm to help us.",
+		"We have health record data, like diagnosis codes and health care costs. We'll use these data to predict future health\n\
+		care costs - a commonly-used prediction label that is correlated with health.",
+		"We apply the algorithm and align the circles from sickest to healthiest with the sickest on the left.",
+		"Let's examine the accuracy of our algorithm. Since we used health care costs as our label \n\
 		it should accurately predict costs.",
-		"But we care more about predicting patient health then predicting costs. How well did the algorithm predict health?",
-		"If we look at information about the patients, we notice a bad trend: Black patients get excluded from the program\n\
-		even though they have worse health than White patients.",
-		"Let's try adding more health information into our inputs, instead of relying only on cost-based insurance\n\
-		data. ",
-		"Now we can see that our algorithm is better at predicting health when it uses health-based inputs, rather\n\
-		than cost-based inputs."
+		"But we care more about predicting patient health than predicting costs. How well did the algorithm predict actual health?",
+		"While health care costs and actual health needs are correlated, they aren't the same. The difference in the two varies\n\
+		is not random with respect to socioeconomic and racial variables. Because of structural biases and differential treatment,\n\
+		Black patients with similar needs to White patients have long been known to have lower costs.\n\
+		Since our algorithm's label is cost, a Black patient and a White patient with the same number of chronic illnesses will have\n\
+		dramatically different algorithmic scores.",
+		"Let's try adding more health information into our label, making it a combination of health care costs and health metrics.\n",
+		"Now we can see that our algorithm is better at predicting health when we tell it to predict health and cost, rather\n\
+		than only cost."
 	];
 
 	var _inputLabels = [
-		{text: "Input 1", clicked: false},
-		{text: "Input 2", clicked: false}, 
-		{text: "Input 3", clicked: false},
-		{text: "Input 4", clicked: false},
-		{text: "Input 5", clicked: false},
-		{text: "Input 6", clicked: false},
-		{text: "Input 7", clicked: false},
-		{text: "Input 8", clicked: false}
+		{text: "Age and sex", clicked: false},
+		{text: "Insurance type", clicked: false}, 
+		{text: "Diagnosis codes", clicked: false},
+		{text: "Procedure codes", clicked: false},
+		{text: "Medications", clicked: false},
+		{text: "Costs", clicked: false}
 	]
 
 	var _circleCaption = [
@@ -190,6 +191,15 @@ var makeSVGView = function(model, data, svgID) {
 	var circleShadows = _svg.selectAll('.shadows')
 		.attr('r', 0);
 
+	var circleShadowRace = _svg.selectAll('text')
+		.data(data)
+		.enter()
+		.append('text')
+		.text(d => d.race)
+		.attr('class', d => (d.id < 10) ? "patients" : "shadows")
+		.attr('x', d => d.x0 * circleBox)
+		.attr('y', d => d.y0 * circleBox)
+		.attr('display', d => (d.id < 10) ? "none" : "inline")
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
@@ -198,13 +208,35 @@ var makeSVGView = function(model, data, svgID) {
 
 	// Move the patients to the right side
 	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
+	circleShadowRace.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
 
 	var _circleCaption = _svg.append('text')
 		.attr('id', 'circleCaption')
-		//.text()
 		.attr('x', viewBoxSize.width * 0.5)
 		.attr('y', 40)
 		.attr('font-weight', "bold");
+
+
+	var step = model.get();
+
+	_circleCaption.selectAll('tspan.circlecaption')
+		.data(d => {
+			var text = model.circleCaption();
+			return text[step].text.split('\n');
+		})
+		.enter()
+		.append('tspan')
+		.attr('class', 'circlecaption')
+		.text(d => d)
+		.attr('x', d => {
+			var text = model.circleCaption();
+			return text[step].x
+		})
+		.attr('y', function(d,i){
+			var step = model.get();
+			var text = model.circleCaption();
+			return text[step].y + (i*5);
+		});
 
 	var _shadowCaption = _svg.append('text')
 		.attr('id', 'shadowCaption')
@@ -255,6 +287,7 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3) _x = d.x3;
 				if (step == 4) _x = d.x4;
 				if (step == 5) _x = d.x5;
+				if (step == 6) _x = d.x6;
 				return _x * circleBox;
 			})
 			.attr('cy', d => {
@@ -264,21 +297,45 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3) _y = d.y3;
 				if (step == 4) _y = d.y4;
 				if (step == 5) _y = d.y5;
+				if (step == 6) _y = d.y6;
 				return _y * circleBox;
 			})
 			.attr('fill', d => {
-				if (step < 4) return sickColorScale(d.cost);
-				return sickColorScale(d.health);
+				if (step == 0) return 'orange';
+				else if (step < 4) return sickColorScale(d.cost);
+				else if (step < 6) return sickColorScale(d.health);
+				else if (step >= 6) return 'orange';
 			});
 		var circleShadows = _svg.selectAll('.shadows')
 			.attr('r', d => {
-				if (step == 3 || step ==4 ) return radius;
+				if (step == 3 || step == 4 || step == 5) return radius;
 				return 0;
 			});
-
+			
+		var circleShadowRace = _svg.selectAll('text.shadows')
+			.transition()
+			.duration(duration)
+			.attr('x', d => {
+				var _x = d.x0;
+				if (step == 1) _x = d.x1;
+				if (step == 2) _x = d.x2;
+				if (step == 3) _x = d.x3;
+				if (step == 4) _x = d.x4;
+				if (step == 5) _x = d.x5;
+				if (step == 6) _x = d.x6;
+				return _x * circleBox;
+			})
+			.attr('y', d => {
+				var _y = d.y0;
+				if (step == 1) _y = d.y1;
+				if (step == 2) _y = d.y2;
+				if (step == 3) _y = d.y3;
+				if (step == 4) _y = d.y4;
+				if (step == 5) _y = d.y5;
+				if (step == 6) _y = d.y6;
+				return _y * circleBox;
+			});
 		d3.selectAll('.circlecaption').remove();
-
-		
 
 		var circleCaption = d3.select("#circleCaption")
 			.selectAll('tspan.circlecaption')
@@ -327,7 +384,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	function _moveThreshold(step) {
 
-		if (step == 2 || step == 3 || step == 4) {
+		if (step >= 2 && step <= 5) {
 			_svg.select('#thresholdShade')
 				.attr('opacity', 0.2);
 			_svg.selectAll('.threshold')//("#threshold")
@@ -447,7 +504,8 @@ var makeInputView = function(model, inputID) {
 		.attr('y', (d,i) => i * 14 + margin.top + 35)
 		.text(d => d.text)
 		.attr('cursor', 'pointer')
-		.attr('display', 'none');
+		.attr('display', 'none')
+		.on('click', _changeColor);
 
 	var _inputTitle = _inputG.append('text')
 		.attr('class', 'algInputs')
@@ -482,7 +540,15 @@ var makeInputView = function(model, inputID) {
 			_svg.select('#algInputsTitle').attr('display', 'inline');
 			_svg.selectAll(".algInputs")
 				.attr('opacity', 1);
-		} else {
+		} 
+		else if (step == 6) {
+			_allInputRects.attr('display', 'inline');
+			_allInputText.attr('display', 'inline');
+			_svg.select('#algInputsTitle').attr('display', 'inline');
+			_svg.selectAll(".algInputs")
+				.attr('opacity', 1);
+		}
+		else {
 			_svg.selectAll(".algInputs")
 				.attr('display', 'none');
 			_svg.selectAll(".algInputs")
