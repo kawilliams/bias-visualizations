@@ -86,7 +86,7 @@ var makeModel = function(data) {
 	{ text: "4Algorithm-predicted health\n (based on insurance costs)",
 		x: viewBoxSize.width * 0.2 - 36,
 		y: viewBoxSize.height * 0.4 + radius},
-	{ text: ["5katy\n"],
+	{ text: "5katy\n",
 		x: margin.left,
 		y: margin.top },
 	{ text: "6Algorithm-predicted health\n (based on health metrics\n and insurance costs)",
@@ -201,7 +201,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _circleCaption = _svg.append('text')
 		.attr('id', 'circleCaption')
-		.text('Patients')
+		//.text()
 		.attr('x', viewBoxSize.width * 0.5)
 		.attr('y', 40)
 		.attr('font-weight', "bold");
@@ -275,22 +275,38 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3 || step ==4 ) return radius;
 				return 0;
 			});
+
+		d3.selectAll('.circlecaption').remove();
+
+		
+
 		var circleCaption = d3.select("#circleCaption")
-			.text(function() {
+			.selectAll('tspan.circlecaption')
+			.data(d => {
 				var step = model.get();
 				var text = model.circleCaption();
-				return text[step].text;
+				//console.log("what should appear", text[step].text);
+				return text[step].text.split('\n');
+			})
+			.enter()
+			.append('tspan')
+			.attr('class', 'circlecaption')
+			.text(d => {
+				//console.log('should match',d);
+				return d;
 			})
 			.attr('x', function(){
 				var step = model.get();
 				var text = model.circleCaption();
 				return text[step].x;
 			})
-			.attr('y', function(){
+			.attr('y', function(d,i){
 				var step = model.get();
 				var text = model.circleCaption();
-				return text[step].y;
-			});
+				return text[step].y + (i*5);
+			})
+
+
 		var shadowCaption = d3.select("#shadowCaption")
 			.text(function() {
 				var step = model.get();
@@ -341,10 +357,8 @@ var makeSVGView = function(model, data, svgID) {
 			_cleanSVG();
 			var step = model.get();
 			var data = model.data();
-			//var text = model.text();
 	
 			_moveCircles(step, data);
-			//_makeTopText(step, text);
 			_moveThreshold(step);
 		},
 		register: function(fxn) {
@@ -355,19 +369,18 @@ var makeSVGView = function(model, data, svgID) {
 
 var makeTopTextView = function(model, data, textID) {
 	var _observers = makeObservers();
-
-	var topText = d3.select('#mySVG')
-		.append('text')
+	var _svg = d3.select('#mySVG');
+	var topText = _svg.append('text')
 		.attr('x', viewBoxSize.width * 0.5)
 		.attr('y', margin.top)
 		.attr('class', 'toptext')
-		.attr('id', textID)
+		.attr('id', textID.replace('#',''))
 		.attr('font-size', '12px')
 		.attr('text-align', 'center');
 
 	var text = model.text();
 
-	topText.selectAll('tspan')
+	topText.selectAll('tspan.toptext')
 		.data(d => text[0].split('\n'))
 		.enter()
 		.append('tspan')
@@ -376,11 +389,12 @@ var makeTopTextView = function(model, data, textID) {
 		.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
 		.attr('y', (d,i) => i * 7 + margin.top);
 
-	var _changeTopText = function(step, text) {
-		
+	var _changeTopText = function(step, text, textID) {
 		d3.select(textID).selectAll('tspan.toptext').remove();
 		d3.select(textID).selectAll('tspan.toptext')
-			.data(d => text[step].split('\n'))
+			.data(d => {
+				return text[step].split('\n');
+			})
 			.enter()
 			.append('tspan')
 			.attr('class', 'toptext')
@@ -393,7 +407,7 @@ var makeTopTextView = function(model, data, textID) {
 		render: function() {
 			var _step = model.get();
 			var _text = model.text();
-			_changeTopText(_step, _text);
+			_changeTopText(_step, _text, textID);
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
