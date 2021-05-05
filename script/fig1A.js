@@ -273,20 +273,20 @@ function drawMySVG(mySVGID, mySVGClass){
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
 				.attr('class', mySVGClass)
-				.attr('height', 120)
-				.attr('width', 260)
+				.attr('height', 110)
+				.attr('width', 240)
 				.attr('x', 100) //(event.x - 170)
 				.attr('y', 100) //(500 - event.x)
 				.attr('fill', 'lightsteelblue')
 				.attr('rx', 5)
 				.attr('opacity', '1');
 
-		var toolTipText = { instructions: "Health providers used an algorithm\n\
-											to determine which patients would get accepted into \n\
-											an extra care program. The x-axis shows how a patient's\n\
-											health score compared to others, and the y-axis shows \n\
-											how healthy the patient is, based on number of chronic\n\
-											conditions. Move the sliders to explore.",
+		var toolTipText = { instructions: "Health providers used an algorithm to determine\n\
+											which patients would get accepted into an extra\n\
+											care program. The x-axis shows how a patient's\n\
+											health score compared to others, and the y-axis\n\
+											shows how healthy the patient is, based on number\n\
+											of chronic conditions. Move the sliders to explore.",
 					horizText: "These two patients are equally sick\n\
 					(X conditions), but only the White \n\
 					patient was referred for screening.",
@@ -294,7 +294,6 @@ function drawMySVG(mySVGID, mySVGClass){
 							   health score from the algorithm \n\
 							   (X percentile); however, the Black \n\
 							   patient has more chronic conditions, \n\
-							   like diabetes and heart disease, \n\
 							   than the White patient (Y, \n\
 							    compared to Z, respectively)."
 					};
@@ -303,14 +302,14 @@ function drawMySVG(mySVGID, mySVGClass){
 				.enter()
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', 105) //(event.x - 170)
+				.attr('x', 107) //(event.x - 170)
 				.attr('y', 110) //(500 - event.x)
 				.attr('font-size', 12);
 			toolTipTextElement
 				.append('tspan')
 				.attr('class', 'tiptext '+mySVGClass)
 				.text(d => d)
-				.attr('x',105)
+				.attr('x',107)
 				.attr('y', (d,i) => i * 15 + 120);
 				
 		// Slider
@@ -441,7 +440,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.transition()
 			.duration(35)
 			.attr('width', 170)
-			.attr('height', whichSlider.includes("horiz") ? 60 : 120)
+			.attr('height', whichSlider.includes("horiz") ? 60 : 110)
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
