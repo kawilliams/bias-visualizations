@@ -1,11 +1,12 @@
 
 var margin = ({top: 3, right: 3, bottom: 3, left: 3});
+var svgSize = {height: 210, width: 300}
 var viewBoxSize = {height: 105, width: 150};
 
 
 var circleBox = 10;
 var radius = 3;
-var algBoxSize = {height: 51, width: 27};
+var algBoxSize = {height: 51, width: 32};
 var thresholdShadeSize = {height: radius + circleBox, width: 5 * circleBox };
 
 var circleCluster = {height: 6 * circleBox, width: 8 * circleBox};
@@ -82,7 +83,7 @@ var makeModel = function(data) {
 		{text: "Procedure codes", clicked: false},
 		{text: "Medications", clicked: false},
 		{text: "Costs", clicked: false}
-	]
+	];
 
 	var _circleCaption = [
 	{ text: "Patients0\n", 
@@ -122,20 +123,20 @@ var makeModel = function(data) {
 		y: 2 * circleBox
 	},
 	{text: "3Actual insurance costs\n",
-		x: viewBoxSize.width * 0.2 - 30,
-		y: viewBoxSize.height * 0.6 + radius
+		x: -40,
+		y: 9 + 2 * circleBox
 	},
 	{text: "4Actual health\n",
-		x: viewBoxSize.width * 0.2 - 24,
-		y: viewBoxSize.height * 0.6 + radius
+		x: -28,
+		y: 9 + 2 * circleBox
 	},
 	{text: "5",
-		x: margin.left,
-		y: 3 * circleBox
+		x: -40,
+		y: 9 + 2 * circleBox
 	},
 	{text: "6Actual health\n",
-		x: viewBoxSize.width * 0.2 - 24,
-		y: viewBoxSize.height * 0.6 + radius
+		x: -40,
+		y: 9 + 2 * circleBox
 	}
 	]
 
@@ -184,7 +185,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _svg = d3.select(svgID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
-		.attr('viewBox', "0 0 " + viewBoxSize.width + " " + viewBoxSize.height)
+		.attr('viewBox', "0 0 " + (viewBoxSize.width * 1.5) + " " + (viewBoxSize.height * 1.5))
 		.classed('svg-content', true)
 		.attr("style", "outline: thin solid red;");
 
@@ -265,25 +266,26 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('id', "threshold")
 			.attr('class', 'threshold')
 			.attr('x', 0)
-			.attr('y', -circleBox * 0.5 - 1)
-			.attr('width', 1)
-			.attr('height', 1.5 * circleBox)
+			.attr('y', -circleBox + radius -1)
+			.attr('width', 2)
+			.attr('height', 2 * circleBox)
 			.attr('display', 'none');
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
 			.attr('class', 'threshold')
-			.attr('x', 0)
+			.attr('x', 1)
 			.attr('y', -circleBox * 0.5)
 			.attr("width", thresholdShadeSize.width)
 			.attr('height', thresholdShadeSize.height)
 			.style('stroke', 'black')
+			.style('stroke-width', '1px')
 			.attr('opacity', 0)
-			.attr('fill', 'white')
+			.attr('fill', 'none')
 			.attr('display', 'none');
 	var _thresholdText = thresholdG.append('text')
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
-			.attr('x', 0)
+			.attr('x', 3)
 			.attr('y', circleBox + radius)
 			.text('Accepted into program')
 			.attr('display', 'none')
@@ -331,26 +333,8 @@ var makeSVGView = function(model, data, svgID) {
 		var circleShadowRace = _svg.selectAll('text.shadows')
 			.transition()
 			.duration(duration)
-			.attr('x', d => {
-				var _x = d.x0;
-				if (step == 1) _x = d.x1;
-				if (step == 2) _x = d.x2;
-				if (step == 3) _x = d.x3;
-				if (step == 4) _x = d.x4;
-				if (step == 5) _x = d.x5;
-				if (step == 6) _x = d.x6;
-				return _x * circleBox;
-			})
-			.attr('y', d => {
-				var _y = d.y0;
-				if (step == 1) _y = d.y1;
-				if (step == 2) _y = d.y2;
-				if (step == 3) _y = d.y3;
-				if (step == 4) _y = d.y4;
-				if (step == 5) _y = d.y5;
-				if (step == 6) _y = d.y6;
-				return _y * circleBox;
-			})
+			.attr('x', d => d.x5 * circleBox - 2)
+			.attr('y', d => d.y5 * circleBox + 2)
 			.attr('display', d => {
 			var step = model.get();
 			if ((step == 5) ){//&& (d.id >= 10)) {
@@ -364,16 +348,12 @@ var makeSVGView = function(model, data, svgID) {
 			.data(d => {
 				var step = model.get();
 				var text = model.circleCaption();
-				//console.log("what should appear", text[step].text);
 				return text[step].text.split('\n');
 			})
 			.enter()
 			.append('tspan')
 			.attr('class', 'circlecaption')
-			.text(d => {
-				//console.log('should match',d);
-				return d;
-			})
+			.text(d => d)
 			.attr('x', function(){
 				var step = model.get();
 				var text = model.circleCaption();
@@ -411,7 +391,7 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', function(){
 				var step = model.get();
-				if (step == 3 || step == 4 || step == 6) return 1;
+				if (step == 3 || step == 4) return 1;
 				return 0;
 			});
 	}
@@ -514,30 +494,28 @@ var makeInputView = function(model, inputID) {
 	var _inputLabels = model.inputs();
 	var _inputG = _svg.append('g');
 	_inputG.append('rect')
-		.attr('class', 'algInputs')
+		.attr('class', 'background')
 		.attr('id', 'algRect')
 		.attr('x', margin.left)
-		.attr('y', margin.top + topTextSize.height + 20)
+		.attr('y', margin.top + topTextSize.height + 15)
 		.attr('width', algBoxSize.width)
 		.attr('height', algBoxSize.height)
-		.attr('fill', 'steelblue')
+		.attr('fill', '#238b45') //green
 		.attr('display', 'none');
 
 	
-	
-	var _inputs = _inputG.selectAll('rect')
+	var _inputs = _inputG.selectAll('rect.algInputs')
 		.data(_inputLabels)
 		.enter()
 		.append('rect')
 		.attr('class', 'algInputs')
 		.attr("x", margin.left + 3)
-		.attr("y", (d,i) => i * 6 + margin.top + topTextSize.height + 20)
+		.attr("y", (d,i) => i * 6 + margin.top + topTextSize.height + 16)
 		.attr('width', algBoxSize.width * 0.8)
 		.attr('height', algBoxSize.height * 0.1)
-		.attr('fill', 'lightsteelblue')
+		.attr('fill', '#74c476') //green
 		.attr('cursor', 'pointer')
-		.attr('display', 'none')
-		.on('click', _changeColor);
+		.attr('display', 'none');
 
 	var _inputText = _inputG.selectAll('text')
 		.data(_inputLabels)
@@ -545,19 +523,35 @@ var makeInputView = function(model, inputID) {
 		.append('text')
 		.attr('class', 'algInputs')
 		.attr('x', margin.left + padding.text)
-		.attr('y', (d,i) => i * 6 + margin.top + topTextSize.height + 30)
+		.attr('y', (d,i) => i * 6 + margin.top + topTextSize.height + 20)
 		.text(d => d.text)
 		.attr('cursor', 'pointer')
 		.attr('display', 'none')
-		.style('font-size', '3px')
-		.on('click', _changeColor);
+		.style('font-size', '3px');
+
+	var _labelRect = _inputG.append('rect')
+		.attr('class', 'labelClass')
+		.attr('x', margin.left + 3)
+		.attr('y', 55 + margin.top + topTextSize.height)
+		.attr('width', algBoxSize.width * 0.8)
+		.attr('height', algBoxSize.height * 0.15)
+		.attr('fill', '#c7e9c0') //green
+		.attr('display', 'none');
+	var _labelLabel = _inputG.append('text')
+		.attr('class', 'labelClass')
+		.attr('id', 'labelText')
+		.attr('x', margin.left + 5)
+		.attr('y', 60 + margin.top + topTextSize.height)
+		.text('Predict Cost')
+		.attr('display', 'none');
+
 
 	var _inputTitle = _inputG.append('text')
 		.attr('class', 'algInputs')
 		.attr('id', 'algInputsTitle')
 		.text('Algorithm Inputs')
-		.attr('x', margin.left)
-		.attr('y', topTextSize.height + 20)
+		.attr('x', margin.left + 2)
+		.attr('y', topTextSize.height + 15)
 		.style('font-weight', 'bold')
 		.style('font-size', '3px')
 		.attr('display', 'none');
@@ -579,26 +573,26 @@ var makeInputView = function(model, inputID) {
 	function _moveInputs(step) {
 		var _allInputRects = _svg.selectAll("rect.algInputs");
 		var _allInputText = _svg.selectAll("text.algInputs");
+		var _allAlgLabels = _svg.selectAll('.labelClass');
 
-		if (step == 1) {
-			_allInputRects.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
-			_allInputText.attr('display', (d,i) => (i < 5) ? 'inline' : 'none');
+		if ((step == 1) || (step == 6)) {
+			_svg.select('#algRect').attr('display', 'inline');
+			_allInputRects.attr('display', 'inline');
+			_allInputText.attr('display', 'inline' );
+			_allAlgLabels.attr('display', 'inline');
 			_svg.select('#algInputsTitle').attr('display', 'inline');
-			_svg.selectAll(".algInputs")
-				.attr('opacity', 1);
+			_svg.selectAll(".algInputs").attr('opacity', 1);
 		} 
 		else if (step == 6) {
-			_allInputRects.attr('display', 'inline');
-			_allInputText.attr('display', 'inline');
-			_svg.select('#algInputsTitle').attr('display', 'inline');
-			_svg.selectAll(".algInputs")
-				.attr('opacity', 1);
+			_svg.select('#labelText').text('Predict Health and Cost');
 		}
 		else {
+			_svg.select('#algRect').attr('display', 'none');
 			_svg.selectAll(".algInputs")
 				.attr('display', 'none');
 			_svg.selectAll(".algInputs")
 				.attr('opacity', 0);
+			_allAlgLabels.attr('display', 'none');
 		}
 	}
 
