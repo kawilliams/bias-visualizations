@@ -1,13 +1,24 @@
 
-var margin = ({top: 20, right: 30, bottom: 30, left: 30});
+var margin = ({top: 3, right: 3, bottom: 3, left: 3});
+var viewBoxSize = {height: 105, width: 150};
 
-var circleBox = 14;
-var algBoxSize = {height: 30, width: 90};
-var radius = 5;
-var viewBoxSize = {height: 150, width: 300};
-var padding = {text: 20};
+
+var circleBox = 10;
+var radius = 3;
+var algBoxSize = {height: 51, width: 27};
+var thresholdShadeSize = {height: radius + circleBox, width: 5 * circleBox };
+
+var circleCluster = {height: 6 * circleBox, width: 8 * circleBox};
+var circleLine = {height: 1 * circleBox, width: 10 * circleBox};
+var circleDoubleLine = {height: 2 * circleBox, width: 10 * circleBox};
+
+var topTextSize = {height: 4, width: 144, fontsize: 3, space: 4};
+var nextButtonSize = {height: 8, width: 20};
+var captionSize = {fontsize: 3};
+
+var padding = {text: 5};
 var duration = 750;
-var thresholdShadeSize = {height: 19, width: 73 };
+
 
 var story = {
 	model: undefined,
@@ -44,22 +55,24 @@ var makeModel = function(data) {
 
 	var _text = [
 		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
-		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll line\n\
-		them up from sickest to healthiest. We'll use an algorithm to help us.",
-		"We have health record data, like diagnosis codes and health care costs. We'll use these data to predict future health\n\
-		care costs - a commonly-used prediction label that is correlated with health.",
-		"We apply the algorithm and align the circles from sickest to healthiest with the sickest on the left.",
-		"Let's examine the accuracy of our algorithm. Since we used health care costs as our label \n\
-		it should accurately predict costs.",
-		"But we care more about predicting patient health than predicting costs. How well did the algorithm predict actual health?",
-		"While health care costs and actual health needs are correlated, they aren't the same. The difference in the two varies\n\
-		is not random with respect to socioeconomic and racial variables. Because of structural biases and differential treatment,\n\
-		Black patients with similar needs to White patients have long been known to have lower costs.\n\
-		Since our algorithm's label is cost, a Black patient and a White patient with the same number of chronic illnesses will have\n\
-		dramatically different algorithmic scores.",
-		"Let's try adding more health information into our label, making it a combination of health care costs and health metrics.\n",
-		"Now we can see that our algorithm is better at predicting health when we tell it to predict health and cost, rather\n\
-		than only cost."
+		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll\n\
+		line them up from sickest to healthiest. We'll use an algorithm to help us.",
+		"We have health record data, like diagnosis codes and health care costs. We'll use these data to predict future\n\
+		health care costs - a commonly-used prediction label that is correlated with health.",
+		"We apply the algorithm and align the circles from sickest to healthiest with the sickest on the right.",
+		"Let's examine the accuracy of our algorithm. Since we used health care costs as our label, the predicted health\n\
+		costs should be very close to the actual health costs.",
+		"But we care more about predicting patient health than predicting costs. \n\
+		How well did the algorithm predict actual health?",
+		"While health care costs and actual health needs are correlated, they aren't the same. The difference in the two\n\
+		variables is not random with respect to socioeconomic and racial variables. Because of structural biases and \n\
+		differential treatment, Black patients with similar needs to White patients have long been known to have lower \n\
+		costs. Since our algorithm's label is cost, a Black patient and a White patient with the same number of chronic \n\
+		illnesses will have dramatically different algorithmic scores.",
+		"Let's try adding more health information into our label, making it a combination of health care costs and \n\
+		health metrics.",
+		"Now we can see that our algorithm is better at predicting health when we tell it to predict health and cost, \n\
+		rather than only cost."
 	];
 
 	var _inputLabels = [
@@ -73,38 +86,38 @@ var makeModel = function(data) {
 
 	var _circleCaption = [
 	{ text: "Patients0\n", 
-		x: margin.left, 
-		y: viewBoxSize.height * 0.3 },
+		x: circleCluster.width * 0.5 - 14, 
+		y: -5 },
 	{ text: "Patients1\n", 
-		x: viewBoxSize.width * 0.7, 
-		y: viewBoxSize.height * 0.3 },
+		x: circleCluster.width * 0.5 + 6,  
+		y: -5 },
 	{ text: "2Algorithm-predicted health\n (based on insurance costs)",
-		x: viewBoxSize.width * 0.2 - 36,
-		y: viewBoxSize.height * 0.4 + radius},
+		x: -40,
+		y: 9},
 	{ text: "3Algorithm-predicted health\n (based on insurance costs)",
-		x: viewBoxSize.width * 0.2 - 36,
-		y: viewBoxSize.height * 0.4 + radius},
+		x: -40,
+		y: 9},
 	{ text: "4Algorithm-predicted health\n (based on insurance costs)",
-		x: viewBoxSize.width * 0.2 - 36,
-		y: viewBoxSize.height * 0.4 + radius},
-	{ text: "5katy\n",
+		x: -40,
+		y: 9},
+	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
 	{ text: "6Algorithm-predicted health\n (based on health metrics\n and insurance costs)",
-		x: viewBoxSize.width * 0.2 - 36,
-		y: viewBoxSize.height * 0.4 + radius},
+		x: -40,
+		y: 9},
 	];
 
 	var _shadowCaption = [
-	{text: "Shadows0",
+	{text: "0",
 		x: margin.left,
 		y: 2 * circleBox
 	},
-	{text: "Shadows1",
+	{text: "1",
 		x: margin.left,
 		y: 2 * circleBox
 	},
-	{text: "Shadows2",
+	{text: "2",
 		x: margin.left,
 		y: 2 * circleBox
 	},
@@ -116,7 +129,7 @@ var makeModel = function(data) {
 		x: viewBoxSize.width * 0.2 - 24,
 		y: viewBoxSize.height * 0.6 + radius
 	},
-	{text: "5kt",
+	{text: "5",
 		x: margin.left,
 		y: 3 * circleBox
 	},
@@ -161,8 +174,6 @@ var makeModel = function(data) {
 		register: function(fxn) {
 			_observers.add(fxn);
 		}
-
-
 	};
 
 }
@@ -173,25 +184,31 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _svg = d3.select(svgID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
-		.attr('viewBox', "0 0 300 150")
-		.classed('svg-content', true);
+		.attr('viewBox', "0 0 " + viewBoxSize.width + " " + viewBoxSize.height)
+		.classed('svg-content', true)
+		.attr("style", "outline: thin solid red;");
 
 	var _cleanSVG = function() {
 		while (_svg.firstChild) {
 			_svg.removeChild(_svg.firstChild);
 		}
 	}
-	
-	var circles = _svg.selectAll('circle')
+	var circleG = _svg.append('g')
+		.attr('class', 'allCircles')
+		.attr('id', 'circleG');
+		// Move the patients to the right side
+	circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+
+	var circles = circleG.selectAll('circle')
 		.data(data)
 		.enter()
 		.append('circle')
 		.attr('class', d => (d.id < 10) ? "patients" : "shadows");
 	
-	var circleShadows = _svg.selectAll('.shadows')
+	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
-	var circleShadowRace = _svg.selectAll('text')
+	var circleShadowRace = circleG.selectAll('text')
 		.data(data)
 		.enter()
 		.append('text')
@@ -199,7 +216,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', d => (d.id < 10) ? "patients" : "shadows")
 		.attr('x', d => d.x0 * circleBox)
 		.attr('y', d => d.y0 * circleBox)
-		.attr('display', d => (d.id < 10) ? "none" : "inline")
+		.attr('display', 'none');
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
@@ -207,18 +224,14 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('fill', 'orange');
 
 	// Move the patients to the right side
-	circles.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
-	circleShadowRace.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')');
-
-	var _circleCaption = _svg.append('text')
-		.attr('id', 'circleCaption')
-		.attr('x', viewBoxSize.width * 0.5)
-		.attr('y', 40)
-		.attr('font-weight', "bold");
-
+	// circles.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + margin.top + topTextSize.height) + ')');
+	// circleShadowRace.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + margin.top + topTextSize.height) + ')');
 
 	var step = model.get();
 
+	var _circleCaption = circleG.append('text')
+		.attr('id', 'circleCaption')
+		.attr('font-weight', "bold");
 	_circleCaption.selectAll('tspan.circlecaption')
 		.data(d => {
 			var text = model.circleCaption();
@@ -230,48 +243,51 @@ var makeSVGView = function(model, data, svgID) {
 		.text(d => d)
 		.attr('x', d => {
 			var text = model.circleCaption();
-			return text[step].x
+			return text[step].x;
 		})
 		.attr('y', function(d,i){
 			var step = model.get();
 			var text = model.circleCaption();
-			return text[step].y + (i*5);
-		});
+			return text[step].y + (i*captionSize.fontsize);
+		})
+		.attr('font-size', captionSize.fontsize);
 
-	var _shadowCaption = _svg.append('text')
+	var _shadowCaption = circleG.append('text')
 		.attr('id', 'shadowCaption')
-		.text('Shadows')
-		.attr('font-weight', "bold");
+		.attr('font-weight', "bold")
+		.attr('font-size', captionSize.fontsize);
 
-
-	var _threshold = _svg.append('rect')
+	var thresholdG = _svg.append('g')
+		.attr('class', 'allThreshold')
+		.attr('id', 'thresholdG')
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + circleBox - radius) +',' + ( viewBoxSize.height * 0.5 - circleBox - topTextSize.height - radius) + ')');
+	var _threshold = thresholdG.append('rect')
 			.attr('id', "threshold")
 			.attr('class', 'threshold')
-			.attr('x', 4 * circleBox + radius + 1)
-			.attr('y', circleBox + radius)
+			.attr('x', 0)
+			.attr('y', -circleBox * 0.5 - 1)
 			.attr('width', 1)
 			.attr('height', 1.5 * circleBox)
-			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
 			.attr('display', 'none');
-	var _thresholdShade = _svg.append('rect')
+	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
 			.attr('class', 'threshold')
-			.attr('x', -2 * radius)
-			.attr('y', circleBox + radius)
-			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
+			.attr('x', 0)
+			.attr('y', -circleBox * 0.5)
 			.attr("width", thresholdShadeSize.width)
 			.attr('height', thresholdShadeSize.height)
-			.attr('fill', 'purple')
+			.style('stroke', 'black')
 			.attr('opacity', 0)
+			.attr('fill', 'white')
 			.attr('display', 'none');
-	var _thresholdText = _svg.append('text')
+	var _thresholdText = thresholdG.append('text')
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
-			.attr('x', -radius)
-			.attr('y', 2 * thresholdShadeSize.height + 5)
-			.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 - 4 * circleBox) +',' + (2 * margin.top) + ')')
+			.attr('x', 0)
+			.attr('y', circleBox + radius)
 			.text('Accepted into program')
 			.attr('display', 'none')
+			.style('font-size', captionSize.fontsize);
 
 	var _moveCircles = function(step) {
 		var sickColorScale = d3.scaleLinear().domain([0,1])
@@ -311,7 +327,7 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3 || step == 4 || step == 5) return radius;
 				return 0;
 			});
-			
+
 		var circleShadowRace = _svg.selectAll('text.shadows')
 			.transition()
 			.duration(duration)
@@ -334,6 +350,12 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _y = d.y5;
 				if (step == 6) _y = d.y6;
 				return _y * circleBox;
+			})
+			.attr('display', d => {
+			var step = model.get();
+			if ((step == 5) ){//&& (d.id >= 10)) {
+				return "inline";
+			} else { return "none"; }
 			});
 		d3.selectAll('.circlecaption').remove();
 
@@ -362,6 +384,10 @@ var makeSVGView = function(model, data, svgID) {
 				var text = model.circleCaption();
 				return text[step].y + (i*5);
 			})
+			.style('font-size', captionSize.fontsize)
+			.transition()
+			.duration(duration)
+			.attr('opacity', 1);
 
 
 		var shadowCaption = d3.select("#shadowCaption")
@@ -379,6 +405,14 @@ var makeSVGView = function(model, data, svgID) {
 				var step = model.get();
 				var text = model.shadowCaption();
 				return text[step].y;
+			})
+			.style('font-size', captionSize.fontsize)
+			.transition()
+			.duration(duration)
+			.attr('opacity', function(){
+				var step = model.get();
+				if (step == 3 || step == 4 || step == 6) return 1;
+				return 0;
 			});
 	}
 
@@ -428,11 +462,10 @@ var makeTopTextView = function(model, data, textID) {
 	var _observers = makeObservers();
 	var _svg = d3.select('#mySVG');
 	var topText = _svg.append('text')
-		.attr('x', viewBoxSize.width * 0.5)
+		.attr('x', margin.left)
 		.attr('y', margin.top)
 		.attr('class', 'toptext')
 		.attr('id', textID.replace('#',''))
-		.attr('font-size', '12px')
 		.attr('text-align', 'center');
 
 	var text = model.text();
@@ -443,8 +476,9 @@ var makeTopTextView = function(model, data, textID) {
 		.append('tspan')
 		.attr('class', 'toptext')
 		.text(d => d)
-		.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-		.attr('y', (d,i) => i * 7 + margin.top);
+		.attr('x', d => margin.left)
+		.attr('y', (d,i) => i * topTextSize.space + margin.top)
+		.attr('font-size', topTextSize.fontsize);
 
 	var _changeTopText = function(step, text, textID) {
 		d3.select(textID).selectAll('tspan.toptext').remove();
@@ -456,8 +490,9 @@ var makeTopTextView = function(model, data, textID) {
 			.append('tspan')
 			.attr('class', 'toptext')
 			.text(d => d)
-			.attr('x', d =>  viewBoxSize.width * 0.5 - d.length )
-			.attr('y', (d,i) => i * 7 + margin.top);
+			.attr('x', d =>  margin.left )//viewBoxSize.width * 0.5 - d.length )
+			.attr('y', (d,i) => i * topTextSize.space + margin.top)
+			.attr('font-size', topTextSize.fontsize);
 	}
 
 	return {
@@ -476,20 +511,29 @@ var makeTopTextView = function(model, data, textID) {
 var makeInputView = function(model, inputID) {
 	var _svg = d3.select('#mySVG');
 	var _observers = makeObservers();
-
-	var _inputG = _svg.append('g');
-
 	var _inputLabels = model.inputs();
+	var _inputG = _svg.append('g');
+	_inputG.append('rect')
+		.attr('class', 'algInputs')
+		.attr('id', 'algRect')
+		.attr('x', margin.left)
+		.attr('y', margin.top + topTextSize.height + 20)
+		.attr('width', algBoxSize.width)
+		.attr('height', algBoxSize.height)
+		.attr('fill', 'steelblue')
+		.attr('display', 'none');
+
+	
 	
 	var _inputs = _inputG.selectAll('rect')
 		.data(_inputLabels)
 		.enter()
 		.append('rect')
 		.attr('class', 'algInputs')
-		.attr("x", margin.left + 10)
-		.attr("y", (d,i) => i * 14 + margin.top + 30)
-		.attr('width', 50)
-		.attr('height', 8)
+		.attr("x", margin.left + 3)
+		.attr("y", (d,i) => i * 6 + margin.top + topTextSize.height + 20)
+		.attr('width', algBoxSize.width * 0.8)
+		.attr('height', algBoxSize.height * 0.1)
 		.attr('fill', 'lightsteelblue')
 		.attr('cursor', 'pointer')
 		.attr('display', 'none')
@@ -500,20 +544,22 @@ var makeInputView = function(model, inputID) {
 		.enter()
 		.append('text')
 		.attr('class', 'algInputs')
-		.attr('x', margin.left + 10 + padding.text)
-		.attr('y', (d,i) => i * 14 + margin.top + 35)
+		.attr('x', margin.left + padding.text)
+		.attr('y', (d,i) => i * 6 + margin.top + topTextSize.height + 30)
 		.text(d => d.text)
 		.attr('cursor', 'pointer')
 		.attr('display', 'none')
+		.style('font-size', '3px')
 		.on('click', _changeColor);
 
 	var _inputTitle = _inputG.append('text')
 		.attr('class', 'algInputs')
 		.attr('id', 'algInputsTitle')
 		.text('Algorithm Inputs')
-		.attr('x', margin.left + 10)
-		.attr('y', margin.top + 20)
+		.attr('x', margin.left)
+		.attr('y', topTextSize.height + 20)
 		.style('font-weight', 'bold')
+		.style('font-size', '3px')
 		.attr('display', 'none');
 
 	function _changeColor() {
@@ -573,21 +619,21 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 	var _btn = d3.select(svgID)
 	.append('rect')
 	.attr('id', buttonID)
-	.attr('x', viewBoxSize.width * 0.5 - 10)
-	.attr('y', viewBoxSize.height - margin.bottom)
-	.attr('width', 30)
-	.attr('height', 12)
+	.attr('x', (viewBoxSize.width - nextButtonSize.width) * 0.5)
+	.attr('y', viewBoxSize.height - margin.bottom - nextButtonSize.height)
+	.attr('width', nextButtonSize.width)
+	.attr('height', nextButtonSize.height)
 	.attr('cursor', 'pointer')
 	.style('fill', 'lightsteelblue')
 	.style('rx', 3);
 
 	var _btnText = d3.select(svgID)
 		.append('text')
-		.attr('x', viewBoxSize.width * 0.5 - 5)
-		.attr('y', viewBoxSize.height - margin.bottom + 7)
+		.attr('x', (viewBoxSize.width - nextButtonSize.width) * 0.5 + 3)
+		.attr('y', viewBoxSize.height - margin.bottom - nextButtonSize.height + 5)
 		.text('NEXT: 0')
 		.attr('cursor', 'pointer')
-		.style('font-size', '6px');
+		.style('font-size', '4px');
 
 	// The button event passes the appropriate
 	//data to any listening controllers
