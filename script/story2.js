@@ -5,7 +5,7 @@ var viewBoxSize = {height: 105, width: 150};
 
 
 var circleBox = 10;
-var radius = 3;
+var radius = 3; //katy: change to 5
 var algBoxSize = {height: 51, width: 32};
 var thresholdShadeSize = {height: radius + circleBox, width: 5 * circleBox };
 
@@ -58,15 +58,16 @@ var makeModel = function(data) {
 		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
 		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll\n\
 		line them up from sickest to healthiest. We'll use an algorithm to help us.",
-		"We have health record data, like diagnosis codes and health care costs. We'll use these data to predict future\n\
-		health care costs - a commonly-used prediction label that is correlated with health.",
+		"We have health record data, like diagnosis and procedure codes, insurance type, medications, care costs, and \n\
+		the age and sex of the person. We'll use these data to predict future health care costs - a commonly-used \n\
+		prediction label that is correlated with health.",
 		"We apply the algorithm and align the circles from sickest to healthiest with the sickest on the right.",
 		"Let's examine the accuracy of our algorithm. Since we used health care costs as our label, the predicted health\n\
 		costs should be very close to the actual health costs.",
 		"But we care more about predicting patient health than predicting costs. \n\
 		How well did the algorithm predict actual health?",
 		"While health care costs and actual health needs are correlated, they aren't the same. The difference in the two\n\
-		variables is not random with respect to socioeconomic and racial variables. Because of structural biases and \n\
+		labels is not random with respect to socioeconomic and racial variables. Because of structural biases and \n\
 		differential treatment, Black patients with similar needs to White patients have long been known to have lower \n\
 		costs. Since our algorithm's label is cost, a Black patient and a White patient with the same number of chronic \n\
 		illnesses will have dramatically different algorithmic scores.",
@@ -77,12 +78,15 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		{text: "Age and sex", clicked: false},
-		{text: "Insurance type", clicked: false}, 
-		{text: "Diagnosis codes", clicked: false},
-		{text: "Procedure codes", clicked: false},
-		{text: "Medications", clicked: false},
-		{text: "Costs", clicked: false}
+		{text: 'Predict\nHealth & Care Cost', clicked: false},
+		{text: 'Predict\nCare Cost', clicked: false},
+		{text: 'Predict\nEmergency Care Cost', clicked: false}
+		// {text: "Age and sex", clicked: false},
+		// {text: "Insurance type", clicked: false}, 
+		// {text: "Diagnosis codes", clicked: false},
+		// {text: "Procedure codes", clicked: false},
+		// {text: "Medications", clicked: false},
+		// {text: "Costs", clicked: false}
 	];
 
 	var _circleCaption = [
@@ -209,15 +213,15 @@ var makeSVGView = function(model, data, svgID) {
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
-	var circleShadowRace = circleG.selectAll('text')
-		.data(data)
-		.enter()
-		.append('text')
-		.text(d => d.race)
-		.attr('class', d => (d.id < 10) ? "patients" : "shadows")
-		.attr('x', d => d.x0 * circleBox)
-		.attr('y', d => d.y0 * circleBox)
-		.attr('display', 'none');
+	// var circleShadowRace = circleG.selectAll('text')
+	// 	.data(data)
+	// 	.enter()
+	// 	.append('text')
+	// 	.text(d => d.race)
+	// 	.attr('class', d => (d.id < 10) ? "patients" : "shadows")
+	// 	.attr('x', d => d.x0 * circleBox)
+	// 	.attr('y', d => d.y0 * circleBox)
+	// 	.attr('display', 'none');
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
@@ -321,26 +325,28 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('fill', d => {
 				if (step == 0) return 'orange';
 				else if (step < 4) return sickColorScale(d.cost);
+				else if (step == 5) return (d.race == 'B') ? 'darkgrey' : 'white';
 				else if (step < 6) return sickColorScale(d.health);
 				else if (step >= 6) return 'orange';
-			});
+			})
+			.style('stroke', (step == 5) ? 'black' : 'none');
 		var circleShadows = _svg.selectAll('.shadows')
 			.attr('r', d => {
 				if (step == 3 || step == 4 || step == 5) return radius;
 				return 0;
 			});
 
-		var circleShadowRace = _svg.selectAll('text.shadows')
-			.transition()
-			.duration(duration)
-			.attr('x', d => d.x5 * circleBox - 2)
-			.attr('y', d => d.y5 * circleBox + 2)
-			.attr('display', d => {
-			var step = model.get();
-			if ((step == 5) ){//&& (d.id >= 10)) {
-				return "inline";
-			} else { return "none"; }
-			});
+		// var circleShadowRace = _svg.selectAll('text.shadows')
+		// 	.transition()
+		// 	.duration(duration)
+		// 	.attr('x', d => d.x5 * circleBox - 2)
+		// 	.attr('y', d => d.y5 * circleBox + 2)
+		// 	.attr('display', d => {
+		// 	var step = model.get();
+		// 	if ((step == 5) ){//&& (d.id >= 10)) {
+		// 		return "inline";
+		// 	} else { return "none"; }
+		// 	});
 		d3.selectAll('.circlecaption').remove();
 
 		var circleCaption = d3.select("#circleCaption")
@@ -493,68 +499,36 @@ var makeInputView = function(model, inputID) {
 	var _observers = makeObservers();
 	var _inputLabels = model.inputs();
 	var _inputG = _svg.append('g');
-	_inputG.append('rect')
-		.attr('class', 'background')
-		.attr('id', 'algRect')
-		.attr('x', margin.left)
-		.attr('y', margin.top + topTextSize.height + 15)
-		.attr('width', algBoxSize.width)
-		.attr('height', algBoxSize.height)
-		.attr('fill', '#238b45') //green
-		.attr('display', 'none');
 
-	
-	var _inputs = _inputG.selectAll('rect.algInputs')
+	var _labelRect = _inputG.selectAll('rect')
 		.data(_inputLabels)
 		.enter()
 		.append('rect')
-		.attr('class', 'algInputs')
-		.attr("x", margin.left + 3)
-		.attr("y", (d,i) => i * 6 + margin.top + topTextSize.height + 16)
+		.attr('class', 'labelClass')
+		.attr('x', margin.left + 3)
+		.attr('y', (d, i) => {
+			return (i * algBoxSize.height * 0.35) + 10 + margin.top + topTextSize.height
+		})
 		.attr('width', algBoxSize.width * 0.8)
-		.attr('height', algBoxSize.height * 0.1)
+		.attr('height', algBoxSize.height * 0.3)
 		.attr('fill', '#74c476') //green
-		.attr('cursor', 'pointer')
-		.attr('display', 'none');
-
-	var _inputText = _inputG.selectAll('text')
+		.attr('display', 'none')
+		.attr("cursor", "pointer")
+		.on('click', _changeColor);
+	var _labelLabel = _inputG.selectAll('text.labelClass')
 		.data(_inputLabels)
 		.enter()
 		.append('text')
-		.attr('class', 'algInputs')
-		.attr('x', margin.left + padding.text)
-		.attr('y', (d,i) => i * 6 + margin.top + topTextSize.height + 20)
-		.text(d => d.text)
-		.attr('cursor', 'pointer')
-		.attr('display', 'none')
-		.style('font-size', '3px');
-
-	var _labelRect = _inputG.append('rect')
-		.attr('class', 'labelClass')
-		.attr('x', margin.left + 3)
-		.attr('y', 55 + margin.top + topTextSize.height)
-		.attr('width', algBoxSize.width * 0.8)
-		.attr('height', algBoxSize.height * 0.15)
-		.attr('fill', '#c7e9c0') //green
-		.attr('display', 'none');
-	var _labelLabel = _inputG.append('text')
 		.attr('class', 'labelClass')
 		.attr('id', 'labelText')
 		.attr('x', margin.left + 5)
-		.attr('y', 60 + margin.top + topTextSize.height)
-		.text('Predict Cost')
-		.attr('display', 'none');
-
-
-	var _inputTitle = _inputG.append('text')
-		.attr('class', 'algInputs')
-		.attr('id', 'algInputsTitle')
-		.text('Algorithm Inputs')
-		.attr('x', margin.left + 2)
-		.attr('y', topTextSize.height + 15)
-		.style('font-weight', 'bold')
-		.style('font-size', '3px')
-		.attr('display', 'none');
+		.attr('y', (d, i) => {
+			return (i * algBoxSize.height * 0.35) + 15 + margin.top + topTextSize.height
+		})
+		.text(d => d.text)
+		.attr('display', 'none')
+		.attr("cursor", "pointer")
+		.on('click', _changeColor);
 
 	function _changeColor() {
 		d3.select(this).attr('fill', (d) => {
@@ -571,27 +545,15 @@ var makeInputView = function(model, inputID) {
 	}
 
 	function _moveInputs(step) {
-		var _allInputRects = _svg.selectAll("rect.algInputs");
-		var _allInputText = _svg.selectAll("text.algInputs");
 		var _allAlgLabels = _svg.selectAll('.labelClass');
 
-		if ((step == 1) || (step == 6)) {
-			_svg.select('#algRect').attr('display', 'inline');
-			_allInputRects.attr('display', 'inline');
-			_allInputText.attr('display', 'inline' );
-			_allAlgLabels.attr('display', 'inline');
-			_svg.select('#algInputsTitle').attr('display', 'inline');
-			_svg.selectAll(".algInputs").attr('opacity', 1);
+		if (step == 1) {
+			_allAlgLabels.attr('display', d => (d.text == "Predict\nCare Cost") ? 'inline' : 'none');
 		} 
 		else if (step == 6) {
-			_svg.select('#labelText').text('Predict Health and Cost');
+			_allAlgLabels.attr('display', 'inline');
 		}
 		else {
-			_svg.select('#algRect').attr('display', 'none');
-			_svg.selectAll(".algInputs")
-				.attr('display', 'none');
-			_svg.selectAll(".algInputs")
-				.attr('opacity', 0);
 			_allAlgLabels.attr('display', 'none');
 		}
 	}
