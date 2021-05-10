@@ -158,10 +158,6 @@ var makeModel = function(data) {
 		//Change the circles' color
 		changeColor: function(index) {
 			_activeColor = index;
-			if (_activeColor < 2) console.log("_activeColor blue", index);
-			else if (_activeColor < 4) console.log("_activeColor green", index);
-			else if (_activeColor < 6) console.log("_activeColor red", index);
-
 			_observers.notify();
 		},
 		//Get the step
@@ -207,7 +203,7 @@ var makeModel = function(data) {
 			
 		},
 		getLabelColor: function(id, hover) {
-			console.log(id, hover);
+			
 			var allColors = d3.schemePaired;
 			var colorScale = d3.scaleLinear().domain([0,1])
 			.range([allColors[id-1], allColors[id]]);
@@ -537,30 +533,34 @@ var makeInputView = function(model, inputID) {
 		.append('text')
 		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
-		.attr('id', 'labelText')
 		.attr('x', margin.left + algBoxSize.width * 0.48)
 		.attr('y', (d, i) => {
 			return (i * algBoxSize.height * 0.35) + 9 + margin.top + topTextSize.height
 		})
-		// .text(d => d)
 		.attr('display', 'none')
 		.attr("cursor", "pointer");
 
-		_labelLabel.selectAll('tspan.tspanLabel')
+		_labelLabel.selectAll('tspan.labelClass')
 			.data(d => d.text.split('\n'))
 			.enter()
 			.append('tspan')
-			.attr('class', 'tspanLabel')
+			.attr('class', 'labelClass')
 			.text(d => d)
+			.attr('id', function() {
+				return this.parentElement.id;
+			})
 			.attr('x', margin.left + algBoxSize.width * 0.48)
 			.attr('dy', 5)
-			.attr('text-anchor', 'middle');
+			.attr('text-anchor', 'middle')
+			.attr("cursor", "pointer");
 
 	function _moveInputs(step) {
 		var _allAlgLabels = _svg.selectAll('.labelClass');
-
+	
 		if (step == 1) {
-			_allAlgLabels.attr('display', d => (d.text == "Predict\nCare\nCost") ? 'inline' : 'none');
+			_allAlgLabels.attr('display', function(){
+				return (this.id == '1') ? 'inline' : 'none';
+			});
 		} 
 		else if (step == 6) {
 			_allAlgLabels.attr('display', 'inline');
