@@ -25,9 +25,10 @@ var story = {
 	model: undefined,
 	views: [],
 	controller: undefined,
-	signal: {
+	signals: {
 		//List of signal types
-		increment: 'INCREMENT'
+		increment: 'INCREMENT',
+		changeColor: 'CHANGE_COLOR'
 	}
 }
 
@@ -51,6 +52,9 @@ var makeModel = function(data) {
 
 	// The storyboard step (0 - 7)
 	var _step = 0;
+
+	// To determine what coloring scheme to use
+	var _activeColor = 'orange';
 
 	var _data = data;
 
@@ -78,9 +82,9 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		{text: 'Predict\nHealth & Care Cost', clicked: false},
-		{text: 'Predict\nCare Cost', clicked: false},
-		{text: 'Predict\nEmergency Care Cost', clicked: false}
+		{text: 'Predict\nHealth & Care Cost', clicked: false, id: 'purple'},
+		{text: 'Predict\nCare Cost', clicked: false, id: 'blue'},
+		{text: 'Predict\nEmergency Care Cost', clicked: false, id: 'navy'}
 		// {text: "Age and sex", clicked: false},
 		// {text: "Insurance type", clicked: false}, 
 		// {text: "Diagnosis codes", clicked: false},
@@ -96,19 +100,22 @@ var makeModel = function(data) {
 	{ text: "Patients1\n", 
 		x: circleCluster.width * 0.5 + 6,  
 		y: -5 },
-	{ text: "2Algorithm-predicted health\n (based on insurance costs)",
-		x: -40,
+	{ text: "2Predicted cost",
+		x: -30,
 		y: 9},
-	{ text: "3Algorithm-predicted health\n (based on insurance costs)",
-		x: -40,
+	{ text: "3Predicted cost",
+		x: -30,
 		y: 9},
-	{ text: "4Algorithm-predicted health\n (based on insurance costs)",
-		x: -40,
+	{ text: "4Predicted cost",
+		x: -30,
 		y: 9},
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
-	{ text: "6Algorithm-predicted health\n (based on health metrics\n and insurance costs)",
+	{ text: "\n",
+		x: margin.left,
+		y: margin.top },
+	{ text: "6Health + cost",
 		x: -40,
 		y: 9},
 	];
@@ -126,13 +133,13 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: 2 * circleBox
 	},
-	{text: "3Actual insurance costs\n",
-		x: -40,
-		y: 9 + 2 * circleBox
+	{text: "3Actual cost\n",
+		x: -25,
+		y: 10 + 2 * circleBox
 	},
 	{text: "4Actual health\n",
 		x: -28,
-		y: 9 + 2 * circleBox
+		y: 10 + 2 * circleBox
 	},
 	{text: "5",
 		x: -40,
@@ -151,6 +158,10 @@ var makeModel = function(data) {
 			_step = _step % 7; 
 			_observers.notify();
 		},
+		changeColor: function(color) {
+			_activeColor = color;
+			_observers.notify();
+		},
 		//Get the step
 		get: function() {
 			return _step;
@@ -166,6 +177,24 @@ var makeModel = function(data) {
 		//Get the algorithm inputs
 		inputs: function() {
 			return _inputLabels;
+		},
+		//Get the circle color scheme
+		getColor: function(d) {
+			var sickColorScale = d3.scaleLinear().domain([0,1])
+			.range(["orange", _activeColor]);
+			if (_activeColor == 'blue') {
+				return sickColorScale(d.cost);
+			}
+			else if (_activeColor == 'purple') {
+				return sickColorScale(d.health);
+			}
+			else if (_activeColor == 'navy') {
+				return sickColorScale(d.health);
+			}
+			else {
+				return 'orange';
+			}
+			
 		},
 		//Get the circle labels
 		circleCaption: function() {
@@ -213,24 +242,11 @@ var makeSVGView = function(model, data, svgID) {
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
-	// var circleShadowRace = circleG.selectAll('text')
-	// 	.data(data)
-	// 	.enter()
-	// 	.append('text')
-	// 	.text(d => d.race)
-	// 	.attr('class', d => (d.id < 10) ? "patients" : "shadows")
-	// 	.attr('x', d => d.x0 * circleBox)
-	// 	.attr('y', d => d.y0 * circleBox)
-	// 	.attr('display', 'none');
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
-		.attr('fill', 'orange');
-
-	// Move the patients to the right side
-	// circles.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + margin.top + topTextSize.height) + ')');
-	// circleShadowRace.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + margin.top + topTextSize.height) + ')');
+		.attr('fill', d => model.getColor(d));
 
 	var step = model.get();
 
@@ -296,8 +312,6 @@ var makeSVGView = function(model, data, svgID) {
 			.style('font-size', captionSize.fontsize);
 
 	var _moveCircles = function(step) {
-		var sickColorScale = d3.scaleLinear().domain([0,1])
-			.range(["orange", "purple"]);
 
 		var circles = _svg.selectAll('circle')
 			.transition()
@@ -323,30 +337,17 @@ var makeSVGView = function(model, data, svgID) {
 				return _y * circleBox;
 			})
 			.attr('fill', d => {
-				if (step == 0) return 'orange';
-				else if (step < 4) return sickColorScale(d.cost);
-				else if (step == 5) return (d.race == 'B') ? 'darkgrey' : 'white';
-				else if (step < 6) return sickColorScale(d.health);
-				else if (step >= 6) return 'orange';
+				var color = model.getColor(d);
+				return color;
+				// if (step == 0) return 'orange';
+				// else if (step < 4) return sickColorScale(d.cost);
+				// else if (step == 5) return (d.race == 'B') ? 'darkgrey' : 'white';
+				// else if (step < 6) return sickColorScale(d.health);
+				// else if (step >= 6) return 'orange';
 			})
 			.style('stroke', (step == 5) ? 'black' : 'none');
-		var circleShadows = _svg.selectAll('.shadows')
-			.attr('r', d => {
-				if (step == 3 || step == 4 || step == 5) return radius;
-				return 0;
-			});
+		
 
-		// var circleShadowRace = _svg.selectAll('text.shadows')
-		// 	.transition()
-		// 	.duration(duration)
-		// 	.attr('x', d => d.x5 * circleBox - 2)
-		// 	.attr('y', d => d.y5 * circleBox + 2)
-		// 	.attr('display', d => {
-		// 	var step = model.get();
-		// 	if ((step == 5) ){//&& (d.id >= 10)) {
-		// 		return "inline";
-		// 	} else { return "none"; }
-		// 	});
 		d3.selectAll('.circlecaption').remove();
 
 		var circleCaption = d3.select("#circleCaption")
@@ -504,6 +505,7 @@ var makeInputView = function(model, inputID) {
 		.data(_inputLabels)
 		.enter()
 		.append('rect')
+		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
 		.attr('x', margin.left + 3)
 		.attr('y', (d, i) => {
@@ -514,7 +516,12 @@ var makeInputView = function(model, inputID) {
 		.attr('fill', '#74c476') //green
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
-		.on('click', _changeColor);
+		.on('mouseenter', function(){
+			d3.select(this).attr('fill', '#5c9c5e'); //dark green
+		})
+		.on('mouseout', function(){
+			d3.select(this).attr('fill', '#74c476'); //green
+		});
 	var _labelLabel = _inputG.selectAll('text.labelClass')
 		.data(_inputLabels)
 		.enter()
@@ -527,22 +534,21 @@ var makeInputView = function(model, inputID) {
 		})
 		.text(d => d.text)
 		.attr('display', 'none')
-		.attr("cursor", "pointer")
-		.on('click', _changeColor);
+		.attr("cursor", "pointer");
 
-	function _changeColor() {
-		d3.select(this).attr('fill', (d) => {
-			if (d.clicked) {
-				d.clicked = false;
-				return 'lightsteelblue';
-			}
-			else {
-				d.clicked = true;
-				return '#33bbbb';
-			}
-		});
+	// function _changeColor() {
+	// 	d3.select(this).attr('fill', (d) => {
+	// 		if (d.clicked) {
+	// 			d.clicked = false;
+	// 			return 'lightsteelblue';
+	// 		}
+	// 		else {
+	// 			d.clicked = true;
+	// 			return 'steelblue';
+	// 		}
+	// 	});
 		
-	}
+	// }
 
 	function _moveInputs(step) {
 		var _allAlgLabels = _svg.selectAll('.labelClass');
@@ -557,6 +563,18 @@ var makeInputView = function(model, inputID) {
 			_allAlgLabels.attr('display', 'none');
 		}
 	}
+
+	// The button event passes the appropriate
+	//data to any listening controllers
+	var _fireChangeColor = function(evt) {
+		_observers.notify({
+			type: story.signals.changeColor,
+			color: evt.target.id
+		});
+	};
+
+	_labelRect.on('click', _fireChangeColor);
+	_labelLabel.on('click', _fireChangeColor);
 
 	return {
 		render: function() {
@@ -580,7 +598,7 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 	.attr('width', nextButtonSize.width)
 	.attr('height', nextButtonSize.height)
 	.attr('cursor', 'pointer')
-	.style('fill', 'lightsteelblue')
+	.style('fill', 'lightgrey')
 	.style('rx', 3);
 
 	var _btnText = d3.select(svgID)
@@ -595,7 +613,7 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 	//data to any listening controllers
 	var _fireIncrementEvent = function() {
 		_observers.notify({
-			type: story.signal.increment
+			type: story.signals.increment
 		});
 	};
 
@@ -617,14 +635,20 @@ var makeController = function(model) {
 	var _increment = function() {
 		model.increment();
 	}
+
+	var _changeColor = function(args) {
+		model.changeColor(args.color);
+	}
 	return {
 		dispatch: function(evt) {
 			if (evt){
 				switch(evt.type){
-				case story.signal.increment:
+				case story.signals.increment:
 					_increment();
 					break;
-
+				case story.signals.changeColor:
+					_changeColor(evt);
+					break;
 				default:
 					console.log("Unknown event type: ", evt);
 				}
