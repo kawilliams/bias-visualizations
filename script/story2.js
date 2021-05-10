@@ -5,7 +5,7 @@ var viewBoxSize = {height: 105, width: 150};
 
 
 var circleBox = 10;
-var radius = 3;
+var radius = 3; //katy: change to 5
 var algBoxSize = {height: 51, width: 32};
 var thresholdShadeSize = {height: radius + circleBox, width: 5 * circleBox };
 
@@ -25,9 +25,10 @@ var story = {
 	model: undefined,
 	views: [],
 	controller: undefined,
-	signal: {
+	signals: {
 		//List of signal types
-		increment: 'INCREMENT'
+		increment: 'INCREMENT',
+		changeColor: 'CHANGE_COLOR'
 	}
 }
 
@@ -52,21 +53,25 @@ var makeModel = function(data) {
 	// The storyboard step (0 - 7)
 	var _step = 0;
 
+	// To determine what coloring scheme to use
+	var _activeColor = 7;
+
 	var _data = data;
 
 	var _text = [
 		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
 		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll\n\
 		line them up from sickest to healthiest. We'll use an algorithm to help us.",
-		"We have health record data, like diagnosis codes and health care costs. We'll use these data to predict future\n\
-		health care costs - a commonly-used prediction label that is correlated with health.",
-		"We apply the algorithm and align the circles from sickest to healthiest with the sickest on the right.",
+		"We have health record data, like diagnosis and procedure codes, insurance type, medications, care costs, and \n\
+		the age and sex of the person. We'll use these data to predict future health care costs - a commonly-used \n\
+		prediction label that is correlated with health.",
+		"We apply the algorithm and align the circles from healthiest to sickest, with the sickest on the right.",
 		"Let's examine the accuracy of our algorithm. Since we used health care costs as our label, the predicted health\n\
 		costs should be very close to the actual health costs.",
 		"But we care more about predicting patient health than predicting costs. \n\
 		How well did the algorithm predict actual health?",
 		"While health care costs and actual health needs are correlated, they aren't the same. The difference in the two\n\
-		variables is not random with respect to socioeconomic and racial variables. Because of structural biases and \n\
+		labels is not random with respect to socioeconomic and racial variables. Because of structural biases and \n\
 		differential treatment, Black patients with similar needs to White patients have long been known to have lower \n\
 		costs. Since our algorithm's label is cost, a Black patient and a White patient with the same number of chronic \n\
 		illnesses will have dramatically different algorithmic scores.",
@@ -77,64 +82,64 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		{text: "Age and sex", clicked: false},
-		{text: "Insurance type", clicked: false}, 
-		{text: "Diagnosis codes", clicked: false},
-		{text: "Procedure codes", clicked: false},
-		{text: "Medications", clicked: false},
-		{text: "Costs", clicked: false}
+		{text: 'Predict\nHealth & Care Cost', clicked: false, id: 3},
+		{text: 'Predict\nCare Cost', clicked: false, id: 1},
+		{text: 'Predict\nEmergency Care Cost', clicked: false, id: 5}
 	];
 
 	var _circleCaption = [
-	{ text: "Patients0\n", 
+	{ text: "Patients\n", 
 		x: circleCluster.width * 0.5 - 14, 
 		y: -5 },
-	{ text: "Patients1\n", 
+	{ text: "Patients\n", 
 		x: circleCluster.width * 0.5 + 6,  
 		y: -5 },
-	{ text: "2Algorithm-predicted health\n (based on insurance costs)",
-		x: -40,
+	{ text: "Predicted cost",
+		x: -30,
 		y: 9},
-	{ text: "3Algorithm-predicted health\n (based on insurance costs)",
-		x: -40,
+	{ text: "Predicted cost",
+		x: -30,
 		y: 9},
-	{ text: "4Algorithm-predicted health\n (based on insurance costs)",
-		x: -40,
+	{ text: "Predicted cost",
+		x: -30,
 		y: 9},
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
-	{ text: "6Algorithm-predicted health\n (based on health metrics\n and insurance costs)",
+	{ text: "\n",
+		x: margin.left,
+		y: margin.top },
+	{ text: "Health + cost",
 		x: -40,
 		y: 9},
 	];
 
 	var _shadowCaption = [
-	{text: "0",
+	{text: "\n",
 		x: margin.left,
 		y: 2 * circleBox
 	},
-	{text: "1",
+	{text: "\n",
 		x: margin.left,
 		y: 2 * circleBox
 	},
-	{text: "2",
+	{text: "\n",
 		x: margin.left,
 		y: 2 * circleBox
 	},
-	{text: "3Actual insurance costs\n",
-		x: -40,
-		y: 9 + 2 * circleBox
+	{text: "Actual cost\n",
+		x: -25,
+		y: 10 + 2 * circleBox
 	},
-	{text: "4Actual health\n",
+	{text: "Actual health\n",
 		x: -28,
-		y: 9 + 2 * circleBox
+		y: 10 + 2 * circleBox
 	},
-	{text: "5",
+	{text: "\n",
 		x: -40,
 		y: 9 + 2 * circleBox
 	},
-	{text: "6Actual health\n",
+	{text: "Actual health\n",
 		x: -40,
 		y: 9 + 2 * circleBox
 	}
@@ -145,6 +150,18 @@ var makeModel = function(data) {
 		increment: function() {
 			_step += 1;
 			_step = _step % 7; 
+
+			if (_step == 5) _activeColor = 'black';
+			else if (_step == 6) _activeColor = 7;
+			_observers.notify();
+		},
+		//Change the circles' color
+		changeColor: function(index) {
+			_activeColor = index;
+			if (_activeColor < 2) console.log("_activeColor blue", index);
+			else if (_activeColor < 4) console.log("_activeColor green", index);
+			else if (_activeColor < 6) console.log("_activeColor red", index);
+
 			_observers.notify();
 		},
 		//Get the step
@@ -162,6 +179,35 @@ var makeModel = function(data) {
 		//Get the algorithm inputs
 		inputs: function() {
 			return _inputLabels;
+		},
+		//Get the circle color scheme
+		getColor: function(d) {
+			//d3.schemePaired
+			//[Lblue, Dblue, Lgreen, Dgreen, Lred, Dred]
+			var allColors = d3.schemePaired;
+
+			var sickColorScale = d3.scaleLinear().domain([0,1])
+			.range([allColors[_activeColor-1], allColors[_activeColor]]);
+			
+			if (_activeColor == 3) { //Pred Health & Cost
+				return sickColorScale(d.cost);
+			}
+			else if (_activeColor == 1) { //Pred Cost
+				return sickColorScale(d.health);
+			}
+			else if (_activeColor == 5) { //Pred Emergency Cost
+				return sickColorScale(d.health);
+			}
+			else if (_activeColor == 'black') {
+				return (d.race == 'B') ? 'black' : 'white';
+			}
+			else {
+				return allColors[7];
+			}
+			
+		},
+		getLabelColor: function(id) {
+			return d3.schemePaired[id];
 		},
 		//Get the circle labels
 		circleCaption: function() {
@@ -209,24 +255,10 @@ var makeSVGView = function(model, data, svgID) {
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
-	var circleShadowRace = circleG.selectAll('text')
-		.data(data)
-		.enter()
-		.append('text')
-		.text(d => d.race)
-		.attr('class', d => (d.id < 10) ? "patients" : "shadows")
-		.attr('x', d => d.x0 * circleBox)
-		.attr('y', d => d.y0 * circleBox)
-		.attr('display', 'none');
-
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
-		.attr('fill', 'orange');
-
-	// Move the patients to the right side
-	// circles.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + margin.top + topTextSize.height) + ')');
-	// circleShadowRace.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + margin.top + topTextSize.height) + ')');
+		.attr('fill', d => model.getColor(d));
 
 	var step = model.get();
 
@@ -292,8 +324,6 @@ var makeSVGView = function(model, data, svgID) {
 			.style('font-size', captionSize.fontsize);
 
 	var _moveCircles = function(step) {
-		var sickColorScale = d3.scaleLinear().domain([0,1])
-			.range(["orange", "purple"]);
 
 		var circles = _svg.selectAll('circle')
 			.transition()
@@ -318,29 +348,9 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 6) _y = d.y6;
 				return _y * circleBox;
 			})
-			.attr('fill', d => {
-				if (step == 0) return 'orange';
-				else if (step < 4) return sickColorScale(d.cost);
-				else if (step < 6) return sickColorScale(d.health);
-				else if (step >= 6) return 'orange';
-			});
-		var circleShadows = _svg.selectAll('.shadows')
-			.attr('r', d => {
-				if (step == 3 || step == 4 || step == 5) return radius;
-				return 0;
-			});
-
-		var circleShadowRace = _svg.selectAll('text.shadows')
-			.transition()
-			.duration(duration)
-			.attr('x', d => d.x5 * circleBox - 2)
-			.attr('y', d => d.y5 * circleBox + 2)
-			.attr('display', d => {
-			var step = model.get();
-			if ((step == 5) ){//&& (d.id >= 10)) {
-				return "inline";
-			} else { return "none"; }
-			});
+			.attr('fill', d => model.getColor(d))
+			.style('stroke', (step == 5) ? 'black' : 'none');
+		
 		d3.selectAll('.circlecaption').remove();
 
 		var circleCaption = d3.select("#circleCaption")
@@ -493,108 +503,68 @@ var makeInputView = function(model, inputID) {
 	var _observers = makeObservers();
 	var _inputLabels = model.inputs();
 	var _inputG = _svg.append('g');
-	_inputG.append('rect')
-		.attr('class', 'background')
-		.attr('id', 'algRect')
-		.attr('x', margin.left)
-		.attr('y', margin.top + topTextSize.height + 15)
-		.attr('width', algBoxSize.width)
-		.attr('height', algBoxSize.height)
-		.attr('fill', '#238b45') //green
-		.attr('display', 'none');
 
-	
-	var _inputs = _inputG.selectAll('rect.algInputs')
+	var _labelRect = _inputG.selectAll('rect')
 		.data(_inputLabels)
 		.enter()
 		.append('rect')
-		.attr('class', 'algInputs')
-		.attr("x", margin.left + 3)
-		.attr("y", (d,i) => i * 6 + margin.top + topTextSize.height + 16)
+		.attr('id', d => d.id)
+		.attr('class', 'labelClass')
+		.attr('x', margin.left + 3)
+		.attr('y', (d, i) => {
+			return (i * algBoxSize.height * 0.35) + 10 + margin.top + topTextSize.height
+		})
 		.attr('width', algBoxSize.width * 0.8)
-		.attr('height', algBoxSize.height * 0.1)
-		.attr('fill', '#74c476') //green
-		.attr('cursor', 'pointer')
-		.attr('display', 'none');
-
-	var _inputText = _inputG.selectAll('text')
+		.attr('height', algBoxSize.height * 0.3)
+		.attr('fill', d => model.getLabelColor(d.id)) //green
+		.attr('display', 'none')
+		.attr("cursor", "pointer")
+		.on('mouseenter', function(){
+			d3.select(this).attr('fill', d => model.getLabelColor(d.id-1)); //light base color
+		})
+		.on('mouseout', function(){
+			d3.select(this).attr('fill', d => model.getLabelColor(d.id)); //base color
+		});
+	var _labelLabel = _inputG.selectAll('text.labelClass')
 		.data(_inputLabels)
 		.enter()
 		.append('text')
-		.attr('class', 'algInputs')
-		.attr('x', margin.left + padding.text)
-		.attr('y', (d,i) => i * 6 + margin.top + topTextSize.height + 20)
-		.text(d => d.text)
-		.attr('cursor', 'pointer')
-		.attr('display', 'none')
-		.style('font-size', '3px');
-
-	var _labelRect = _inputG.append('rect')
-		.attr('class', 'labelClass')
-		.attr('x', margin.left + 3)
-		.attr('y', 55 + margin.top + topTextSize.height)
-		.attr('width', algBoxSize.width * 0.8)
-		.attr('height', algBoxSize.height * 0.15)
-		.attr('fill', '#c7e9c0') //green
-		.attr('display', 'none');
-	var _labelLabel = _inputG.append('text')
+		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
 		.attr('id', 'labelText')
 		.attr('x', margin.left + 5)
-		.attr('y', 60 + margin.top + topTextSize.height)
-		.text('Predict Cost')
-		.attr('display', 'none');
-
-
-	var _inputTitle = _inputG.append('text')
-		.attr('class', 'algInputs')
-		.attr('id', 'algInputsTitle')
-		.text('Algorithm Inputs')
-		.attr('x', margin.left + 2)
-		.attr('y', topTextSize.height + 15)
-		.style('font-weight', 'bold')
-		.style('font-size', '3px')
-		.attr('display', 'none');
-
-	function _changeColor() {
-		d3.select(this).attr('fill', (d) => {
-			if (d.clicked) {
-				d.clicked = false;
-				return 'lightsteelblue';
-			}
-			else {
-				d.clicked = true;
-				return '#33bbbb';
-			}
-		});
-		
-	}
+		.attr('y', (d, i) => {
+			return (i * algBoxSize.height * 0.35) + 15 + margin.top + topTextSize.height
+		})
+		.text(d => d.text)
+		.attr('display', 'none')
+		.attr("cursor", "pointer");
 
 	function _moveInputs(step) {
-		var _allInputRects = _svg.selectAll("rect.algInputs");
-		var _allInputText = _svg.selectAll("text.algInputs");
 		var _allAlgLabels = _svg.selectAll('.labelClass');
 
-		if ((step == 1) || (step == 6)) {
-			_svg.select('#algRect').attr('display', 'inline');
-			_allInputRects.attr('display', 'inline');
-			_allInputText.attr('display', 'inline' );
-			_allAlgLabels.attr('display', 'inline');
-			_svg.select('#algInputsTitle').attr('display', 'inline');
-			_svg.selectAll(".algInputs").attr('opacity', 1);
+		if (step == 1) {
+			_allAlgLabels.attr('display', d => (d.text == "Predict\nCare Cost") ? 'inline' : 'none');
 		} 
 		else if (step == 6) {
-			_svg.select('#labelText').text('Predict Health and Cost');
+			_allAlgLabels.attr('display', 'inline');
 		}
 		else {
-			_svg.select('#algRect').attr('display', 'none');
-			_svg.selectAll(".algInputs")
-				.attr('display', 'none');
-			_svg.selectAll(".algInputs")
-				.attr('opacity', 0);
 			_allAlgLabels.attr('display', 'none');
 		}
 	}
+
+	// The button event passes the appropriate
+	//data to any listening controllers
+	var _fireChangeColor = function(evt) {
+		_observers.notify({
+			type: story.signals.changeColor,
+			color: evt.target.id
+		});
+	};
+
+	_labelRect.on('click', _fireChangeColor);
+	_labelLabel.on('click', _fireChangeColor);
 
 	return {
 		render: function() {
@@ -618,7 +588,7 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 	.attr('width', nextButtonSize.width)
 	.attr('height', nextButtonSize.height)
 	.attr('cursor', 'pointer')
-	.style('fill', 'lightsteelblue')
+	.style('fill', 'lightgrey')
 	.style('rx', 3);
 
 	var _btnText = d3.select(svgID)
@@ -633,7 +603,7 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 	//data to any listening controllers
 	var _fireIncrementEvent = function() {
 		_observers.notify({
-			type: story.signal.increment
+			type: story.signals.increment
 		});
 	};
 
@@ -655,14 +625,19 @@ var makeController = function(model) {
 	var _increment = function() {
 		model.increment();
 	}
+	var _changeColor = function(args) {
+		model.changeColor(args.color);
+	}
 	return {
 		dispatch: function(evt) {
 			if (evt){
 				switch(evt.type){
-				case story.signal.increment:
+				case story.signals.increment:
 					_increment();
 					break;
-
+				case story.signals.changeColor:
+					_changeColor(evt);
+					break;
 				default:
 					console.log("Unknown event type: ", evt);
 				}
@@ -677,7 +652,6 @@ var makeController = function(model) {
 }
 document.addEventListener("DOMContentLoaded", function(event){
 	
-
 	d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		story.model = makeModel(d);
