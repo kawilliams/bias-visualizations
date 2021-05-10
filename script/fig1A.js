@@ -1,5 +1,6 @@
 var height = 500,
 	width = 500;
+
 var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
@@ -273,9 +274,9 @@ function drawMySVG(mySVGID, mySVGClass){
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
 				.attr('class', mySVGClass)
-				.attr('height', 110)
-				.attr('width', 240)
-				.attr('x', 100) //(event.x - 170)
+				.attr('height', 100)
+				.attr('width', 280)
+				.attr('x', 90) //(event.x - 170)
 				.attr('y', 120) //(500 - event.x)
 				.attr('fill', 'lightsteelblue')
 				.attr('rx', 5)
@@ -300,14 +301,14 @@ function drawMySVG(mySVGID, mySVGClass){
 				.enter()
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', 107) //(event.x - 170)
+				.attr('x', 95) //(event.x - 170)
 				.attr('y', 130) //(500 - event.x)
 				.attr('font-size', 12);
 			toolTipTextElement
 				.append('tspan')
 				.attr('class', 'tiptext '+mySVGClass)
 				.text(d => d)
-				.attr('x',107)
+				.attr('x',95)
 				.attr('y', (d,i) => i * 15 + 135);
 				
 		// Slider
@@ -437,8 +438,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 170 : 185)
-			.attr('height', whichSlider.includes("horiz") ? 60 : 70)
+			.attr('width', whichSlider.includes("horiz") ? 205 : 225)
+			.attr('height', whichSlider.includes("horiz") ? 55 : 65)
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
@@ -510,14 +511,14 @@ function drawMySVG(mySVGID, mySVGClass){
 					.enter()
 					.append("text")
 					.attr('class', 'tiptext')
-					.attr('x', 105) //(event.x - 170)
+					.attr('x', 95) //(event.x - 170)
 					.attr('y', 135) //(500 - event.x)
 					.attr('font-size', 12);
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
 					.text(d => d)
-					.attr('x',105)
+					.attr('x',95)
 					.attr('y', (d,i) => i * 15 + 135);
 		}
 
