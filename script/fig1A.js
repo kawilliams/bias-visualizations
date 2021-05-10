@@ -137,7 +137,7 @@ function drawMySVG(mySVGID, mySVGClass){
 
 
 		// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
-		var cutoffLines = [{percentile: 55, text: 'Referred for screen'},
+		var cutoffLines = [{percentile: 55, text: 'Referred for screening'},
 							{percentile: 97, text: 'Defaulted into program'}];
 		svg.append('g')
 			.selectAll('line')
@@ -159,7 +159,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.enter()
 			.append('text')
 				.attr('class', mySVGClass)
-				.attr('transform', d => 'translate('+(x(d.percentile)-3)+', 50)')
+				.attr('transform', d => 'translate('+(x(d.percentile)-5)+', 10) rotate(-90)')
 				.attr('fill', d => 'black')
 				.text(d => d.text)
 				.attr('text-anchor', 'end');
@@ -260,7 +260,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				return d;
 			})
 			.attr('display', 'none')
-			.attr('x', function() { return this.parentElement.x.baseVal[0].value; })
+			.attr('x', function() { return this.parentElement.x.baseVal[0].value + 3; })
 			.attr('dy', '1.2em')
 
 		dataCircles
@@ -276,7 +276,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('height', 110)
 				.attr('width', 240)
 				.attr('x', 100) //(event.x - 170)
-				.attr('y', 100) //(500 - event.x)
+				.attr('y', 120) //(500 - event.x)
 				.attr('fill', 'lightsteelblue')
 				.attr('rx', 5)
 				.attr('opacity', '1');
@@ -288,14 +288,12 @@ function drawMySVG(mySVGID, mySVGClass){
 											shows how healthy the patient is, based on number\n\
 											of chronic conditions. Move the sliders to explore.",
 					horizText: "These two patients are equally sick\n\
-					(X conditions), but only the White \n\
-					patient was referred for screening.",
-					vertText: "Both patients received the same \n\
-							   health score from the algorithm \n\
-							   (X percentile); however, the Black \n\
-							   patient has more chronic conditions, \n\
-							   than the White patient (Y, \n\
-							    compared to Z, respectively)."
+								(X conditions), but only the White \n\
+								patient was referred for screening.",
+					vertText:  "Both patients received the same score\n\
+							   	from the algorithm (X percentile) but\n\
+							   	the Black patient has diff more chronic\n\
+							   	conditions than the White patient."
 					};
 		var toolTipTextElement = toolTipG.selectAll('text.'+mySVGClass)
 				.data(d => toolTipText.instructions.split("\n"))
@@ -303,14 +301,14 @@ function drawMySVG(mySVGID, mySVGClass){
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
 				.attr('x', 107) //(event.x - 170)
-				.attr('y', 110) //(500 - event.x)
+				.attr('y', 130) //(500 - event.x)
 				.attr('font-size', 12);
 			toolTipTextElement
 				.append('tspan')
 				.attr('class', 'tiptext '+mySVGClass)
 				.text(d => d)
 				.attr('x',107)
-				.attr('y', (d,i) => i * 15 + 120);
+				.attr('y', (d,i) => i * 15 + 135);
 				
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
@@ -428,7 +426,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 		
 		function dragend(event, d){
-			var whichSlider = "." + d3.select(this).attr('class') + "." + mySVGClass;
+			var whichSlider = "." + d3.select(this).attr('class').replace(' ', '.');
 			d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
 		}
 
@@ -439,8 +437,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', 170)
-			.attr('height', whichSlider.includes("horiz") ? 60 : 110)
+			.attr('width', whichSlider.includes("horiz") ? 170 : 185)
+			.attr('height', whichSlider.includes("horiz") ? 60 : 70)
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
@@ -472,11 +470,12 @@ function drawMySVG(mySVGID, mySVGClass){
 			}
 			if (selectedCircles.length == 2 && whichSlider.includes("vert")){
 				var X = selectedCircles[1].risk_score_quantile;
-				var Y = selectedCircles[0].num_chronic_conds_mean.toFixed(2);
-				var Z = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
+				var Y = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
+				var Z = selectedCircles[0].num_chronic_conds_mean.toFixed(2);
+				
+				var diff = (Z - Y).toFixed(2);
 				text = text.replace("X", X);
-				text = text.replace("Y", Y);
-				text = text.replace("Z", Z);
+				text = text.replace("diff", diff);
 			}
 			else if (whichSlider.includes("vert")){
 				//Need to use a LoBF point
@@ -499,9 +498,10 @@ function drawMySVG(mySVGID, mySVGClass){
 				var X = blackCurve[blackApproxIndex][0].toFixed(0);
 				var Y = whiteCurve[whiteApproxIndex][1].toFixed(2);
 				var Z = blackCurve[blackApproxIndex][1].toFixed(2);
+				
+				var diff = (Z - Y).toFixed(2);
 				text = text.replace("X", X);
-				text = text.replace("Y", Y);
-				text = text.replace("Z", Z);
+				text = text.replace("diff", diff);
 			}
 
 
@@ -511,14 +511,14 @@ function drawMySVG(mySVGID, mySVGClass){
 					.append("text")
 					.attr('class', 'tiptext')
 					.attr('x', 105) //(event.x - 170)
-					.attr('y', 110) //(500 - event.x)
+					.attr('y', 135) //(500 - event.x)
 					.attr('font-size', 12);
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
 					.text(d => d)
 					.attr('x',105)
-					.attr('y', (d,i) => i * 15 + 120);
+					.attr('y', (d,i) => i * 15 + 135);
 		}
 
 		function showDotToolTip(event, d) {
@@ -541,8 +541,10 @@ function drawMySVG(mySVGID, mySVGClass){
 
 }
 
-drawMySVG('#fig1AVert', 'vertGraph');
 drawMySVG('#fig1AHoriz', 'horizGraph');
+
+drawMySVG('#fig1AVert', 'vertGraph');
+
 
 
 
