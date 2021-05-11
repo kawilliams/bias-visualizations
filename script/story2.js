@@ -87,6 +87,9 @@ var makeModel = function(data) {
 		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: 5}
 	];
 
+	//Default is Predict Care Cost
+	var _label = 1; 
+
 	var _circleCaption = [
 	{ text: "Patients\n", 
 		x: circleCluster.width * 0.5 - 14, 
@@ -155,9 +158,10 @@ var makeModel = function(data) {
 			else if (_step == 6) _activeColor = 7;
 			_observers.notify();
 		},
-		//Change the circles' color
+		//Change the circles' color & label
 		changeColor: function(index) {
-			_activeColor = index;
+			_activeColor = parseInt(index);
+			_label = parseInt(index);
 			_observers.notify();
 		},
 		//Get the step
@@ -186,13 +190,13 @@ var makeModel = function(data) {
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
 			
 			if (_activeColor == 3) { //Pred Health & Cost
-				return colorScale(d.cost);
+				return colorScale(d.health);
 			}
 			else if (_activeColor == 1) { //Pred Cost
-				return colorScale(d.health);
+				return colorScale(d.cost);
 			}
 			else if (_activeColor == 5) { //Pred Emergency Cost
-				return colorScale(d.health);
+				return colorScale(d.emergency);
 			}
 			else if (_activeColor == 'black') {
 				return (d.race == 'B') ? 'black' : 'white';
@@ -200,7 +204,9 @@ var makeModel = function(data) {
 			else {
 				return allColors[7];
 			}
-			
+		},
+		getLabel: function() {
+			return _label;
 		},
 		getLabelColor: function(id, hover) {
 			
@@ -337,7 +343,13 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3) _x = d.x3;
 				if (step == 4) _x = d.x4;
 				if (step == 5) _x = d.x5;
-				if (step == 6) _x = d.x6;
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					if (whichLabel == 1) _x = d.x6health;
+					else if (whichLabel == 3) _x = d.x6cost;
+					else if (whichLabel == 5) _x = d.x6emergency;
+					else { _x = d.x6; }
+				}
 				return _x * circleBox;
 			})
 			.attr('cy', d => {
@@ -347,7 +359,14 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3) _y = d.y3;
 				if (step == 4) _y = d.y4;
 				if (step == 5) _y = d.y5;
-				if (step == 6) _y = d.y6;
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					console.log("Which label:", whichLabel, typeof(whichLabel));
+					if (whichLabel == 1) _y = d.y6health;
+					else if (whichLabel == 3) _y = d.y6cost;
+					else if (whichLabel == 5) _y = d.y6emergency;
+					else { _y = d.y6; }
+				}
 				return _y * circleBox;
 			})
 			.attr('fill', d => model.getColor(d))
