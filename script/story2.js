@@ -20,6 +20,10 @@ var captionSize = {fontsize: 3};
 var padding = {text: 5};
 var duration = 750;
 
+var LABELCOST = 1;
+var LABELHEALTH = 3;
+var LABELEMERGENCY = 5;
+
 
 var story = {
 	model: undefined,
@@ -82,9 +86,20 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: 3},
-		{text: 'Predict\nCare\nCost', clicked: false, id: 1},
-		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: 5}
+		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: LABELHEALTH},
+		{text: 'Predict\nCare\nCost', clicked: false, id: LABELCOST},
+		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: LABELEMERGENCY}
+	];
+
+	//Default is Predict Care Cost
+	var _label = LABELCOST; 
+	var _labelApplied = false;
+
+	var _commentary = [
+		{text: 'Not so good', x: 100, y: 65, step: 4, label: LABELCOST},
+		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELCOST},
+		{text: 'Much better!', x: 120, y: 65, step: 6, label: LABELHEALTH},
+		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELEMERGENCY}
 	];
 
 	var _circleCaption = [
@@ -106,12 +121,9 @@ var makeModel = function(data) {
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
-	{ text: "\n",
-		x: margin.left,
-		y: margin.top },
-	{ text: "Health + cost",
-		x: -40,
-		y: 9},
+	{ text: "Predicted\n",
+		x: margin.left + 5,
+		y: margin.top }
 	];
 
 	var _shadowCaption = [
@@ -135,13 +147,13 @@ var makeModel = function(data) {
 		x: -28,
 		y: 10 + 2 * circleBox
 	},
-	{text: "\n",
-		x: -40,
-		y: 9 + 2 * circleBox
+	{text: "Actual\n",
+		x: margin.left,
+		y: 10 + 2 * circleBox
 	},
-	{text: "Actual health\n",
-		x: -40,
-		y: 9 + 2 * circleBox
+	{text: "Actual\n",
+		x: margin.left + 5,
+		y: 5 + 2 * circleBox
 	}
 	]
 
@@ -153,11 +165,15 @@ var makeModel = function(data) {
 
 			if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = 7;
+
+			_labelApplied = false;
 			_observers.notify();
 		},
-		//Change the circles' color
+		//Change the circles' color & label
 		changeColor: function(index) {
-			_activeColor = index;
+			_activeColor = parseInt(index);
+			_label = parseInt(index);
+			_labelApplied = true;
 			_observers.notify();
 		},
 		//Get the step
@@ -179,20 +195,25 @@ var makeModel = function(data) {
 		//Get the circle color scheme
 		getColor: function(d) {
 			//d3.schemePaired
-			//[Lblue, Dblue, Lgreen, Dgreen, Lred, Dred]
-			var allColors = d3.schemePaired;
+			//[Lblue, Dblue, Lgreen, Dgreen, Lred - changed, Dred, orange]
+			var allColors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#ffbbba","#e31a1c","#fdbf6f","#ff7f00"];
+			console.log(d3.schemePaired);
 
 			var colorScale = d3.scaleLinear().domain([0,1])
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
 			
-			if (_activeColor == 3) { //Pred Health & Cost
+			if (_activeColor == LABELHEALTH) { //Pred Health & Cost
+				return colorScale(d.health);
+			}
+			else if ((_activeColor == LABELCOST) && (_step <= 3)) { //Pred Cost
 				return colorScale(d.cost);
 			}
-			else if (_activeColor == 1) { //Pred Cost
-				return colorScale(d.health);
+			else if ((_activeColor == LABELCOST) && (_step >= 4)) { //Show the difference cost & health
+				return  colorScale(d.problem);
 			}
-			else if (_activeColor == 5) { //Pred Emergency Cost
-				return colorScale(d.health);
+
+			else if (_activeColor == LABELEMERGENCY) { //Pred Emergency Cost
+				return colorScale(d.emergency);
 			}
 			else if (_activeColor == 'black') {
 				return (d.race == 'B') ? 'black' : 'white';
@@ -200,7 +221,15 @@ var makeModel = function(data) {
 			else {
 				return allColors[7];
 			}
-			
+		},
+		getLabel: function() {
+			return _label;
+		},
+		getLabelApplied: function() {
+			return _labelApplied;
+		},
+		getCommentary: function() {
+			return _commentary;
 		},
 		getLabelColor: function(id, hover) {
 			
@@ -337,7 +366,13 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3) _x = d.x3;
 				if (step == 4) _x = d.x4;
 				if (step == 5) _x = d.x5;
-				if (step == 6) _x = d.x6;
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					if (whichLabel == LABELHEALTH) _x = d.x6health;
+					else if (whichLabel == LABELCOST) _x = d.x6cost;
+					else if (whichLabel == LABELEMERGENCY) _x = d.x6emergency;
+					else { _x = d.x6; }
+				}
 				return _x * circleBox;
 			})
 			.attr('cy', d => {
@@ -347,7 +382,13 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 3) _y = d.y3;
 				if (step == 4) _y = d.y4;
 				if (step == 5) _y = d.y5;
-				if (step == 6) _y = d.y6;
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					if (whichLabel == LABELHEALTH) _y = d.y6health;
+					else if (whichLabel == LABELCOST) _y = d.y6cost;
+					else if (whichLabel == LABELEMERGENCY) _y = d.y6emergency;
+					else { _y = d.y6; }
+				}
 				return _y * circleBox;
 			})
 			.attr('fill', d => model.getColor(d))
@@ -403,7 +444,7 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', function(){
 				var step = model.get();
-				if (step == 3 || step == 4) return 1;
+				if (step == 3 || step == 4 || step == 6) return 1;
 				return 0;
 			});
 	}
@@ -602,6 +643,38 @@ var makeInputView = function(model, inputID) {
 		}
 	}
 }
+var makeCommentaryView = function(model, data, svgID) {
+	var _observers = makeObservers();
+
+	var _commentary = d3.select(svgID).selectAll('text.commentary')
+		.data(model.getCommentary())
+		.enter()
+		.append('text')
+		.attr('class', 'commentary')
+		.attr('x', d => d.x)
+		.attr('y', d => d.y)
+		.text(d => d.text)
+		.style('font-size', '4px')
+		.attr('opacity', 0);
+
+	return {
+		render: function() {
+			var step = model.get();
+			var label = model.getLabel();
+			var isLabelActive = model.getLabelApplied();
+			_commentary.attr('opacity', function(d) {
+				if (((isLabelActive) || (step == 4)) && (d.step == step) && (d.label == label)) {
+					return 1;
+				}
+				return 0;
+			});
+		},
+		register: function(fxn) {
+			_observers.add(fxn);
+		}
+	}
+
+}
 
 var makeButtonView = function(model, data, buttonID, svgID) {
 	var _observers = makeObservers();
@@ -684,6 +757,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.views.push(makeTopTextView(story.model, d, '#textView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
+		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
 		story.views.push(makeInputView(story.model, '#inputs'))
 		story.controller = makeController(story.model);
 		
