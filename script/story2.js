@@ -96,6 +96,7 @@ var makeModel = function(data) {
 	var _labelApplied = false;
 
 	var _commentary = [
+		{text: 'Pretty good!', x: 100, y: 65, step: 3, label: LABELCOST},
 		{text: 'Not so good', x: 100, y: 65, step: 4, label: LABELCOST},
 		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELCOST},
 		{text: 'Much better!', x: 120, y: 65, step: 6, label: LABELHEALTH},
@@ -663,7 +664,7 @@ var makeCommentaryView = function(model, data, svgID) {
 			var label = model.getLabel();
 			var isLabelActive = model.getLabelApplied();
 			_commentary.attr('opacity', function(d) {
-				if (((isLabelActive) || (step == 4)) && (d.step == step) && (d.label == label)) {
+				if (((isLabelActive) || (step == 4) || (step == 3)) && (d.step == step) && (d.label == label)) {
 					return 1;
 				}
 				return 0;
