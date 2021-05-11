@@ -20,6 +20,10 @@ var captionSize = {fontsize: 3};
 var padding = {text: 5};
 var duration = 750;
 
+var LABELCOST = 1;
+var LABELHEALTH = 3;
+var LABELEMERGENCY = 5;
+
 
 var story = {
 	model: undefined,
@@ -82,13 +86,21 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: 3},
-		{text: 'Predict\nCare\nCost', clicked: false, id: 1},
-		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: 5}
+		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: LABELHEALTH},
+		{text: 'Predict\nCare\nCost', clicked: false, id: LABELCOST},
+		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: LABELEMERGENCY}
 	];
 
 	//Default is Predict Care Cost
-	var _label = 1; 
+	var _label = LABELCOST; 
+	var _labelApplied = false;
+
+	var _commentary = [
+		{text: 'Not so good', x: 100, y: 65, step: 4, label: LABELCOST},
+		{text: 'Not so good', x: 100, y: 65, step: 6, label: LABELCOST},
+		{text: 'Much better!', x: 100, y: 65, step: 6, label: LABELHEALTH},
+		{text: 'Not so good', x: 100, y: 65, step: 6, label: LABELEMERGENCY}
+	];
 
 	var _circleCaption = [
 	{ text: "Patients\n", 
@@ -156,12 +168,15 @@ var makeModel = function(data) {
 
 			if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = 7;
+
+			_labelApplied = false;
 			_observers.notify();
 		},
 		//Change the circles' color & label
 		changeColor: function(index) {
 			_activeColor = parseInt(index);
 			_label = parseInt(index);
+			_labelApplied = true;
 			_observers.notify();
 		},
 		//Get the step
@@ -189,13 +204,17 @@ var makeModel = function(data) {
 			var colorScale = d3.scaleLinear().domain([0,1])
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
 			
-			if (_activeColor == 3) { //Pred Health & Cost
+			if (_activeColor == LABELHEALTH) { //Pred Health & Cost
 				return colorScale(d.health);
 			}
-			else if (_activeColor == 1) { //Pred Cost
+			else if ((_activeColor == LABELCOST) && (_step <= 3)) { //Pred Cost
 				return colorScale(d.cost);
 			}
-			else if (_activeColor == 5) { //Pred Emergency Cost
+			else if ((_activeColor == LABELCOST) && (_step >= 4)) { //Show the difference cost & health
+				return  colorScale(d.problem);
+			}
+
+			else if (_activeColor == LABELEMERGENCY) { //Pred Emergency Cost
 				return colorScale(d.emergency);
 			}
 			else if (_activeColor == 'black') {
@@ -207,6 +226,12 @@ var makeModel = function(data) {
 		},
 		getLabel: function() {
 			return _label;
+		},
+		getLabelApplied: function() {
+			return _labelApplied;
+		},
+		getCommentary: function() {
+			return _commentary;
 		},
 		getLabelColor: function(id, hover) {
 			
@@ -345,9 +370,9 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _x = d.x5;
 				if (step == 6) {
 					var whichLabel = model.getLabel();
-					if (whichLabel == 1) _x = d.x6health;
-					else if (whichLabel == 3) _x = d.x6cost;
-					else if (whichLabel == 5) _x = d.x6emergency;
+					if (whichLabel == LABELHEALTH) _x = d.x6health;
+					else if (whichLabel == LABELCOST) _x = d.x6cost;
+					else if (whichLabel == LABELEMERGENCY) _x = d.x6emergency;
 					else { _x = d.x6; }
 				}
 				return _x * circleBox;
@@ -361,10 +386,9 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _y = d.y5;
 				if (step == 6) {
 					var whichLabel = model.getLabel();
-					console.log("Which label:", whichLabel, typeof(whichLabel));
-					if (whichLabel == 1) _y = d.y6health;
-					else if (whichLabel == 3) _y = d.y6cost;
-					else if (whichLabel == 5) _y = d.y6emergency;
+					if (whichLabel == LABELHEALTH) _y = d.y6health;
+					else if (whichLabel == LABELCOST) _y = d.y6cost;
+					else if (whichLabel == LABELEMERGENCY) _y = d.y6emergency;
 					else { _y = d.y6; }
 				}
 				return _y * circleBox;
@@ -621,6 +645,38 @@ var makeInputView = function(model, inputID) {
 		}
 	}
 }
+var makeCommentaryView = function(model, data, svgID) {
+	var _observers = makeObservers();
+
+	var _commentary = d3.select(svgID).selectAll('text.commentary')
+		.data(model.getCommentary())
+		.enter()
+		.append('text')
+		.attr('class', 'commentary')
+		.attr('x', d => d.x)
+		.attr('y', d => d.y)
+		.text(d => d.text)
+		.style('font-size', '4px')
+		.attr('opacity', 0);
+
+	return {
+		render: function() {
+			var step = model.get();
+			var label = model.getLabel();
+			var isLabelActive = model.getLabelApplied();
+			_commentary.attr('opacity', function(d) {
+				if (((isLabelActive) || (step == 4)) && (d.step == step) && (d.label == label)) {
+					return 1;
+				}
+				return 0;
+			});
+		},
+		register: function(fxn) {
+			_observers.add(fxn);
+		}
+	}
+
+}
 
 var makeButtonView = function(model, data, buttonID, svgID) {
 	var _observers = makeObservers();
@@ -703,6 +759,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.views.push(makeTopTextView(story.model, d, '#textView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
+		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
 		story.views.push(makeInputView(story.model, '#inputs'))
 		story.controller = makeController(story.model);
 		
