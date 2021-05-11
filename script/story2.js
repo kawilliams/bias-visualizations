@@ -6,7 +6,7 @@ var viewBoxSize = {height: 105, width: 150};
 
 var circleBox = 10;
 var radius = 3; //katy: change to 5
-var algBoxSize = {height: 51, width: 32};
+var algBoxSize = {height: 51, width: 44};
 var thresholdShadeSize = {height: radius + circleBox, width: 5 * circleBox };
 
 var circleCluster = {height: 6 * circleBox, width: 8 * circleBox};
@@ -82,9 +82,9 @@ var makeModel = function(data) {
 	];
 
 	var _inputLabels = [
-		{text: 'Predict\nHealth & Care Cost', clicked: false, id: 3},
-		{text: 'Predict\nCare Cost', clicked: false, id: 1},
-		{text: 'Predict\nEmergency Care Cost', clicked: false, id: 5}
+		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: 3},
+		{text: 'Predict\nCare\nCost', clicked: false, id: 1},
+		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: 5}
 	];
 
 	var _circleCaption = [
@@ -158,10 +158,6 @@ var makeModel = function(data) {
 		//Change the circles' color
 		changeColor: function(index) {
 			_activeColor = index;
-			if (_activeColor < 2) console.log("_activeColor blue", index);
-			else if (_activeColor < 4) console.log("_activeColor green", index);
-			else if (_activeColor < 6) console.log("_activeColor red", index);
-
 			_observers.notify();
 		},
 		//Get the step
@@ -186,17 +182,17 @@ var makeModel = function(data) {
 			//[Lblue, Dblue, Lgreen, Dgreen, Lred, Dred]
 			var allColors = d3.schemePaired;
 
-			var sickColorScale = d3.scaleLinear().domain([0,1])
+			var colorScale = d3.scaleLinear().domain([0,1])
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
 			
 			if (_activeColor == 3) { //Pred Health & Cost
-				return sickColorScale(d.cost);
+				return colorScale(d.cost);
 			}
 			else if (_activeColor == 1) { //Pred Cost
-				return sickColorScale(d.health);
+				return colorScale(d.health);
 			}
 			else if (_activeColor == 5) { //Pred Emergency Cost
-				return sickColorScale(d.health);
+				return colorScale(d.health);
 			}
 			else if (_activeColor == 'black') {
 				return (d.race == 'B') ? 'black' : 'white';
@@ -206,8 +202,14 @@ var makeModel = function(data) {
 			}
 			
 		},
-		getLabelColor: function(id) {
-			return d3.schemePaired[id];
+		getLabelColor: function(id, hover) {
+			
+			var allColors = d3.schemePaired;
+			var colorScale = d3.scaleLinear().domain([0,1])
+			.range([allColors[id-1], allColors[id]]);
+			
+			if (hover) return colorScale(0.2);//d3.schemePaired[id];
+			return colorScale(0.5);
 		},
 		//Get the circle labels
 		circleCaption: function() {
@@ -516,14 +518,14 @@ var makeInputView = function(model, inputID) {
 		})
 		.attr('width', algBoxSize.width * 0.8)
 		.attr('height', algBoxSize.height * 0.3)
-		.attr('fill', d => model.getLabelColor(d.id)) //green
+		.attr('fill', d => model.getLabelColor(d.id, false)) //green
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
 		.on('mouseenter', function(){
-			d3.select(this).attr('fill', d => model.getLabelColor(d.id-1)); //light base color
+			d3.select(this).attr('fill', d => model.getLabelColor(d.id, true)); //light base color
 		})
 		.on('mouseout', function(){
-			d3.select(this).attr('fill', d => model.getLabelColor(d.id)); //base color
+			d3.select(this).attr('fill', d => model.getLabelColor(d.id, false)); //base color
 		});
 	var _labelLabel = _inputG.selectAll('text.labelClass')
 		.data(_inputLabels)
@@ -531,20 +533,44 @@ var makeInputView = function(model, inputID) {
 		.append('text')
 		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
-		.attr('id', 'labelText')
-		.attr('x', margin.left + 5)
+		.attr('x', margin.left + algBoxSize.width * 0.48)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 15 + margin.top + topTextSize.height
+			return (i * algBoxSize.height * 0.35) + 9 + margin.top + topTextSize.height
 		})
-		.text(d => d.text)
 		.attr('display', 'none')
-		.attr("cursor", "pointer");
+		.attr("cursor", "pointer")
+		.on('mouseenter', function(d, data){
+			var thisId = data.id;
+			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+				.attr('fill', c => model.getLabelColor(c.id, true)); //light color
+		})
+		.on('mouseout', function(d, data){
+			var thisId = data.id;
+			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+				.attr('fill', c => model.getLabelColor(c.id, false)); //base color
+		});
+
+		_labelLabel.selectAll('tspan.labelClass')
+			.data(d => d.text.split('\n'))
+			.enter()
+			.append('tspan')
+			.attr('class', 'labelClass')
+			.text(d => d)
+			.attr('id', function() {
+				return this.parentElement.id;
+			})
+			.attr('x', margin.left + algBoxSize.width * 0.48)
+			.attr('dy', 5)
+			.attr('text-anchor', 'middle')
+			.attr("cursor", "pointer");
 
 	function _moveInputs(step) {
 		var _allAlgLabels = _svg.selectAll('.labelClass');
-
+	
 		if (step == 1) {
-			_allAlgLabels.attr('display', d => (d.text == "Predict\nCare Cost") ? 'inline' : 'none');
+			_allAlgLabels.attr('display', function(){
+				return (this.id == '1') ? 'inline' : 'none';
+			});
 		} 
 		else if (step == 6) {
 			_allAlgLabels.attr('display', 'inline');
