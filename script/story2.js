@@ -97,9 +97,9 @@ var makeModel = function(data) {
 
 	var _commentary = [
 		{text: 'Not so good', x: 100, y: 65, step: 4, label: LABELCOST},
-		{text: 'Not so good', x: 100, y: 65, step: 6, label: LABELCOST},
-		{text: 'Much better!', x: 100, y: 65, step: 6, label: LABELHEALTH},
-		{text: 'Not so good', x: 100, y: 65, step: 6, label: LABELEMERGENCY}
+		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELCOST},
+		{text: 'Much better!', x: 120, y: 65, step: 6, label: LABELHEALTH},
+		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELEMERGENCY}
 	];
 
 	var _circleCaption = [
@@ -121,12 +121,9 @@ var makeModel = function(data) {
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
-	{ text: "\n",
-		x: margin.left,
-		y: margin.top },
-	{ text: "Health + cost",
-		x: -40,
-		y: 9},
+	{ text: "Predicted\n",
+		x: margin.left + 5,
+		y: margin.top }
 	];
 
 	var _shadowCaption = [
@@ -150,13 +147,13 @@ var makeModel = function(data) {
 		x: -28,
 		y: 10 + 2 * circleBox
 	},
-	{text: "\n",
-		x: -40,
-		y: 9 + 2 * circleBox
+	{text: "Actual\n",
+		x: margin.left,
+		y: 10 + 2 * circleBox
 	},
-	{text: "Actual health\n",
-		x: -40,
-		y: 9 + 2 * circleBox
+	{text: "Actual\n",
+		x: margin.left + 5,
+		y: 5 + 2 * circleBox
 	}
 	]
 
@@ -200,6 +197,7 @@ var makeModel = function(data) {
 			//d3.schemePaired
 			//[Lblue, Dblue, Lgreen, Dgreen, Lred, Dred]
 			var allColors = d3.schemePaired;
+			console.log(allColors);
 
 			var colorScale = d3.scaleLinear().domain([0,1])
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
@@ -446,7 +444,7 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', function(){
 				var step = model.get();
-				if (step == 3 || step == 4) return 1;
+				if (step == 3 || step == 4 || step == 6) return 1;
 				return 0;
 			});
 	}
