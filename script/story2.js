@@ -538,7 +538,17 @@ var makeInputView = function(model, inputID) {
 			return (i * algBoxSize.height * 0.35) + 9 + margin.top + topTextSize.height
 		})
 		.attr('display', 'none')
-		.attr("cursor", "pointer");
+		.attr("cursor", "pointer")
+		.on('mouseenter', function(d, data){
+			var thisId = data.id;
+			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+				.attr('fill', c => model.getLabelColor(c.id, true)); //light color
+		})
+		.on('mouseout', function(d, data){
+			var thisId = data.id;
+			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+				.attr('fill', c => model.getLabelColor(c.id, false)); //base color
+		});
 
 		_labelLabel.selectAll('tspan.labelClass')
 			.data(d => d.text.split('\n'))
