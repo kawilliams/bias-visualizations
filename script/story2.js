@@ -413,7 +413,7 @@ var makeSVGView = function(model, data, svgID) {
 		if (step >= 2 && step <= 5) {
 			_svg.select('#thresholdShade')
 				.attr('opacity', 0.2);
-			_svg.selectAll('.threshold')//("#threshold")
+			_svg.selectAll('.threshold')
 				.attr('display', 'inline')
 				.transition()
 				.duration(duration)
@@ -425,7 +425,7 @@ var makeSVGView = function(model, data, svgID) {
 				});
 		} 
 		else {
-			_svg.selectAll('.threshold') //("#threshold")
+			_svg.selectAll('.threshold') 
 				.transition()
 				.duration(duration)
 				.attr('opacity', 0);
