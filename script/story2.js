@@ -62,6 +62,34 @@ var makeModel = function(data) {
 
 	var _data = data;
 
+	var _connectors = {
+		predActCostInit: [], //length should be 9
+		predActCostLabel: [], //length should be 1
+		predActEmergency: [], //length should be 4
+		predActHealth: [], // length should be 10
+		predActProblem: [] // length should be 1
+	};
+
+	for (var i=0; i<data.length/2; i++) {
+		var circle = data[i+10];
+		var shadow = data[i];
+		if (circle.problem == shadow.problem) {
+			_connectors.predActProblem.push([[circle.x4, circle.y4], [shadow.x4, shadow.y4]]);
+			_connectors.predActCostLabel.push([[circle.x6cost, circle.y6cost], [shadow.x6cost, shadow.y6cost]]);
+		}
+		if (circle.cost == shadow.cost) {
+			_connectors.predActCostInit.push([[circle.x3, circle.y3], [shadow.x3, shadow.y3]]);
+		}
+		if (circle.health == shadow.health) {
+			_connectors.predActHealth.push([[circle.x6health, circle.y6health], [shadow.x6health, shadow.y6health]]);
+		}
+		if (circle.emergency == shadow.emergency) {
+			_connectors.predActEmergency.push([[circle.x6emergency, circle.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
+		}
+	}
+	//console.log(_connectors);
+	
+
 	var _text = [
 		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
 		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll\n\
@@ -193,6 +221,10 @@ var makeModel = function(data) {
 		inputs: function() {
 			return _inputLabels;
 		},
+		//Get the connectors 
+		connectors: function(){
+			return _connectors;
+		},
 		//Get the circle color scheme
 		getColor: function(d) {
 			//d3.schemePaired
@@ -277,6 +309,20 @@ var makeSVGView = function(model, data, svgID) {
 		// Move the patients to the right side
 	circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
+	var step = model.get(); 
+
+	var _connectorLines = circleG.selectAll('line.connector')
+		.data(model.connectors().predActCostInit)
+		.enter()
+		.append('line')
+		.attr('class', 'connector')
+		.attr('stroke', 'grey')
+		.attr('x1', d => d[0][0] * circleBox)
+		.attr('y1', d => d[0][1] * circleBox)
+		.attr('x2', d => d[0][0] * circleBox) //line starts at the circle
+		.attr('y2', d => d[0][1] * circleBox) //and connects to the shadow on transition
+		.attr('opacity', '0');
+
 	var circles = circleG.selectAll('circle')
 		.data(data)
 		.enter()
@@ -290,8 +336,6 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
 		.attr('fill', d => model.getColor(d));
-
-	var step = model.get();
 
 	var _circleCaption = circleG.append('text')
 		.attr('id', 'circleCaption')
@@ -368,10 +412,22 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _x = d.x5;
 				if (step == 6) {
 					var whichLabel = model.getLabel();
-					if (whichLabel == LABELHEALTH) _x = d.x6health;
-					else if (whichLabel == LABELCOST) _x = d.x6cost;
-					else if (whichLabel == LABELEMERGENCY) _x = d.x6emergency;
-					else { _x = d.x6; }
+					var isLabelActive = model.getLabelApplied();
+					//console.log(isLabelActive);
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {
+						//console.log("x health positions");
+						_x = d.x6health;
+					}
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) {
+						//console.log("x cost positions");
+						_x = d.x6cost;}
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) {
+						//console.log("x emergency positions");
+						_x = d.x6emergency;}
+					else { 
+						//console.log("x scattered positions");
+						_x = d.x6; 
+					}
 				}
 				return _x * circleBox;
 			})
@@ -384,10 +440,22 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _y = d.y5;
 				if (step == 6) {
 					var whichLabel = model.getLabel();
-					if (whichLabel == LABELHEALTH) _y = d.y6health;
-					else if (whichLabel == LABELCOST) _y = d.y6cost;
-					else if (whichLabel == LABELEMERGENCY) _y = d.y6emergency;
-					else { _y = d.y6; }
+					var isLabelActive = model.getLabelApplied();
+					//console.log(isLabelActive);
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {
+						//console.log("y health positions");
+						_y = d.y6health;
+					}
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) {
+						//console.log("y cost positions");
+						_y = d.y6cost;}
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) {
+						//console.log("y emergency positions");
+						_y = d.y6emergency;}
+					else { 
+						//console.log("y scattered positions");
+						_y = d.y6; 
+					}
 				}
 				return _y * circleBox;
 			})
@@ -445,6 +513,34 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('opacity', function(){
 				var step = model.get();
 				if (step == 3 || step == 4 || step == 6) return 1;
+				return 0;
+			});
+
+		d3.selectAll('line.connector').attr('opacity', 0);
+
+		var connectors = d3.selectAll('line.connector')
+			.data(function(){
+				//console.log(model.connectors());
+				if (step == 3) return model.connectors().predActCostInit;
+				if (step == 4) return model.connectors().predActProblem;
+				if (step == 6) {
+					var label = model.getLabel();
+					var isLabelActive = model.getLabelApplied();
+					if (isLabelActive && label == LABELHEALTH) return model.connectors().predActHealth;
+					if (isLabelActive && label == LABELCOST) return model.connectors().predActProblem;
+					if (isLabelActive && label == LABELEMERGENCY) return model.connectors().predActEmergency;
+					else return model.connectors().predActCostInit;
+				}
+				else return model.connectors().predActCostInit;
+			})
+			.transition()
+			.duration(duration)
+			.attr('x2', d => d[1][0] * circleBox)
+			.attr('y2', d => d[1][1] * circleBox)
+			.attr('opacity', function(){
+				var isLabelActive = model.getLabelApplied();
+				if (step == 3 || step == 4) return 1;
+				else if ((step == 6) && (isLabelActive)) return 1;
 				return 0;
 			});
 	}
@@ -738,11 +834,11 @@ var makeController = function(model) {
 					_changeColor(evt);
 					break;
 				default:
-					console.log("Unknown event type: ", evt);
+					//console.log("Unknown event type: ", evt);
 				}
 			}
 			else {
-				console.log("Initial load, no event yet");
+				//console.log("Initial load, no event yet");
 			}
 
 
@@ -768,8 +864,8 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 	}) 
 	.catch(function(error){
-		console.log("Error on csv load");
-		console.log(error)
+		//console.log("Error on csv load");
+		//console.log(error)
 	})
 
 
