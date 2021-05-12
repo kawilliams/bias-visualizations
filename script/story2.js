@@ -88,7 +88,6 @@ var makeModel = function(data) {
 			_connectors.predActEmergency.push([[circle.x6emergency, circle.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
 		}
 	}
-	console.log(_connectors);
 	
 
 	var _text = [
@@ -414,21 +413,11 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 6) {
 					var whichLabel = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
-					//console.log(isLabelActive);
-					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {
-						//console.log("x health positions");
-						_x = d.x6health;
-					}
-					else if ((isLabelActive) && (whichLabel == LABELCOST)) {
-						//console.log("x cost positions");
-						_x = d.x6cost;}
-					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) {
-						//console.log("x emergency positions");
-						_x = d.x6emergency;}
-					else { 
-						//console.log("x scattered positions");
-						_x = d.x6; 
-					}
+					
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _x = d.x6health;
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) _x = d.x6cost;
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _x = d.x6emergency;
+					else _x = d.x6; 
 				}
 				return _x * circleBox;
 			})
@@ -442,21 +431,11 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 6) {
 					var whichLabel = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
-					//console.log(isLabelActive);
-					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {
-						//console.log("y health positions");
-						_y = d.y6health;
-					}
-					else if ((isLabelActive) && (whichLabel == LABELCOST)) {
-						//console.log("y cost positions");
-						_y = d.y6cost;}
-					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) {
-						//console.log("y emergency positions");
-						_y = d.y6emergency;}
-					else { 
-						//console.log("y scattered positions");
-						_y = d.y6; 
-					}
+
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _y = d.y6health;
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) _y = d.y6cost;
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _y = d.y6emergency;
+					else _y = d.y6; 
 				}
 				return _y * circleBox;
 			})
@@ -525,7 +504,6 @@ var makeSVGView = function(model, data, svgID) {
 
 		var connectors = d3.selectAll('line.connector')
 			.data(function(){
-				//console.log(model.connectors());
 				if (step == 3) return model.connectors().predActCostInit;
 				if (step == 4) return model.connectors().predActProblem;
 				if (step == 6) {
@@ -551,8 +529,8 @@ var makeSVGView = function(model, data, svgID) {
 				return 0;
 			});
 
-			
-		if (step == 6) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+		var isLabelActive = model.getLabelApplied();
+		if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
 	}
 
@@ -845,11 +823,11 @@ var makeController = function(model) {
 					_changeColor(evt);
 					break;
 				default:
-					//console.log("Unknown event type: ", evt);
+					console.log("Unknown event type: ", evt);
 				}
 			}
 			else {
-				//console.log("Initial load, no event yet");
+				console.log("Initial load, no event yet");
 			}
 
 
@@ -875,8 +853,8 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 	}) 
 	.catch(function(error){
-		//console.log("Error on csv load");
-		//console.log(error)
+		console.log("Error on csv load");
+		console.log(error)
 	})
 
 
