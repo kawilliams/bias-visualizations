@@ -198,9 +198,8 @@ var makeModel = function(data) {
 			//d3.schemePaired
 			//[Lblue, Dblue, Lgreen, Dgreen, Lred - changed, Dred, orange]
 			var allColors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#ffbbba","#e31a1c","#fdbf6f","#ff7f00"];
-			console.log(d3.schemePaired);
 
-			var colorScale = d3.scaleLinear().domain([0,1])
+			var colorScale = d3.scaleLinear().domain([0,1,2])
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
 			
 			if (_activeColor == LABELHEALTH) { //Pred Health & Cost
