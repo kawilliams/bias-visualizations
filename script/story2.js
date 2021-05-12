@@ -73,6 +73,7 @@ var makeModel = function(data) {
 	for (var i=0; i<data.length/2; i++) {
 		var circle = data[i+10];
 		var shadow = data[i];
+	
 		if (circle.problem == shadow.problem) {
 			_connectors.predActProblem.push([[circle.x4, circle.y4], [shadow.x4, shadow.y4]]);
 			_connectors.predActCostLabel.push([[circle.x6cost, circle.y6cost], [shadow.x6cost, shadow.y6cost]]);
@@ -87,7 +88,7 @@ var makeModel = function(data) {
 			_connectors.predActEmergency.push([[circle.x6emergency, circle.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
 		}
 	}
-	//console.log(_connectors);
+	console.log(_connectors);
 	
 
 	var _text = [
@@ -151,8 +152,8 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: margin.top },
 	{ text: "Predicted\n",
-		x: margin.left + 5,
-		y: margin.top }
+		x: -10,
+		y: margin.top + 3 }
 	];
 
 	var _shadowCaption = [
@@ -181,8 +182,8 @@ var makeModel = function(data) {
 		y: 10 + 2 * circleBox
 	},
 	{text: "Actual\n",
-		x: margin.left + 5,
-		y: 5 + 2 * circleBox
+		x: -10,
+		y: 4 * circleBox - 3
 	}
 	]
 
@@ -312,16 +313,16 @@ var makeSVGView = function(model, data, svgID) {
 	var step = model.get(); 
 
 	var _connectorLines = circleG.selectAll('line.connector')
-		.data(model.connectors().predActCostInit)
+		.data(data)
 		.enter()
 		.append('line')
 		.attr('class', 'connector')
 		.attr('stroke', 'grey')
-		.attr('x1', d => d[0][0] * circleBox)
-		.attr('y1', d => d[0][1] * circleBox)
-		.attr('x2', d => d[0][0] * circleBox) //line starts at the circle
-		.attr('y2', d => d[0][1] * circleBox) //and connects to the shadow on transition
-		.attr('opacity', '0');
+		.attr('x1', d => d.x0 * circleBox)
+		.attr('y1', d => d.y0 * circleBox)
+		.attr('x2', d => d.x0 * circleBox) //line starts at the circle
+		.attr('y2', d => d.y0 * circleBox) //and connects to the shadow on transition
+		.attr('opacity', 1); 
 
 	var circles = circleG.selectAll('circle')
 		.data(data)
@@ -488,7 +489,10 @@ var makeSVGView = function(model, data, svgID) {
 			.style('font-size', captionSize.fontsize)
 			.transition()
 			.duration(duration)
-			.attr('opacity', 1);
+			.attr('opacity', function() {
+				if ((!model.getLabelApplied())&& (step == 6)) return 0;
+				return 1;
+			});
 
 
 		var shadowCaption = d3.select("#shadowCaption")
@@ -512,7 +516,8 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', function(){
 				var step = model.get();
-				if (step == 3 || step == 4 || step == 6) return 1;
+				if (step == 3 || step == 4) return 1;
+				else if ((step == 6) && (model.getLabelApplied())) return 1;
 				return 0;
 			});
 
@@ -535,6 +540,8 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.transition()
 			.duration(duration)
+			.attr('x1', d => d[0][0] * circleBox)
+			.attr('y1', d => d[0][1] * circleBox)
 			.attr('x2', d => d[1][0] * circleBox)
 			.attr('y2', d => d[1][1] * circleBox)
 			.attr('opacity', function(){
@@ -543,6 +550,10 @@ var makeSVGView = function(model, data, svgID) {
 				else if ((step == 6) && (isLabelActive)) return 1;
 				return 0;
 			});
+
+			
+		if (step == 6) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+
 	}
 
 	function _moveThreshold(step) {
