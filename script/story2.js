@@ -62,6 +62,34 @@ var makeModel = function(data) {
 
 	var _data = data;
 
+	var _connectors = {
+		predActCostInit: [], //length should be 9
+		predActCostLabel: [], //length should be 1
+		predActEmergency: [], //length should be 4
+		predActHealth: [], // length should be 10
+		predActProblem: [] // length should be 1
+	};
+
+	for (var i=0; i<data.length/2; i++) {
+		var circle = data[i+10];
+		var shadow = data[i];
+	
+		if (circle.problem == shadow.problem) {
+			_connectors.predActProblem.push([[circle.x4, circle.y4], [shadow.x4, shadow.y4]]);
+			_connectors.predActCostLabel.push([[circle.x6cost, circle.y6cost], [shadow.x6cost, shadow.y6cost]]);
+		}
+		if (circle.cost == shadow.cost) {
+			_connectors.predActCostInit.push([[circle.x3, circle.y3], [shadow.x3, shadow.y3]]);
+		}
+		if (circle.health == shadow.health) {
+			_connectors.predActHealth.push([[circle.x6health, circle.y6health], [shadow.x6health, shadow.y6health]]);
+		}
+		if (circle.emergency == shadow.emergency) {
+			_connectors.predActEmergency.push([[circle.x6emergency, circle.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
+		}
+	}
+	
+
 	var _text = [
 		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
 		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll\n\
@@ -123,8 +151,8 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: margin.top },
 	{ text: "Predicted\n",
-		x: margin.left + 5,
-		y: margin.top }
+		x: -10,
+		y: margin.top + 3 }
 	];
 
 	var _shadowCaption = [
@@ -153,8 +181,8 @@ var makeModel = function(data) {
 		y: 10 + 2 * circleBox
 	},
 	{text: "Actual\n",
-		x: margin.left + 5,
-		y: 5 + 2 * circleBox
+		x: -10,
+		y: 4 * circleBox - 3
 	}
 	]
 
@@ -193,14 +221,17 @@ var makeModel = function(data) {
 		inputs: function() {
 			return _inputLabels;
 		},
+		//Get the connectors 
+		connectors: function(){
+			return _connectors;
+		},
 		//Get the circle color scheme
 		getColor: function(d) {
 			//d3.schemePaired
 			//[Lblue, Dblue, Lgreen, Dgreen, Lred - changed, Dred, orange]
 			var allColors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#ffbbba","#e31a1c","#fdbf6f","#ff7f00"];
-			console.log(d3.schemePaired);
 
-			var colorScale = d3.scaleLinear().domain([0,1])
+			var colorScale = d3.scaleLinear().domain([0,1,2])
 			.range([allColors[_activeColor-1], allColors[_activeColor]]);
 			
 			if (_activeColor == LABELHEALTH) { //Pred Health & Cost
@@ -278,6 +309,20 @@ var makeSVGView = function(model, data, svgID) {
 		// Move the patients to the right side
 	circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
+	var step = model.get(); 
+
+	var _connectorLines = circleG.selectAll('line.connector')
+		.data(data)
+		.enter()
+		.append('line')
+		.attr('class', 'connector')
+		.attr('stroke', 'grey')
+		.attr('x1', d => d.x0 * circleBox)
+		.attr('y1', d => d.y0 * circleBox)
+		.attr('x2', d => d.x0 * circleBox) //line starts at the circle
+		.attr('y2', d => d.y0 * circleBox) //and connects to the shadow on transition
+		.attr('opacity', 1); 
+
 	var circles = circleG.selectAll('circle')
 		.data(data)
 		.enter()
@@ -291,8 +336,6 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
 		.attr('fill', d => model.getColor(d));
-
-	var step = model.get();
 
 	var _circleCaption = circleG.append('text')
 		.attr('id', 'circleCaption')
@@ -350,7 +393,7 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
 			.attr('x', 3)
-			.attr('y', circleBox + radius)
+			.attr('y', -circleBox + 3)
 			.text('Accepted into program')
 			.attr('display', 'none')
 			.style('font-size', captionSize.fontsize);
@@ -369,10 +412,12 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _x = d.x5;
 				if (step == 6) {
 					var whichLabel = model.getLabel();
-					if (whichLabel == LABELHEALTH) _x = d.x6health;
-					else if (whichLabel == LABELCOST) _x = d.x6cost;
-					else if (whichLabel == LABELEMERGENCY) _x = d.x6emergency;
-					else { _x = d.x6; }
+					var isLabelActive = model.getLabelApplied();
+					
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _x = d.x6health;
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) _x = d.x6cost;
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _x = d.x6emergency;
+					else _x = d.x6; 
 				}
 				return _x * circleBox;
 			})
@@ -385,10 +430,12 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 5) _y = d.y5;
 				if (step == 6) {
 					var whichLabel = model.getLabel();
-					if (whichLabel == LABELHEALTH) _y = d.y6health;
-					else if (whichLabel == LABELCOST) _y = d.y6cost;
-					else if (whichLabel == LABELEMERGENCY) _y = d.y6emergency;
-					else { _y = d.y6; }
+					var isLabelActive = model.getLabelApplied();
+
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _y = d.y6health;
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) _y = d.y6cost;
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _y = d.y6emergency;
+					else _y = d.y6; 
 				}
 				return _y * circleBox;
 			})
@@ -421,7 +468,10 @@ var makeSVGView = function(model, data, svgID) {
 			.style('font-size', captionSize.fontsize)
 			.transition()
 			.duration(duration)
-			.attr('opacity', 1);
+			.attr('opacity', function() {
+				if ((!model.getLabelApplied())&& (step == 6)) return 0;
+				return 1;
+			});
 
 
 		var shadowCaption = d3.select("#shadowCaption")
@@ -445,9 +495,43 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', function(){
 				var step = model.get();
-				if (step == 3 || step == 4 || step == 6) return 1;
+				if (step == 3 || step == 4) return 1;
+				else if ((step == 6) && (model.getLabelApplied())) return 1;
 				return 0;
 			});
+
+		d3.selectAll('line.connector').attr('opacity', 0);
+
+		var connectors = d3.selectAll('line.connector')
+			.data(function(){
+				if (step == 3) return model.connectors().predActCostInit;
+				if (step == 4) return model.connectors().predActProblem;
+				if (step == 6) {
+					var label = model.getLabel();
+					var isLabelActive = model.getLabelApplied();
+					if (isLabelActive && label == LABELHEALTH) return model.connectors().predActHealth;
+					if (isLabelActive && label == LABELCOST) return model.connectors().predActProblem;
+					if (isLabelActive && label == LABELEMERGENCY) return model.connectors().predActEmergency;
+					else return model.connectors().predActCostInit;
+				}
+				else return model.connectors().predActCostInit;
+			})
+			.transition()
+			.duration(duration)
+			.attr('x1', d => d[0][0] * circleBox)
+			.attr('y1', d => d[0][1] * circleBox)
+			.attr('x2', d => d[1][0] * circleBox)
+			.attr('y2', d => d[1][1] * circleBox)
+			.attr('opacity', function(){
+				var isLabelActive = model.getLabelApplied();
+				if (step == 3 || step == 4) return 1;
+				else if ((step == 6) && (isLabelActive)) return 1;
+				return 0;
+			});
+
+		var isLabelActive = model.getLabelApplied();
+		if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+
 	}
 
 	function _moveThreshold(step) {
