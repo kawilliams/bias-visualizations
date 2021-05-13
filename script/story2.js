@@ -338,19 +338,51 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y2', d => d.y0 * circleBox) //and connects to the shadow on transition
 		.attr('opacity', 1); 
 
+	var makeBig = function(event) {
+		d3.select(this).transition().ease(d3.easeBounce)
+		.attr('r', radius + 3)
+		.transition()
+		.attr('r', radius);
+	}
+
+	var showPatientId = function(event) {
+		var circleId = d3.select(this).node().id.split('circle')[1];
+		d3.select("#text" + circleId).attr('opacity', 1);
+	}
+	var hidePatientId = function(event) {
+		var circleId = d3.select(this).node().id.split('circle')[1];
+		d3.select("#text" + circleId).attr('opacity', 0);
+	}
+
 	var circles = circleG.selectAll('circle')
 		.data(data)
 		.enter()
 		.append('circle')
-		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles");
-	
+		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
+		.attr('id', d => 'circle' + d.id)
+	var circlesToolTip = circleG.selectAll('text.tooltip')
+		.data(data)
+		.enter()
+		.append('text')
+		.attr('class', 'tooltip')
+		.attr('id', d => 'text' + d.id)
+		.attr('x', d => d.x0 * circleBox + radius + 1)
+		.attr('y', d => d.y0 * circleBox)
+		.text(d => (d.id < 10) ? "Patient " + d.id : "")
+		.attr('opacity', 0)
+		.style('font-size', 3);
+
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
-		.attr('fill', d => model.getColor(d));
+		.attr('fill', d => model.getColor(d))
+		.on('click', makeBig)
+		.on('mouseenter', showPatientId)
+		.on('mouseout', hidePatientId);
+
 
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
 	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
@@ -383,7 +415,7 @@ var makeSVGView = function(model, data, svgID) {
 		.style('font-size', captionSize.fontsize)
 		.attr('opacity', 0);
 
-	// _raceKey.attr('display', 'none');
+	_raceKey.attr('display', 'none');
 
 	var _circleCaption = circleG.append('text')
 		.attr('id', 'circleCaption')
