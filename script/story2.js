@@ -393,7 +393,7 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
 			.attr('x', 3)
-			.attr('y', circleBox + radius)
+			.attr('y', -circleBox + 3)
 			.text('Accepted into program')
 			.attr('display', 'none')
 			.style('font-size', captionSize.fontsize);
