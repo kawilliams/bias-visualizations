@@ -342,7 +342,7 @@ var makeSVGView = function(model, data, svgID) {
 		.data(data)
 		.enter()
 		.append('circle')
-		.attr('class', d => (d.id < 10) ? "patients" : "shadows");
+		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles");
 	
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
@@ -351,6 +351,39 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
 		.attr('fill', d => model.getColor(d));
+
+	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
+	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
+		.attr('x', viewBoxSize.width / 2 - radius - 2)
+		.attr('y', viewBoxSize.height/2 + radius + 2)
+		.attr('width', 2 * circleBox)
+		.attr('height', 2 * circleBox)
+		.attr('fill', 'none')
+		.style('stroke', 'black');
+	var _raceCircles = _raceKey.selectAll('circle.racekey')
+			.data([0,1])
+			.enter()
+			.append('circle')
+			.attr('class', 'racekey')
+			.attr('cx', viewBoxSize.width / 2)
+			.attr('cy', d => (d * circleBox) + viewBoxSize.height/2 + 10)
+			.attr('r', radius)
+			.attr('fill', d => (d == 0) ? 'black' : 'white')
+			.style('stroke', 'black')
+			.attr('opacity', 0);
+		
+	var _raceText = _raceKey.selectAll('text.racekey')
+		.data([0,1])
+		.enter()
+		.append('text')
+		.attr('class', 'racekey')
+		.attr('x', viewBoxSize.width / 2 + radius + 2)
+		.attr('y', d => (d * circleBox) + viewBoxSize.height/2 + 11)
+		.text(d => (d == 0) ? 'Black' : 'White')
+		.style('font-size', captionSize.fontsize)
+		.attr('opacity', 0);
+
+	// _raceKey.attr('display', 'none');
 
 	var _circleCaption = circleG.append('text')
 		.attr('id', 'circleCaption')
@@ -415,7 +448,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _moveCircles = function(step) {
 
-		var circles = _svg.selectAll('circle')
+		var circles = _svg.selectAll('circle.allCircles')
 			.transition()
 			.duration(duration)
 			.attr('cx', d => {
@@ -456,6 +489,11 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.attr('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
+
+		var _raceKey = d3.selectAll('.racekey').attr('display', (step == 5) ? 'inline' : 'none')
+			.transition()
+			.duration(duration)
+			.attr('opacity', 1);
 		
 		d3.selectAll('.circlecaption').remove();
 
@@ -543,7 +581,8 @@ var makeSVGView = function(model, data, svgID) {
 				else if ((step == 6) && (isLabelActive)) return 1;
 				return 0;
 			});
-
+		//Circle positions are unique on step 6, so we shift everything for that step
+		//(this translation is used instead of adding an additional coordinate row in the .csv)
 		var isLabelActive = model.getLabelApplied();
 		if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
