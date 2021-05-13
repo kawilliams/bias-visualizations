@@ -14,7 +14,7 @@ var circleLine = {height: 1 * circleBox, width: 10 * circleBox};
 var circleDoubleLine = {height: 2 * circleBox, width: 10 * circleBox};
 
 var topTextSize = {height: 4, width: 144, fontsize: 3, space: 4};
-var nextButtonSize = {height: 8, width: 20};
+var buttonSize = {height: 8, width: 20};
 var captionSize = {fontsize: 3};
 
 var padding = {text: 5};
@@ -23,6 +23,9 @@ var duration = 750;
 var LABELCOST = 1;
 var LABELHEALTH = 3;
 var LABELEMERGENCY = 5;
+var LABELNONE = 7;
+
+var STEPCOUNT = 7;
 
 
 var story = {
@@ -32,6 +35,7 @@ var story = {
 	signals: {
 		//List of signal types
 		increment: 'INCREMENT',
+		decrement: 'DECREMENT',
 		changeColor: 'CHANGE_COLOR'
 	}
 }
@@ -54,11 +58,11 @@ var makeModel = function(data) {
 	//Make observers that can be notified
 	var _observers = makeObservers();
 
-	// The storyboard step (0 - 7)
+	// The storyboard step (0 - STEPCOUNT)
 	var _step = 0;
 
 	// To determine what coloring scheme to use
-	var _activeColor = 7;
+	var _activeColor = LABELNONE;
 
 	var _data = data;
 
@@ -186,14 +190,26 @@ var makeModel = function(data) {
 	}
 	]
 
+
+
 	return {
 		//Increment the step & tell everyone
 		increment: function() {
 			_step += 1;
-			_step = _step % 7; 
+			_step = _step % STEPCOUNT; 
 
 			if (_step == 5) _activeColor = 'black';
-			else if (_step == 6) _activeColor = 7;
+			else if (_step == 6) _activeColor = LABELNONE;
+
+			_labelApplied = false;
+			_observers.notify();
+		},
+		//Decrement the step & tell everyone
+		decrement: function(){
+			_step -= 1;
+			if (_step == -1) _step = STEPCOUNT - 1;
+			if (_step == 5) _activeColor = 'black';
+			else if (_step == 6) _activeColor = LABELNONE;
 
 			_labelApplied = false;
 			_observers.notify();
@@ -295,8 +311,7 @@ var makeSVGView = function(model, data, svgID) {
 	var _svg = d3.select(svgID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
 		.attr('viewBox', "0 0 " + (viewBoxSize.width * 1.5) + " " + (viewBoxSize.height * 1.5))
-		.classed('svg-content', true)
-		.attr("style", "outline: thin solid red;");
+		.classed('svg-content', true);
 
 	var _cleanSVG = function() {
 		while (_svg.firstChild) {
@@ -306,7 +321,7 @@ var makeSVGView = function(model, data, svgID) {
 	var circleG = _svg.append('g')
 		.attr('class', 'allCircles')
 		.attr('id', 'circleG');
-		// Move the patients to the right side
+	// Move the patients to the right side
 	circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
 	var step = model.get(); 
@@ -323,19 +338,84 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y2', d => d.y0 * circleBox) //and connects to the shadow on transition
 		.attr('opacity', 1); 
 
+	var makeBig = function(event) {
+		d3.select(this).transition().ease(d3.easeBounce)
+		.attr('r', radius + 3)
+		.transition()
+		.attr('r', radius);
+	}
+
+	var showPatientId = function(event) {
+		var circleId = d3.select(this).node().id.split('circle')[1];
+		d3.select("#text" + circleId).attr('opacity', 1);
+	}
+	var hidePatientId = function(event) {
+		var circleId = d3.select(this).node().id.split('circle')[1];
+		d3.select("#text" + circleId).attr('opacity', 0);
+	}
+
 	var circles = circleG.selectAll('circle')
 		.data(data)
 		.enter()
 		.append('circle')
-		.attr('class', d => (d.id < 10) ? "patients" : "shadows");
-	
+		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
+		.attr('id', d => 'circle' + d.id);
+	var circlesToolTip = circleG.selectAll('text.tooltip')
+		.data(data)
+		.enter()
+		.append('text')
+		.attr('class', 'tooltip')
+		.attr('id', d => 'text' + d.id)
+		.attr('x', d => d.x0 * circleBox + radius + 1)
+		.attr('y', d => d.y0 * circleBox)
+		.text(d => (d.id < 10) ? "Patient " + d.id : "")
+		.attr('opacity', 0)
+		.style('font-size', 3);
+
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
 	circles.attr('cx', d => d.x0 * circleBox )
 		.attr('cy', d => d.y0 * circleBox )
 		.attr('r', radius)
-		.attr('fill', d => model.getColor(d));
+		.attr('fill', d => model.getColor(d))
+		.on('click', makeBig)
+		.on('mouseenter', showPatientId)
+		.on('mouseout', hidePatientId);
+
+
+	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
+	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
+		.attr('x', viewBoxSize.width / 2 - radius - 2)
+		.attr('y', viewBoxSize.height/2 + radius + 2)
+		.attr('width', 2 * circleBox)
+		.attr('height', 2 * circleBox)
+		.attr('fill', 'none')
+		.style('stroke', 'black');
+	var _raceCircles = _raceKey.selectAll('circle.racekey')
+			.data([0,1])
+			.enter()
+			.append('circle')
+			.attr('class', 'racekey')
+			.attr('cx', viewBoxSize.width / 2)
+			.attr('cy', d => (d * circleBox) + viewBoxSize.height/2 + 10)
+			.attr('r', radius)
+			.attr('fill', d => (d == 0) ? 'black' : 'white')
+			.style('stroke', 'black')
+			.attr('opacity', 0);
+		
+	var _raceText = _raceKey.selectAll('text.racekey')
+		.data([0,1])
+		.enter()
+		.append('text')
+		.attr('class', 'racekey')
+		.attr('x', viewBoxSize.width / 2 + radius + 2)
+		.attr('y', d => (d * circleBox) + viewBoxSize.height/2 + 11)
+		.text(d => (d == 0) ? 'Black' : 'White')
+		.style('font-size', captionSize.fontsize)
+		.attr('opacity', 0);
+
+	_raceKey.attr('display', 'none');
 
 	var _circleCaption = circleG.append('text')
 		.attr('id', 'circleCaption')
@@ -400,7 +480,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _moveCircles = function(step) {
 
-		var circles = _svg.selectAll('circle')
+		var circles = _svg.selectAll('circle.allCircles')
 			.transition()
 			.duration(duration)
 			.attr('cx', d => {
@@ -441,6 +521,11 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.attr('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
+
+		var _raceKey = d3.selectAll('.racekey').attr('display', (step == 5) ? 'inline' : 'none')
+			.transition()
+			.duration(duration)
+			.attr('opacity', 1);
 		
 		d3.selectAll('.circlecaption').remove();
 
@@ -528,7 +613,8 @@ var makeSVGView = function(model, data, svgID) {
 				else if ((step == 6) && (isLabelActive)) return 1;
 				return 0;
 			});
-
+		//Circle positions are unique on step 6, so we shift everything for that step
+		//(this translation is used instead of adding an additional coordinate row in the .csv)
 		var isLabelActive = model.getLabelApplied();
 		if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
@@ -761,27 +847,50 @@ var makeCommentaryView = function(model, data, svgID) {
 
 }
 
-var makeButtonView = function(model, data, buttonID, svgID) {
+var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var _observers = makeObservers();
+	var buttonData = [{ 
+		id: "nextButton", 
+		text: "NEXT", 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 5, 
+		y: viewBoxSize.height - margin.bottom - buttonSize.height
+	},{ 
+		id: "nextButton", 
+		text: "BACK",
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 - 5 - buttonSize.width, 
+		y: viewBoxSize.height - margin.bottom - buttonSize.height
+	}];
+	var _buttons = d3.select(svgID).selectAll('rect.button')
+		.data(buttonData)
+		.enter()
+		.append('rect')
+		.attr('id', d => d.id)
+		.attr('class', 'button')
+		.attr('x', d => d.x)
+		.attr('y', d => d.y)
+		.attr('width', buttonSize.width)
+		.attr('height', buttonSize.height)
+		.attr('cursor', 'pointer')
+		.style('fill', 'lightgrey')
+		.style('rx', 3);
 
-	var _btn = d3.select(svgID)
-	.append('rect')
-	.attr('id', buttonID)
-	.attr('x', (viewBoxSize.width - nextButtonSize.width) * 0.5)
-	.attr('y', viewBoxSize.height - margin.bottom - nextButtonSize.height)
-	.attr('width', nextButtonSize.width)
-	.attr('height', nextButtonSize.height)
-	.attr('cursor', 'pointer')
-	.style('fill', 'lightgrey')
-	.style('rx', 3);
+	var _forward = d3.select(nextID);
+	var _backward = d3.select(backID);
 
-	var _btnText = d3.select(svgID)
+	var _buttonsText = d3.select(svgID).selectAll('text.button')
+		.data(buttonData)
+		.enter()
 		.append('text')
-		.attr('x', (viewBoxSize.width - nextButtonSize.width) * 0.5 + 3)
-		.attr('y', viewBoxSize.height - margin.bottom - nextButtonSize.height + 5)
-		.text('NEXT: 0')
+		.attr('id', d => d.text)
+		.attr('class', 'button')
+		.attr('x', d => d.x + 3)
+		.attr('y', d => d.y + 5)
+		.text(d => d.text)
 		.attr('cursor', 'pointer')
 		.style('font-size', '4px');
+
+	var _forwardText = d3.select('#NEXT');
+	var _backwardText = d3.select('#BACK');
 
 	// The button event passes the appropriate
 	//data to any listening controllers
@@ -790,13 +899,21 @@ var makeButtonView = function(model, data, buttonID, svgID) {
 			type: story.signals.increment
 		});
 	};
+	var _fireDecrementEvent = function() {
+		_observers.notify({
+			type: story.signals.decrement
+		});
+	};
 
-	_btn.on('click', _fireIncrementEvent);
-	_btnText.on('click', _fireIncrementEvent);
+	_forward.on('click', _fireIncrementEvent);
+	_backward.on('click', _fireDecrementEvent);
+	_forwardText.on('click', _fireIncrementEvent);
+	_backwardText.on('click', _fireDecrementEvent);
 
 	return {
 		render: function() {
-			_btnText.text("NEXT: " + model.get());
+			_forwardText.text("NEXT: " + model.get());
+			_backwardText.text("BACK: " + model.get());
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
@@ -809,6 +926,9 @@ var makeController = function(model) {
 	var _increment = function() {
 		model.increment();
 	}
+	var _decrement = function() {
+		model.decrement();
+	}
 	var _changeColor = function(args) {
 		model.changeColor(args.color);
 	}
@@ -818,6 +938,9 @@ var makeController = function(model) {
 				switch(evt.type){
 				case story.signals.increment:
 					_increment();
+					break;
+				case story.signals.decrement:
+					_decrement();
 					break;
 				case story.signals.changeColor:
 					_changeColor(evt);
@@ -841,7 +964,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.model = makeModel(d);
 		story.views.push(makeTopTextView(story.model, d, '#textView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
-		story.views.push(makeButtonView(story.model, d, '#nextButton', '#mySVG'));
+		story.views.push(makeButtonView(story.model, d, '#backButton', '#nextButton', '#mySVG'));
 		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
 		story.views.push(makeInputView(story.model, '#inputs'))
 		story.controller = makeController(story.model);
