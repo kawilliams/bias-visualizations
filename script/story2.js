@@ -359,7 +359,7 @@ var makeSVGView = function(model, data, svgID) {
 		.enter()
 		.append('circle')
 		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
-		.attr('id', d => 'circle' + d.id)
+		.attr('id', d => 'circle' + d.id);
 	var circlesToolTip = circleG.selectAll('text.tooltip')
 		.data(data)
 		.enter()
