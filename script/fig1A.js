@@ -288,13 +288,14 @@ function drawMySVG(mySVGID, mySVGClass){
 											health score compared to others, and the y-axis\n\
 											shows how healthy the patient is, based on number\n\
 											of chronic conditions. Move the sliders to explore.",
-					horizText: "These two patients are equally sick\n\
-								(X conditions), but only the White \n\
-								patient was referred for screening.",
-					vertText:  "Both patients received the same score\n\
-							   	from the algorithm (X percentile) but\n\
-							   	the Black patient has diff more chronic\n\
-							   	conditions than the White patient."
+					horizText: "Two patients at this level would be \n\
+								equally sick (X conditions), but to the\n\
+								algorithm the Black patient needed to\n\
+								be more sick to be referred.",
+					vertText:  "Both patients at this point received the\n\
+								same score from the algorithm (X percentile)\n\
+								but the Black patient would have diff more\n\
+								conditions than the White patient."
 					};
 		var toolTipTextElement = toolTipG.selectAll('text.'+mySVGClass)
 				.data(d => toolTipText.instructions.split("\n"))

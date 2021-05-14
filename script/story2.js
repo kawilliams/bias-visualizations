@@ -114,7 +114,7 @@ var makeModel = function(data) {
 		"Let's try adding more health information into our label, making it a combination of health care costs and \n\
 		health metrics.",
 		"Now we can see that our algorithm is better at predicting health when we tell it to predict health and cost, \n\
-		rather than only cost."
+		rather than only cost. Incorporating health metrics, like blood pressure and cholesterol levels, into the "
 	];
 
 	var _inputLabels = [
@@ -200,7 +200,7 @@ var makeModel = function(data) {
 
 			if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = LABELNONE;
-
+			else _activeColor == LABELCOST;
 			_labelApplied = false;
 			_observers.notify();
 		},
@@ -208,9 +208,10 @@ var makeModel = function(data) {
 		decrement: function(){
 			_step -= 1;
 			if (_step == -1) _step = STEPCOUNT - 1;
+
 			if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = LABELNONE;
-
+			else  _activeColor = LABELCOST;
 			_labelApplied = false;
 			_observers.notify();
 		},
@@ -243,6 +244,7 @@ var makeModel = function(data) {
 		},
 		//Get the circle color scheme
 		getColor: function(d) {
+			console.log("_activeColor", _activeColor);
 			//d3.schemePaired
 			//[Lblue, Dblue, Lgreen, Dgreen, Lred - changed, Dred, orange]
 			var allColors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#ffbbba","#e31a1c","#fdbf6f","#ff7f00"];
@@ -850,13 +852,13 @@ var makeCommentaryView = function(model, data, svgID) {
 var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var _observers = makeObservers();
 	var buttonData = [{ 
-		id: "nextButton", 
-		text: "NEXT", 
+		id: nextID, 
+		text: "NEXT: 0", 
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 5, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
-		id: "nextButton", 
-		text: "BACK",
+		id: backID, 
+		text: "BACK: 0",
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 - 5 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
@@ -881,7 +883,7 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 		.data(buttonData)
 		.enter()
 		.append('text')
-		.attr('id', d => d.text)
+		.attr('id', d => d.id + 'text')
 		.attr('class', 'button')
 		.attr('x', d => d.x + 3)
 		.attr('y', d => d.y + 5)
@@ -889,8 +891,8 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 		.attr('cursor', 'pointer')
 		.style('font-size', '4px');
 
-	var _forwardText = d3.select('#NEXT');
-	var _backwardText = d3.select('#BACK');
+	var _forwardText = d3.select('#' + nextID + 'text');
+	var _backwardText = d3.select('#' + backID + 'text');
 
 	// The button event passes the appropriate
 	//data to any listening controllers
@@ -964,7 +966,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.model = makeModel(d);
 		story.views.push(makeTopTextView(story.model, d, '#textView'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
-		story.views.push(makeButtonView(story.model, d, '#backButton', '#nextButton', '#mySVG'));
+		story.views.push(makeButtonView(story.model, d, 'backButton', 'nextButton', '#mySVG'));
 		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
 		story.views.push(makeInputView(story.model, '#inputs'))
 		story.controller = makeController(story.model);
