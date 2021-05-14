@@ -198,7 +198,8 @@ var makeModel = function(data) {
 			_step += 1;
 			_step = _step % STEPCOUNT; 
 
-			if (_step == 5) _activeColor = 'black';
+			if (_step == 0) _activeColor = LABELNONE;
+			else if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = LABELNONE;
 			else _activeColor == LABELCOST;
 			_labelApplied = false;
@@ -209,7 +210,8 @@ var makeModel = function(data) {
 			_step -= 1;
 			if (_step == -1) _step = STEPCOUNT - 1;
 
-			if (_step == 5) _activeColor = 'black';
+			if (_step == 0) _activeColor = LABELNONE;
+			else if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = LABELNONE;
 			else  _activeColor = LABELCOST;
 			_labelApplied = false;
@@ -853,12 +855,12 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var _observers = makeObservers();
 	var buttonData = [{ 
 		id: nextID, 
-		text: "NEXT: 0", 
+		text: "NEXT: 1", 
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 5, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
 		id: backID, 
-		text: "BACK: 0",
+		text: "BACK: 1",
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 - 5 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
@@ -914,8 +916,8 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 
 	return {
 		render: function() {
-			_forwardText.text("NEXT: " + model.get());
-			_backwardText.text("BACK: " + model.get());
+			_forwardText.text("NEXT: " + (model.get() + 1));
+			_backwardText.text("BACK: " + (model.get() + 1));
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
