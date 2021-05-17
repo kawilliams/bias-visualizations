@@ -95,24 +95,26 @@ var makeModel = function(data) {
 	
 
 	var _text = [
-		"Below are 10 patients with varying levels of health and only 5 of them can be accepted into the high-risk care \n\
-		management program to help with their chronic illnesses. We want to prioritize those that are sickest, so we'll\n\
-		line them up from sickest to healthiest. We'll use an algorithm to help us.",
-		"We have health record data, like diagnosis and procedure codes, insurance type, medications, care costs, and \n\
-		the age and sex of the person. We'll use these data to predict future health care costs - a commonly-used \n\
-		prediction label that is correlated with health.",
-		"We apply the algorithm and align the circles from healthiest to sickest, with the sickest on the right.",
-		"Let's examine the accuracy of our algorithm. Since we used health care costs as our label, the predicted health\n\
-		costs should be very close to the actual health costs.",
-		"But we care more about predicting patient health than predicting costs. \n\
+		"Below are ten patients with varying levels of health and only five of them can be accepted into the high-risk\n\
+		care management program to help with their chronic illnesses. We want to prioritize those that are sickest, so\n\
+		we'll line them up from sickest to healthiest. We'll use an algorithm to help us score health levels.",
+		"We have health record data, like diagnosis and procedure codes, insurance type, medications, care costs, and\n\
+		the age and sex of the person. We'll use these data to predict future health care costs - a commonly-used prediction\n\
+		label that is correlated with health.",
+		"We apply the algorithm and align the circles from healthiest to sickest, with the sickest on the right. The five\n\
+		sickest patients (the darkest blue circles) are accepted into the care management program.",
+		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should\n\
+		be very close to the actual care costs.",
+		"But we care more about predicting patient health than predicting future care costs.\n\
 		How well did the algorithm predict actual health?",
-		"While health care costs and actual health needs are correlated, they aren't the same. The difference in the two\n\
-		labels is not random with respect to socioeconomic and racial variables. Because of structural biases and \n\
-		differential treatment, Black patients with similar needs to White patients have long been known to have lower \n\
-		costs. Since our algorithm's label is cost, a Black patient and a White patient with the same number of chronic \n\
-		illnesses will have dramatically different algorithmic scores.",
-		"Let's try adding more health information into our label, making it a combination of health care costs and \n\
-		health metrics.",
+		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random\n\
+		with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care\n\
+		costs for Black patients will be lower than the care costs for a similarly ill White patient. Even though the algorithm\n\
+		did not include race as an input, these societal inequalities produced dramatically different algorithmic scores and so\n\
+		sicker people were excluded from the care program.",
+		"We can fix this by changing our label to target from care costs to something that might be a closer approximation of \n\
+		actual health for all patients. Click on the different labels (the colored rectangles) to see how closely the predictions\n\
+		match the actual health.",
 		"\n\nResearchers conducted experiments on the patient data to see which of the three label choices - active chronic\n\
 		conditions, total care costs, emergency care cost - did the best job of (1) predicting the sickest patients, and\n\
 		(2) mitigating bias in label choice. All three labels notably perform the same at predicting the 97th percentile\n\
@@ -133,11 +135,15 @@ var makeModel = function(data) {
 	var _labelApplied = false;
 
 	var _commentary = [
-		{text: 'Pretty good!', x: 100, y: 65, step: 3, label: LABELCOST},
-		{text: 'Not so good', x: 100, y: 65, step: 4, label: LABELCOST},
-		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELCOST},
-		{text: 'Much better!', x: 120, y: 65, step: 6, label: LABELHEALTH},
-		{text: 'Not so good', x: 120, y: 65, step: 6, label: LABELEMERGENCY}
+		{text: ['Pretty good!'], x: [100], y: [65], step: 3, label: LABELCOST},
+		{text: ['Not so good'], x: [100], y: [65], step: 4, label: LABELCOST},
+		{text: ["Much better!"], x: [120], y: [65], step: 6, label: LABELHEALTH},
+		{text: ["The number of chronic conditions", "is similar to the actual health."], x: [10, 10], y: [85, 90], step: 6, label: LABELHEALTH},
+		{text: ["Not so good"], x: [120], y: [65], step: 6, label: LABELCOST},
+		{text: ["Using total care cost is not a fair","label."], x: [10, 10], y: [85, 90], step: 6, label: LABELCOST},
+		{text: ["Not so good"], x: [120], y: [65], step: 6, label: LABELEMERGENCY},
+		{text: ["Emergency costs is not a fair","label."], x: [10, 10], y: [85, 90], step: 6, label: LABELEMERGENCY}
+		
 	];
 
 	var _circleCaption = [
@@ -259,7 +265,6 @@ var makeModel = function(data) {
 		},
 		//Get the circle color scheme
 		getColor: function(d) {
-			console.log("_activeColor", _activeColor);
 			//d3.schemePaired
 			//[Lblue, Dblue, Lgreen, Dgreen, Lred - changed, Dred, orange]
 			var allColors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#ffbbba","#e31a1c","#fdbf6f","#ff7f00"];
@@ -834,24 +839,52 @@ var makeInputView = function(model, inputID) {
 }
 var makeCommentaryView = function(model, data, svgID) {
 	var _observers = makeObservers();
-
+	
 	var _commentary = d3.select(svgID).selectAll('text.commentary')
 		.data(model.getCommentary())
 		.enter()
-		.append('text')
+		.append('text') 
 		.attr('class', 'commentary')
-		.attr('x', d => d.x)
-		.attr('y', d => d.y)
-		.text(d => d.text)
-		.style('font-size', '4px')
-		.attr('opacity', 0);
+		.attr('display', 'none');
+	_commentary.selectAll('tspan.commentary')
+		.data(d => d.text)
+		.enter()
+		.append('tspan')
+		.attr('class', 'commentary')
+		.text(d => d)
+		.attr('x', d => {
+			if ((d == "Pretty good!") ||
+				(d == "Not so good") ||
+				(d == "Much better!")) {
+				return 120;
+			}
+			return 10;
+		})
+		.attr('y', (d, i) => {
+			if ((d == "Pretty good!") ||
+				(d == "Not so good") ||
+				(d == "Much better!")) {
+				return 65;
+			}
+			return 75 + (i * 4);
+		})
+		.attr('font-size', captionSize.fontsize);
+	
 
 	return {
 		render: function() {
 			var step = model.get();
 			var label = model.getLabel();
 			var isLabelActive = model.getLabelApplied();
-			_commentary.attr('opacity', function(d) {
+			d3.selectAll('text.commentary')
+			.attr('display', function(d) {
+				if (((isLabelActive) || (step == 4) || (step == 3)) && (d.step == step) && (d.label == label)) {
+					return 'inline';
+				}
+				return 'none';
+			})
+			.transition()
+			.attr('opacity', function(d) {
 				if (((isLabelActive) || (step == 4) || (step == 3)) && (d.step == step) && (d.label == label)) {
 					return 1;
 				}
