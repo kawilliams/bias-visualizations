@@ -288,10 +288,14 @@ function drawMySVG(mySVGID, mySVGClass){
 											health score compared to others, and the y-axis\n\
 											shows how healthy the patient is, based on number\n\
 											of chronic conditions. Move the sliders to explore.",
-					horizText: "Two patients at this level would be \n\
-								equally sick (X conditions), but to the\n\
+					horizTextAcrossThreshold: "Two patients at this level would be \n\
+								equally sick (Y conditions), but to the\n\
 								algorithm the Black patient needed to\n\
 								be more sick to be referred.",
+					horizTextSameSide: "Two patients at this level would be \n\
+								equally sick (Y conditions), but to the\n\
+								algorithm the Black patient needed to\n\
+								be more sick to be scored higher.",
 					vertText:  "Both patients at this point received the\n\
 								same score from the algorithm (X percentile)\n\
 								but the Black patient would have diff more\n\
@@ -433,7 +437,8 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 
 		function toolTipAppear(event, d, whichSlider, selectedCircles){
-			var text = whichSlider.includes("horiz") ? toolTipText.horizText : toolTipText.vertText;
+
+			var text = whichSlider.includes("horiz") ? toolTipText.horizTextSameSide : toolTipText.vertText;
 
 			toolTipG.selectAll('text').remove();
 			toolTipG.select("rect")
@@ -444,31 +449,46 @@ function drawMySVG(mySVGID, mySVGClass){
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
-				var X = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
-				var Y = selectedCircles[1].risk_score_quantile - selectedCircles[0].risk_score_quantile;
-				text = text.replace("X", X);
+				var blackPatientScore = selectedCircles[0].risk_score_quantile;
+				var whitePatientScore = selectedCircles[1].risk_score_quantile;
+				//If one patient is past the threshold but the other isn't
+				if ((whichSlider.includes("horiz")) && (blackPatientScore <= 55) && (whitePatientScore >= 55)){
+					text = toolTipText.horizTextAcrossThreshold;
+				}
+				var Y = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
+			
 				text = text.replace("Y", Y);
 			} 
 			else if (whichSlider.includes("horiz")){
+
 				//Need to use a LoBF point
 				var blackApproxY = 0;
+				var blackPatientScore = 0;
 				var blackApproxIndex = -1;
 				blackCurve.forEach((element,i) => {
 					if (y(element[1]) > event.y) {
 						blackApproxY = y(element[1]);
+						blackPatientScore = element[0];
 						blackApproxIndex = i;
 					}
 				});
 				var whiteApproxY = 0;
+				var whitePatientScore = 0;
 				var whiteApproxIndex = -1;
 				whiteCurve.forEach((element,i) => {
 					if (y(element[1]) > event.y) {
 						whiteApproxY = y(element[1]);
+						whitePatientScore = element[0];
 						whiteApproxIndex = i;
 					}
 				});
-				var X = blackCurve[blackApproxIndex][1].toFixed(2);
-				text = text.replace("X", X);
+				//If one patient is past the threshold but the other isn't
+				if ((blackPatientScore <= 55) && (whitePatientScore >= 55)) {
+					text = toolTipText.horizTextAcrossThreshold;
+				}
+
+				var Y = blackCurve[blackApproxIndex][1].toFixed(2);
+				text = text.replace("Y", Y);
 			}
 			if (selectedCircles.length == 2 && whichSlider.includes("vert")){
 				var X = selectedCircles[1].risk_score_quantile;
