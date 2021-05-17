@@ -618,7 +618,7 @@ var makeSVGView = function(model, data, svgID) {
 					var label = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
 					if (isLabelActive && label == LABELHEALTH) return model.connectors().predActHealth;
-					if (isLabelActive && label == LABELCOST) return model.connectors().predActProblem;
+					if (isLabelActive && label == LABELCOST) return model.connectors().predActCostLabel;
 					if (isLabelActive && label == LABELEMERGENCY) return model.connectors().predActEmergency;
 					else return model.connectors().predActCostInit;
 				}
@@ -639,7 +639,7 @@ var makeSVGView = function(model, data, svgID) {
 		//Circle positions are unique on step 6, so we shift everything for that step
 		//(this translation is used instead of adding an additional coordinate row in the .csv)
 		var isLabelActive = model.getLabelApplied();
-		if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+		//if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
 	}
 
