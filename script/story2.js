@@ -25,7 +25,7 @@ var LABELHEALTH = 3;
 var LABELEMERGENCY = 5;
 var LABELNONE = 7;
 
-var STEPCOUNT = 7;
+var STEPCOUNT = 8;
 
 
 var story = {
@@ -113,8 +113,13 @@ var makeModel = function(data) {
 		illnesses will have dramatically different algorithmic scores.",
 		"Let's try adding more health information into our label, making it a combination of health care costs and \n\
 		health metrics.",
-		"Now we can see that our algorithm is better at predicting health when we tell it to predict health and cost, \n\
-		rather than only cost. Incorporating health metrics, like blood pressure and cholesterol levels, into the "
+		"\n\nResearchers conducted experiments on the patient data to see which of the three label choices - active chronic\n\
+		conditions, total care costs, emergency care cost - did the best job of (1) predicting the sickest patients, and\n\
+		(2) mitigating bias in label choice. All three labels notably perform the same at predicting the 97th percentile\n\
+		and above. However, there is a distinct variation across the three labels in the racial composition of the\n\
+		highest-risk group: the fraction of Black patients at or above these risk levels ranges from 14.1% for the total\n\
+		cost label to 26.7% for the chronic conditions label. This nearly twofold variation in composition of Black patients\n\
+		in the highest-risk groups...\n\nThe bias attributable to label choice has impacts in algorithms used in the health sector..."
 	];
 
 	var _inputLabels = [
@@ -156,7 +161,11 @@ var makeModel = function(data) {
 		y: margin.top },
 	{ text: "Predicted\n",
 		x: -10,
-		y: margin.top + 3 }
+		y: margin.top + 3 },
+	{ text: "\n",
+		x: 0,
+		y: 0
+	}
 	];
 
 	var _shadowCaption = [
@@ -187,6 +196,10 @@ var makeModel = function(data) {
 	{text: "Actual\n",
 		x: -10,
 		y: 4 * circleBox - 3
+	},
+	{ text: "\n",
+		x: 0,
+		y: 0
 	}
 	]
 
@@ -524,7 +537,8 @@ var makeSVGView = function(model, data, svgID) {
 				return _y * circleBox;
 			})
 			.attr('fill', d => model.getColor(d))
-			.style('stroke', (step == 5) ? 'black' : 'none');
+			.style('stroke', (step == 5) ? 'black' : 'none')
+			.attr('opacity', (step == 7) ? 0 : 1);
 
 		var _raceKey = d3.selectAll('.racekey').attr('display', (step == 5) ? 'inline' : 'none')
 			.transition()
