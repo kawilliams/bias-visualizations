@@ -444,8 +444,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 205 : 225)
-			.attr('height', whichSlider.includes("horiz") ? 55 : 65)
+			.attr('width', whichSlider.includes("horiz") ? 219 : 225)
+			.attr('height', whichSlider.includes("horiz") ? 65 : 65)
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
