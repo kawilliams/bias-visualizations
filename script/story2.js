@@ -636,11 +636,6 @@ var makeSVGView = function(model, data, svgID) {
 				else if ((step == 6) && (isLabelActive)) return 1;
 				return 0;
 			});
-		//Circle positions are unique on step 6, so we shift everything for that step
-		//(this translation is used instead of adding an additional coordinate row in the .csv)
-		var isLabelActive = model.getLabelApplied();
-		//if ((isLabelActive) && (step == 6)) circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left + 2 * circleBox) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
-
 	}
 
 	function _moveThreshold(step) {
