@@ -135,14 +135,14 @@ var makeModel = function(data) {
 	var _labelApplied = false;
 
 	var _commentary = [
-		{text: ['Pretty good!'], x: [100], y: [65], step: 3, label: LABELCOST},
-		{text: ['Not so good'], x: [100], y: [65], step: 4, label: LABELCOST},
-		{text: ["Much better!"], x: [120], y: [65], step: 6, label: LABELHEALTH},
-		{text: ["The number of chronic conditions", "is similar to the actual health."], x: [10, 10], y: [85, 90], step: 6, label: LABELHEALTH},
-		{text: ["Not so good"], x: [120], y: [65], step: 6, label: LABELCOST},
-		{text: ["Using total care cost is not a fair","label."], x: [10, 10], y: [85, 90], step: 6, label: LABELCOST},
-		{text: ["Not so good"], x: [120], y: [65], step: 6, label: LABELEMERGENCY},
-		{text: ["Emergency costs is not a fair","label."], x: [10, 10], y: [85, 90], step: 6, label: LABELEMERGENCY}
+		{text: ['Pretty good!'], step: 3, label: LABELCOST},
+		{text: ['Not so good'], step: 4, label: LABELCOST},
+		{text: ["Much better!"], step: 6, label: LABELHEALTH},
+		{text: ["The number of chronic conditions", "is similar to the actual health."], step: 6, label: LABELHEALTH},
+		{text: ["Not so good"], step: 6, label: LABELCOST},
+		{text: ["Using total care cost is not a fair","label."], step: 6, label: LABELCOST},
+		{text: ["Not so good"], step: 6, label: LABELEMERGENCY},
+		{text: ["Emergency costs is not a fair","label."], step: 6, label: LABELEMERGENCY}
 		
 	];
 
@@ -166,7 +166,7 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: margin.top },
 	{ text: "Predicted\n",
-		x: -10,
+		x: 10,
 		y: margin.top + 3 },
 	{ text: "\n",
 		x: 0,
@@ -200,7 +200,7 @@ var makeModel = function(data) {
 		y: 10 + 2 * circleBox
 	},
 	{text: "Actual\n",
-		x: -10,
+		x: 10,
 		y: 4 * circleBox - 3
 	},
 	{ text: "\n",
@@ -853,7 +853,7 @@ var makeCommentaryView = function(model, data, svgID) {
 				(d == "Much better!")) {
 				return 120;
 			}
-			return 10;
+			return 50;
 		})
 		.attr('y', (d, i) => {
 			if ((d == "Pretty good!") ||
@@ -873,14 +873,20 @@ var makeCommentaryView = function(model, data, svgID) {
 			var isLabelActive = model.getLabelApplied();
 			d3.selectAll('text.commentary')
 			.attr('display', function(d) {
-				if (((isLabelActive) || (step == 4) || (step == 3)) && (d.step == step) && (d.label == label)) {
+				if (((step == 4) || (step == 3)) && (d.step == step)) {
+					return 'inline';
+				}
+				if ((isLabelActive) && (d.step == step) && (d.label == label)) {
 					return 'inline';
 				}
 				return 'none';
 			})
 			.transition()
 			.attr('opacity', function(d) {
-				if (((isLabelActive) || (step == 4) || (step == 3)) && (d.step == step) && (d.label == label)) {
+				if (((step == 4) || (step == 3)) && (d.step == step)) {
+					return 1;
+				}
+				if (isLabelActive && (d.step == step) && (d.label == label)) {
 					return 1;
 				}
 				return 0;
