@@ -220,6 +220,7 @@ var makeModel = function(data) {
 			if (_step == 0) _activeColor = LABELNONE;
 			else if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = LABELNONE;
+			else if (_step == 7) _activeColor = LABELHEALTH;
 			else _activeColor == LABELCOST;
 			_labelApplied = false;
 			_observers.notify();
@@ -232,6 +233,7 @@ var makeModel = function(data) {
 			if (_step == 0) _activeColor = LABELNONE;
 			else if (_step == 5) _activeColor = 'black';
 			else if (_step == 6) _activeColor = LABELNONE;
+			else if (_step == 7) _activeColor = LABELHEALTH;
 			else  _activeColor = LABELCOST;
 			_labelApplied = false;
 			_observers.notify();
@@ -521,6 +523,7 @@ var makeSVGView = function(model, data, svgID) {
 					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _x = d.x6emergency;
 					else _x = d.x6; 
 				}
+				if (step == 7) _x = d.x7health;
 				return _x * circleBox;
 			})
 			.attr('cy', d => {
@@ -539,11 +542,11 @@ var makeSVGView = function(model, data, svgID) {
 					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _y = d.y6emergency;
 					else _y = d.y6; 
 				}
+				if (step == 7) _y = d.y7health;
 				return _y * circleBox;
 			})
 			.attr('fill', d => model.getColor(d))
-			.style('stroke', (step == 5) ? 'black' : 'none')
-			.attr('opacity', (step == 7) ? 0 : 1);
+			.style('stroke', (step == 5) ? 'black' : 'none');
 
 		var _raceKey = d3.selectAll('.racekey').attr('display', (step == 5) ? 'inline' : 'none')
 			.transition()
