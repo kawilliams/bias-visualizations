@@ -907,12 +907,12 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var buttonData = [{ 
 		id: nextID, 
 		text: "NEXT: 1", 
-		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 5, 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 20, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
 		id: backID, 
 		text: "BACK: 1",
-		x: (viewBoxSize.width - buttonSize.width) * 0.5 - 5 - buttonSize.width, 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 10 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
 	var _buttons = d3.select(svgID).selectAll('rect.button')
