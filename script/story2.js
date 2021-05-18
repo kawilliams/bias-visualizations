@@ -376,14 +376,64 @@ var makeSVGView = function(model, data, svgID) {
 	var hidePatientId = function(event) {
 		var circleId = d3.select(this).node().id.split('circle')[1];
 		d3.select("#text" + circleId).attr('opacity', 0);
-	}
+	}		
 
-	var circles = circleG.selectAll('circle')
+	function personPath(startX, startY) {
+
+		//var path = "M 22.50,18.64\
+        var path = "c-1.64,0.47,-2.61,1.24,-3.06,2.38\
+        c-0.21,0.54,-0.24,1.32,-0.19,5.17\
+        c0,0,0.05,4.51,0.05,4.51\
+        c0,0,0.51,1.1,0.51,1.1\
+        c0.28,0.59,0.69,1.26,0.89,1.48\
+        c0.55,0.58,0.61,0.8,1.33,5.16\
+        c0.36,2.18,0.75,4.2,0.88,4.45\
+        c0.37,0.8,0.92,1.02,2.59,1.02\
+        c1.63,0,2.08,-0.16,2.48,-0.86\
+        c0.18,-0.28,0.54,-1.97,0.93,-4.3\
+        c0.76,-4.59,0.86,-4.97,1.36,-5.47\
+        c0.61,-0.59,1.14,-1.8,1.39,-3.08\
+        c0.31,-1.7,0.31,-7.81,-0.04,-8.93\
+        c-0.31,-1.05,-1.14,-1.89,-2.34,-2.38\
+        c-0.81,-0.31,-1.23,-0.36,-3.5,-0.41\
+        c-1.75,-0.03,-2.81,0.04,-3.28,0.16\
+        zm1.77,-11.45c-0.89,0.18,-1.52,0.53,-2.36,1.29\
+        c-2.16,2,-2.14,5.43,0.03,7.43\
+        c1.09,1.01,1.95,1.34,3.45,1.34\
+        c1.03,0,1.41,-0.08,2.13,-0.42\
+        c3.12,-1.5,3.92,-5.61,1.57,-8.11\
+        c-1.18,-1.28,-3.12,-1.89,-4.82,-1.53z";
+
+        start = "M " + startX + " " + startY;
+        path = start + " " + path; 
+        return path;
+    }
+	// var people = circleG
+	// 	.append('path')
+	// 	.style("stroke", "black")
+	// 	.style("fill", "none")
+	// 	.attr("d", personPath(30, 30));
+
+	// var people = circleG
+	// 	.append('path')
+	// 	.style("stroke", "black")
+	// 	.style("fill", "none")
+	// 	.attr("d", personPath(50, 30));
+
+
+	// var circles = circleG.selectAll('circle')
+	// 	.data(data)
+	// 	.enter()
+	// 	.append('circle')
+	// 	.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
+	// 	.attr('id', d => 'circle' + d.id);
+	var circles = circleG.selectAll('path')
 		.data(data)
 		.enter()
-		.append('circle')
+		.append('path')
 		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
-		.attr('id', d => 'circle' + d.id);
+		.attr('id', d => "circle" + d.id);
+
 	var circlesToolTip = circleG.selectAll('text.tooltip')
 		.data(data)
 		.enter()
@@ -399,13 +449,17 @@ var makeSVGView = function(model, data, svgID) {
 	var circleShadows = circleG.selectAll('.shadows')
 		.attr('r', 0);
 
-	circles.attr('cx', d => d.x0 * circleBox )
-		.attr('cy', d => d.y0 * circleBox )
-		.attr('r', radius)
-		.attr('fill', d => model.getColor(d))
-		.on('click', makeBig)
-		.on('mouseenter', showPatientId)
-		.on('mouseout', hidePatientId);
+
+	// circles.attr('cx', d => d.x0 * circleBox )
+	// 	.attr('cy', d => d.y0 * circleBox )
+	// 	.attr('r', 20)
+	// 	.attr('fill', "url(#image)")//d => model.getColor(d))
+	// 	.on('click', makeBig)
+	// 	.on('mouseenter', showPatientId)
+	// 	.on('mouseout', hidePatientId);
+	circles.attr("d", d => personPath(d.x0 * circleBox, d.y0  * circleBox))
+		.style("stroke", "none")
+		.style("fill", d => model.getColor(d));
 
 
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
