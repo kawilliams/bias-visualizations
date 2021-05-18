@@ -4,10 +4,12 @@ var svgSize = {height: 210, width: 300}
 var viewBoxSize = {height: 105, width: 150};
 
 
-var personBox = {width: 8, height: 10};
-var radius = 5; //katy: change to 5
+var personBox = {width: 11, height: 14};
+var radius = 5;
+var radiusW = 5; //katy: change to 5
+var radiusH = 7;
 var algBoxSize = {height: 51, width: 44};
-var thresholdShadeSize = {height: 2 * radius + personBox.height, width: 5 * personBox.width };
+var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
 var peopleCluster = {height: 6 * personBox.height, width: 8 * personBox.width};
 var peopleLine = {height: 1 * personBox.height, width: 10 * personBox.width};
@@ -362,12 +364,12 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y2', d => d.y0 * personBox.height) //and connects to the shadow head on transition
 		.attr('opacity', 1); 
 
-	var makeBig = function(event) {
-		d3.select(this).transition().ease(d3.easeBounce)
-		.attr('r', radius + 3)
-		.transition()
-		.attr('r', radius);
-	}
+	// var makeBig = function(event) {
+	// 	d3.select(this).transition().ease(d3.easeBounce)
+	// 	.attr('r', radius + 3)
+	// 	.transition()
+	// 	.attr('r', radius);
+	// }
 
 	var showPatientId = function(event) {
 		var circleId = d3.select(this).node().id.split('people')[1];
@@ -380,8 +382,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	function personPath(startX, startY) {
 
-		//var path = "M 22.50,18.64\
-        var path = "c-0.66,0.18,-1.04,0.49,-1.22,0.95c-0.09,0.21,-0.1,0.53,-0.08,2.06c0,0,0.02,1.81,0.02,1.81c0,0,0.21,0.44,0.21,0.44c0.11,0.24,0.27,0.5,0.35,0.59c0.22,0.23,0.25,0.32,0.53,2.07c0.15,0.87,0.3,1.68,0.35,1.78c0.15,0.32,0.37,0.4,1.04,0.4c0.65,0,0.83,-0.06,0.99,-0.34c0.07,-0.11,0.22,-0.79,0.37,-1.72c0.31,-1.84,0.35,-1.99,0.55,-2.19c0.24,-0.24,0.45,-0.72,0.55,-1.23c0.13,-0.68,0.13,-3.12,-0.01,-3.57c-0.12,-0.42,-0.46,-0.76,-0.94,-0.95c-0.32,-0.13,-0.49,-0.15,-1.4,-0.17c-0.7,-0.01,-1.12,0.02,-1.31,0.07zm0.71,-4.58c-0.36,0.07,-0.61,0.21,-0.95,0.51c-0.86,0.8,-0.85,2.17,0.02,2.97c0.43,0.41,0.78,0.54,1.38,0.54c0.41,0,0.56,-0.03,0.85,-0.17c1.25,-0.6,1.57,-2.24,0.63,-3.24c-0.48,-0.52,-1.25,-0.76,-1.93,-0.61z";
+        var path = "c-0.82,0.23,-1.3,0.62,-1.53,1.19c-0.1,0.27,-0.12,0.66,-0.1,2.58c0,0,0.03,2.26,0.03,2.26c0,0,0.26,0.55,0.26,0.55c0.14,0.3,0.34,0.63,0.44,0.74c0.27,0.29,0.31,0.4,0.67,2.58c0.18,1.09,0.37,2.1,0.43,2.23c0.19,0.39,0.46,0.5,1.3,0.5c0.81,0,1.04,-0.07,1.24,-0.43c0.09,-0.14,0.27,-0.98,0.46,-2.14c0.39,-2.3,0.43,-2.49,0.68,-2.74c0.31,-0.3,0.57,-0.9,0.7,-1.54c0.15,-0.85,0.15,-3.9,-0.02,-4.47c-0.15,-0.52,-0.57,-0.94,-1.17,-1.18c-0.41,-0.16,-0.62,-0.18,-1.75,-0.21c-0.87,-0.01,-1.41,0.02,-1.64,0.08zm0.88,-5.73c-0.44,0.1,-0.75,0.27,-1.18,0.65c-1.07,1,-1.07,2.71,0.02,3.71c0.55,0.51,0.98,0.67,1.73,0.67c0.51,0,0.7,-0.03,1.06,-0.21c1.56,-0.75,1.96,-2.8,0.79,-4.05c-0.6,-0.64,-1.57,-0.95,-2.42,-0.77z";
         start = "M " + startX + " " + startY;
         path = start + " " + path; 
         return path;
@@ -399,7 +400,7 @@ var makeSVGView = function(model, data, svgID) {
 		.append('text')
 		.attr('class', 'tooltip')
 		.attr('id', d => 'text' + d.id)
-		.attr('x', d => d.x0 * personBox.width + radius + 1)
+		.attr('x', d => d.x0 * personBox.width + radiusW + 1)
 		.attr('y', d => d.y0 * personBox.height)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
@@ -411,15 +412,15 @@ var makeSVGView = function(model, data, svgID) {
 	people.attr("d", d => personPath(d.x0 * personBox.width, d.y0  * personBox.height))
 		.style("stroke", "none")
 		.style("fill", d => model.getColor(d))
-		.on('click', makeBig)
+		// .on('click', makeBig)
 		.on('mouseenter', showPatientId)
 		.on('mouseout', hidePatientId);
 
 
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
 	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
-		.attr('x', viewBoxSize.width / 2 - radius - 2)
-		.attr('y', viewBoxSize.height/2 + radius + 2)
+		.attr('x', viewBoxSize.width / 2 - radiusW - 2)
+		.attr('y', viewBoxSize.height/2 + radiusH + 2)
 		.attr('width', 2 * personBox.width)
 		.attr('height', 2 * personBox.height)
 		.attr('fill', 'none')
@@ -431,7 +432,7 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('class', 'racekey')
 			.attr('cx', viewBoxSize.width / 2)
 			.attr('cy', d => (d * personBox.height) + viewBoxSize.height/2 + 10)
-			.attr('r', radius)
+			.attr('r', 4)
 			.attr('fill', d => (d == 0) ? 'black' : 'white')
 			.style('stroke', 'black')
 			.attr('opacity', 0);
@@ -441,7 +442,7 @@ var makeSVGView = function(model, data, svgID) {
 		.enter()
 		.append('text')
 		.attr('class', 'racekey')
-		.attr('x', viewBoxSize.width / 2 + radius + 2)
+		.attr('x', viewBoxSize.width / 2 + radiusW + 2)
 		.attr('y', d => (d * personBox.height) + viewBoxSize.height/2 + 11)
 		.text(d => (d == 0) ? 'Black' : 'White')
 		.style('font-size', captionSize.fontsize)
@@ -480,7 +481,7 @@ var makeSVGView = function(model, data, svgID) {
 	var thresholdG = _svg.append('g')
 		.attr('class', 'allThreshold')
 		.attr('id', 'thresholdG')
-		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width - radius) +',' + ( viewBoxSize.height * 0.5 - personBox.height - topTextSize.height - radius) + ')');
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width - 1) +',' + ( viewBoxSize.height * 0.5 - personBox.height - topTextSize.height - radiusH) + ')');
 
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
@@ -499,9 +500,9 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('id', "threshold")
 			.attr('class', 'threshold')
 			.attr('x', 0)
-			.attr('y', -personBox.height + radius -1)
+			.attr('y', -personBox.height + radiusH -1)
 			.attr('width', 2)
-			.attr('height', thresholdShadeSize.height + radius)
+			.attr('height', thresholdShadeSize.height + radiusH)
 			.attr('display', 'none');
 
 	var _thresholdText = thresholdG.append('text')
@@ -629,10 +630,10 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.transition()
 			.duration(duration)
-			.attr('x1', d => d[0][0] * personBox.width)
-			.attr('y1', d => d[0][1] * personBox.height)
-			.attr('x2', d => d[1][0] * personBox.width)
-			.attr('y2', d => d[1][1] * personBox.height)
+			.attr('x1', d => d[0][0] * personBox.width + 1)
+			.attr('y1', d => d[0][1] * personBox.height + 10)
+			.attr('x2', d => d[1][0] * personBox.width + 1)
+			.attr('y2', d => d[1][1] * personBox.height - 4)
 			.attr('opacity', function(){
 				var isLabelActive = model.getLabelApplied();
 				if (step == 3 || step == 4) return 1;
