@@ -4,14 +4,14 @@ var svgSize = {height: 210, width: 300}
 var viewBoxSize = {height: 105, width: 150};
 
 
-var circleBox = {width: 10, height: 15};
+var personBox = {width: 8, height: 10};
 var radius = 5; //katy: change to 5
 var algBoxSize = {height: 51, width: 44};
-var thresholdShadeSize = {height: radius + circleBox.height, width: 5 * circleBox.width };
+var thresholdShadeSize = {height: 2 * radius + personBox.height, width: 5 * personBox.width };
 
-var peopleCluster = {height: 6 * circleBox.height, width: 8 * circleBox.width};
-var peopleLine = {height: 1 * circleBox.height, width: 10 * circleBox.width};
-var peopleDoubleLine = {height: 2 * circleBox.height, width: 10 * circleBox.width};
+var peopleCluster = {height: 6 * personBox.height, width: 8 * personBox.width};
+var peopleLine = {height: 1 * personBox.height, width: 10 * personBox.width};
+var peopleDoubleLine = {height: 2 * personBox.height, width: 10 * personBox.width};
 
 var topTextSize = {height: 4, width: 144, fontsize: 3, space: 4};
 var buttonSize = {height: 8, width: 20};
@@ -146,7 +146,7 @@ var makeModel = function(data) {
 		
 	];
 
-	var _circleCaption = [
+	var _personCaption = [
 	{ text: "Patients\n", 
 		x: peopleCluster.width * 0.5 - 14, 
 		y: -5 },
@@ -185,23 +185,23 @@ var makeModel = function(data) {
 	},
 	{text: "\n",
 		x: margin.left,
-		y: 2 * circleBox.height
+		y: 2 * personBox.height
 	},
 	{text: "Actual cost\n",
 		x: -25,
-		y: 10 + 2 * circleBox.height
+		y: 10 + 2 * personBox.height
 	},
 	{text: "Actual health\n",
 		x: -28,
-		y: 10 + 2 * circleBox.height
+		y: 10 + 2 * personBox.height
 	},
 	{text: "Actual\n",
 		x: margin.left,
-		y: 10 + 2 * circleBox.height
+		y: 10 + 2 * personBox.height
 	},
 	{text: "Actual\n",
 		x: 10,
-		y: 4 * circleBox.height - 3
+		y: 4 * personBox.height - 3
 	},
 	{ text: "\n",
 		x: 0,
@@ -313,8 +313,8 @@ var makeModel = function(data) {
 			return colorScale(0.5);
 		},
 		//Get the circle labels
-		circleCaption: function() {
-			return _circleCaption;
+		personCaption: function() {
+			return _personCaption;
 		},
 		//Get the circle labels
 		shadowCaption: function() {
@@ -356,10 +356,10 @@ var makeSVGView = function(model, data, svgID) {
 		.append('line')
 		.attr('class', 'connector')
 		.attr('stroke', 'grey')
-		.attr('x1', d => d.x0 * circleBox.width)
-		.attr('y1', d => d.y0 * circleBox.height)
-		.attr('x2', d => d.x0 * circleBox.width) //line starts at the feet
-		.attr('y2', d => d.y0 * circleBox.height) //and connects to the shadow head on transition
+		.attr('x1', d => d.x0 * personBox.width)
+		.attr('y1', d => d.y0 * personBox.height)
+		.attr('x2', d => d.x0 * personBox.width) //line starts at the feet
+		.attr('y2', d => d.y0 * personBox.height) //and connects to the shadow head on transition
 		.attr('opacity', 1); 
 
 	var makeBig = function(event) {
@@ -399,8 +399,8 @@ var makeSVGView = function(model, data, svgID) {
 		.append('text')
 		.attr('class', 'tooltip')
 		.attr('id', d => 'text' + d.id)
-		.attr('x', d => d.x0 * circleBox.width + radius + 1)
-		.attr('y', d => d.y0 * circleBox.height)
+		.attr('x', d => d.x0 * personBox.width + radius + 1)
+		.attr('y', d => d.y0 * personBox.height)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
 		.style('font-size', 3);
@@ -408,7 +408,7 @@ var makeSVGView = function(model, data, svgID) {
 	var peopleShadows = peopleG.selectAll('.shadows')
 		.attr('r', 0);
 
-	people.attr("d", d => personPath(d.x0 * circleBox.width, d.y0  * circleBox.height))
+	people.attr("d", d => personPath(d.x0 * personBox.width, d.y0  * personBox.height))
 		.style("stroke", "none")
 		.style("fill", d => model.getColor(d))
 		.on('click', makeBig)
@@ -420,8 +420,8 @@ var makeSVGView = function(model, data, svgID) {
 	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
 		.attr('x', viewBoxSize.width / 2 - radius - 2)
 		.attr('y', viewBoxSize.height/2 + radius + 2)
-		.attr('width', 2 * circleBox.width)
-		.attr('height', 2 * circleBox.height)
+		.attr('width', 2 * personBox.width)
+		.attr('height', 2 * personBox.height)
 		.attr('fill', 'none')
 		.style('stroke', 'black');
 	var _raceCircles = _raceKey.selectAll('circle.racekey')
@@ -430,7 +430,7 @@ var makeSVGView = function(model, data, svgID) {
 			.append('circle')
 			.attr('class', 'racekey')
 			.attr('cx', viewBoxSize.width / 2)
-			.attr('cy', d => (d * circleBox.height) + viewBoxSize.height/2 + 10)
+			.attr('cy', d => (d * personBox.height) + viewBoxSize.height/2 + 10)
 			.attr('r', radius)
 			.attr('fill', d => (d == 0) ? 'black' : 'white')
 			.style('stroke', 'black')
@@ -442,19 +442,19 @@ var makeSVGView = function(model, data, svgID) {
 		.append('text')
 		.attr('class', 'racekey')
 		.attr('x', viewBoxSize.width / 2 + radius + 2)
-		.attr('y', d => (d * circleBox.height) + viewBoxSize.height/2 + 11)
+		.attr('y', d => (d * personBox.height) + viewBoxSize.height/2 + 11)
 		.text(d => (d == 0) ? 'Black' : 'White')
 		.style('font-size', captionSize.fontsize)
 		.attr('opacity', 0);
 
 	_raceKey.attr('display', 'none');
 
-	var _circleCaption = peopleG.append('text')
-		.attr('id', 'circleCaption')
+	var _personCaption = peopleG.append('text')
+		.attr('id', 'personCaption')
 		.attr('font-weight', "bold");
-	_circleCaption.selectAll('tspan.circlecaption')
+	_personCaption.selectAll('tspan.circlecaption')
 		.data(d => {
-			var text = model.circleCaption();
+			var text = model.personCaption();
 			return text[step].text.split('\n');
 		})
 		.enter()
@@ -462,12 +462,12 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'circlecaption')
 		.text(d => d)
 		.attr('x', d => {
-			var text = model.circleCaption();
+			var text = model.personCaption();
 			return text[step].x;
 		})
 		.attr('y', function(d,i){
 			var step = model.get();
-			var text = model.circleCaption();
+			var text = model.personCaption();
 			return text[step].y + (i*captionSize.fontsize);
 		})
 		.attr('font-size', captionSize.fontsize);
@@ -480,39 +480,42 @@ var makeSVGView = function(model, data, svgID) {
 	var thresholdG = _svg.append('g')
 		.attr('class', 'allThreshold')
 		.attr('id', 'thresholdG')
-		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + circleBox.width - radius) +',' + ( viewBoxSize.height * 0.5 - circleBox.height - topTextSize.height - radius) + ')');
-	var _threshold = thresholdG.append('rect')
-			.attr('id', "threshold")
-			.attr('class', 'threshold')
-			.attr('x', 0)
-			.attr('y', -circleBox.height + radius -1)
-			.attr('width', 2)
-			.attr('height', 2 * circleBox.height)
-			.attr('display', 'none');
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width - radius) +',' + ( viewBoxSize.height * 0.5 - personBox.height - topTextSize.height - radius) + ')');
+
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
 			.attr('class', 'threshold')
 			.attr('x', 1)
-			.attr('y', -circleBox.height * 0.5)
+			.attr('y', -personBox.height * 0.5)
 			.attr("width", thresholdShadeSize.width)
 			.attr('height', thresholdShadeSize.height)
-			.style('stroke', 'black')
+			.style('stroke', 'lightgrey')
 			.style('stroke-width', '1px')
 			.attr('opacity', 0)
 			.attr('fill', 'none')
 			.attr('display', 'none');
+
+	var _threshold = thresholdG.append('rect')
+			.attr('id', "threshold")
+			.attr('class', 'threshold')
+			.attr('x', 0)
+			.attr('y', -personBox.height + radius -1)
+			.attr('width', 2)
+			.attr('height', thresholdShadeSize.height + radius)
+			.attr('display', 'none');
+
 	var _thresholdText = thresholdG.append('text')
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
 			.attr('x', 3)
-			.attr('y', -circleBox.height + 3)
+			.attr('y', -personBox.height + 3)
 			.text('Accepted into program')
 			.attr('display', 'none')
 			.style('font-size', captionSize.fontsize);
 
 	var _moveCircles = function(step) {
 
-		// 	people.attr("d", d => personPath(d.x0 * circleBox, d.y0  * circleBox))
+		// 	people.attr("d", d => personPath(d.x0 * personBox, d.y0  * personBox))
 		// .style("stroke", "none")
 		// .style("fill", d => model.getColor(d))
 		// .on('click', makeBig)
@@ -540,7 +543,7 @@ var makeSVGView = function(model, data, svgID) {
 					else { _x = d.x6; _y = d.y6; }
 				}
 				if (step == 7) { _x = d.x7health; _y = d.y7health;}
-				return personPath( _x * circleBox.width, _y * circleBox.height);
+				return personPath( _x * personBox.width, _y * personBox.height);
 			})
 			.style('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
@@ -552,11 +555,11 @@ var makeSVGView = function(model, data, svgID) {
 		
 		d3.selectAll('.circlecaption').remove();
 
-		var circleCaption = d3.select("#circleCaption")
+		var personCaption = d3.select("#personCaption")
 			.selectAll('tspan.circlecaption')
 			.data(d => {
 				var step = model.get();
-				var text = model.circleCaption();
+				var text = model.personCaption();
 				return text[step].text.split('\n');
 			})
 			.enter()
@@ -565,12 +568,12 @@ var makeSVGView = function(model, data, svgID) {
 			.text(d => d)
 			.attr('x', function(){
 				var step = model.get();
-				var text = model.circleCaption();
+				var text = model.personCaption();
 				return text[step].x;
 			})
 			.attr('y', function(d,i){
 				var step = model.get();
-				var text = model.circleCaption();
+				var text = model.personCaption();
 				return text[step].y + (i*5);
 			})
 			.style('font-size', captionSize.fontsize)
@@ -626,10 +629,10 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.transition()
 			.duration(duration)
-			.attr('x1', d => d[0][0] * circleBox.width)
-			.attr('y1', d => d[0][1] * circleBox.height)
-			.attr('x2', d => d[1][0] * circleBox.width)
-			.attr('y2', d => d[1][1] * circleBox.height)
+			.attr('x1', d => d[0][0] * personBox.width)
+			.attr('y1', d => d[0][1] * personBox.height)
+			.attr('x2', d => d[1][0] * personBox.width)
+			.attr('y2', d => d[1][1] * personBox.height)
 			.attr('opacity', function(){
 				var isLabelActive = model.getLabelApplied();
 				if (step == 3 || step == 4) return 1;
@@ -642,17 +645,12 @@ var makeSVGView = function(model, data, svgID) {
 
 		if (step >= 2 && step <= 5) {
 			_svg.select('#thresholdShade')
-				.attr('opacity', 0.2);
+				.attr('opacity', 1);
 			_svg.selectAll('.threshold')
 				.attr('display', 'inline')
 				.transition()
 				.duration(duration)
-				.attr('opacity', function(){
-					if (this.id == "thresholdShade") {
-						return 0.2;
-					}
-					return 1;
-				});
+				.attr('opacity',1);
 		} 
 		else {
 			_svg.selectAll('.threshold') 
@@ -744,7 +742,7 @@ var makeInputView = function(model, inputID) {
 		.attr('class', 'labelClass')
 		.attr('x', margin.left + 3)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 10 + margin.top + topTextSize.height
+			return (i * algBoxSize.height * 0.35) + 20 + margin.top + topTextSize.height;
 		})
 		.attr('width', algBoxSize.width * 0.8)
 		.attr('height', algBoxSize.height * 0.3)
@@ -765,7 +763,7 @@ var makeInputView = function(model, inputID) {
 		.attr('class', 'labelClass')
 		.attr('x', margin.left + algBoxSize.width * 0.48)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 9 + margin.top + topTextSize.height
+			return (i * algBoxSize.height * 0.35) + 19 + margin.top + topTextSize.height
 		})
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
