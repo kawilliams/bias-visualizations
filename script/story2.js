@@ -75,21 +75,21 @@ var makeModel = function(data) {
 	};
 
 	for (var i=0; i<data.length/2; i++) {
-		var circle = data[i+10];
+		var person = data[i+10];
 		var shadow = data[i];
 	
-		if (circle.problem == shadow.problem) {
-			_connectors.predActProblem.push([[circle.x4, circle.y4], [shadow.x4, shadow.y4]]);
-			_connectors.predActCostLabel.push([[circle.x6cost, circle.y6cost], [shadow.x6cost, shadow.y6cost]]);
+		if (person.problem == shadow.problem) {
+			_connectors.predActProblem.push([[person.x4, person.y4], [shadow.x4, shadow.y4]]);
+			_connectors.predActCostLabel.push([[person.x6cost, person.y6cost], [shadow.x6cost, shadow.y6cost]]);
 		}
-		if (circle.cost == shadow.cost) {
-			_connectors.predActCostInit.push([[circle.x3, circle.y3], [shadow.x3, shadow.y3]]);
+		if (person.cost == shadow.cost) {
+			_connectors.predActCostInit.push([[person.x3, person.y3], [shadow.x3, shadow.y3]]);
 		}
-		if (circle.health == shadow.health) {
-			_connectors.predActHealth.push([[circle.x6health, circle.y6health], [shadow.x6health, shadow.y6health]]);
+		if (person.health == shadow.health) {
+			_connectors.predActHealth.push([[person.x6health, person.y6health], [shadow.x6health, shadow.y6health]]);
 		}
-		if (circle.emergency == shadow.emergency) {
-			_connectors.predActEmergency.push([[circle.x6emergency, circle.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
+		if (person.emergency == shadow.emergency) {
+			_connectors.predActEmergency.push([[person.x6emergency, person.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
 		}
 	}
 	
@@ -342,15 +342,15 @@ var makeSVGView = function(model, data, svgID) {
 			_svg.removeChild(_svg.firstChild);
 		}
 	}
-	var circleG = _svg.append('g')
-		.attr('class', 'allCircles')
-		.attr('id', 'circleG');
+	var peopleG = _svg.append('g')
+		.attr('class', 'allPeople')
+		.attr('id', 'peopleG');
 	// Move the patients to the right side
-	circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
 
 	var step = model.get(); 
 
-	var _connectorLines = circleG.selectAll('line.connector')
+	var _connectorLines = peopleG.selectAll('line.connector')
 		.data(data)
 		.enter()
 		.append('line')
@@ -370,71 +370,30 @@ var makeSVGView = function(model, data, svgID) {
 	}
 
 	var showPatientId = function(event) {
-		var circleId = d3.select(this).node().id.split('circle')[1];
+		var circleId = d3.select(this).node().id.split('people')[1];
 		d3.select("#text" + circleId).attr('opacity', 1);
 	}
 	var hidePatientId = function(event) {
-		var circleId = d3.select(this).node().id.split('circle')[1];
+		var circleId = d3.select(this).node().id.split('people')[1];
 		d3.select("#text" + circleId).attr('opacity', 0);
 	}		
 
 	function personPath(startX, startY) {
 
 		//var path = "M 22.50,18.64\
-        var path = "c-1.64,0.47,-2.61,1.24,-3.06,2.38\
-        c-0.21,0.54,-0.24,1.32,-0.19,5.17\
-        c0,0,0.05,4.51,0.05,4.51\
-        c0,0,0.51,1.1,0.51,1.1\
-        c0.28,0.59,0.69,1.26,0.89,1.48\
-        c0.55,0.58,0.61,0.8,1.33,5.16\
-        c0.36,2.18,0.75,4.2,0.88,4.45\
-        c0.37,0.8,0.92,1.02,2.59,1.02\
-        c1.63,0,2.08,-0.16,2.48,-0.86\
-        c0.18,-0.28,0.54,-1.97,0.93,-4.3\
-        c0.76,-4.59,0.86,-4.97,1.36,-5.47\
-        c0.61,-0.59,1.14,-1.8,1.39,-3.08\
-        c0.31,-1.7,0.31,-7.81,-0.04,-8.93\
-        c-0.31,-1.05,-1.14,-1.89,-2.34,-2.38\
-        c-0.81,-0.31,-1.23,-0.36,-3.5,-0.41\
-        c-1.75,-0.03,-2.81,0.04,-3.28,0.16\
-        zm1.77,-11.45c-0.89,0.18,-1.52,0.53,-2.36,1.29\
-        c-2.16,2,-2.14,5.43,0.03,7.43\
-        c1.09,1.01,1.95,1.34,3.45,1.34\
-        c1.03,0,1.41,-0.08,2.13,-0.42\
-        c3.12,-1.5,3.92,-5.61,1.57,-8.11\
-        c-1.18,-1.28,-3.12,-1.89,-4.82,-1.53z";
-
+        var path = "c-0.33,0.09,-0.52,0.24,-0.61,0.47c-0.04,0.11,-0.05,0.27,-0.04,1.04c0,0,0.01,0.9,0.01,0.9c0,0,0.1,0.22,0.1,0.22c0.06,0.12,0.14,0.25,0.18,0.3c0.11,0.11,0.12,0.16,0.27,1.03c0.07,0.43,0.15,0.84,0.17,0.89c0.08,0.16,0.19,0.2,0.52,0.2c0.33,0,0.42,-0.03,0.5,-0.17c0.03,-0.06,0.1,-0.39,0.18,-0.86c0.15,-0.92,0.17,-0.99,0.27,-1.09c0.13,-0.12,0.23,-0.36,0.28,-0.62c0.06,-0.34,0.06,-1.56,0,-1.79c-0.07,-0.21,-0.23,-0.37,-0.47,-0.47c-0.17,-0.06,-0.25,-0.07,-0.7,-0.08c-0.35,-0.01,-0.57,0,-0.66,0.03zm0.35,-2.29c-0.18,0.03,-0.3,0.1,-0.47,0.26c-0.43,0.4,-0.43,1.08,0.01,1.48c0.22,0.2,0.39,0.27,0.69,0.27c0.2,0,0.28,-0.02,0.42,-0.08c0.63,-0.3,0.79,-1.13,0.32,-1.63c-0.24,-0.25,-0.63,-0.37,-0.97,-0.3z";
         start = "M " + startX + " " + startY;
         path = start + " " + path; 
         return path;
     }
-	// var people = circleG
-	// 	.append('path')
-	// 	.style("stroke", "black")
-	// 	.style("fill", "none")
-	// 	.attr("d", personPath(30, 30));
-
-	// var people = circleG
-	// 	.append('path')
-	// 	.style("stroke", "black")
-	// 	.style("fill", "none")
-	// 	.attr("d", personPath(50, 30));
-
-
-	// var circles = circleG.selectAll('circle')
-	// 	.data(data)
-	// 	.enter()
-	// 	.append('circle')
-	// 	.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
-	// 	.attr('id', d => 'circle' + d.id);
-	var circles = circleG.selectAll('path')
+	var people = peopleG.selectAll('path')
 		.data(data)
 		.enter()
 		.append('path')
-		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
-		.attr('id', d => "circle" + d.id);
+		.attr('class', d => (d.id < 10) ? "patients allPeople" : "shadows allPeople")
+		.attr('id', d => "people" + d.id);
 
-	var circlesToolTip = circleG.selectAll('text.tooltip')
+	var peopleToolTip = peopleG.selectAll('text.tooltip')
 		.data(data)
 		.enter()
 		.append('text')
@@ -446,20 +405,15 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('opacity', 0)
 		.style('font-size', 3);
 
-	var circleShadows = circleG.selectAll('.shadows')
+	var peopleShadows = peopleG.selectAll('.shadows')
 		.attr('r', 0);
 
-
-	// circles.attr('cx', d => d.x0 * circleBox )
-	// 	.attr('cy', d => d.y0 * circleBox )
-	// 	.attr('r', 20)
-	// 	.attr('fill', "url(#image)")//d => model.getColor(d))
-	// 	.on('click', makeBig)
-	// 	.on('mouseenter', showPatientId)
-	// 	.on('mouseout', hidePatientId);
-	circles.attr("d", d => personPath(d.x0 * circleBox, d.y0  * circleBox))
+	people.attr("d", d => personPath(d.x0 * circleBox, d.y0  * circleBox))
 		.style("stroke", "none")
-		.style("fill", d => model.getColor(d));
+		.style("fill", d => model.getColor(d))
+		.on('click', makeBig)
+		.on('mouseenter', showPatientId)
+		.on('mouseout', hidePatientId);
 
 
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
@@ -495,7 +449,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	_raceKey.attr('display', 'none');
 
-	var _circleCaption = circleG.append('text')
+	var _circleCaption = peopleG.append('text')
 		.attr('id', 'circleCaption')
 		.attr('font-weight', "bold");
 	_circleCaption.selectAll('tspan.circlecaption')
@@ -518,7 +472,7 @@ var makeSVGView = function(model, data, svgID) {
 		})
 		.attr('font-size', captionSize.fontsize);
 
-	var _shadowCaption = circleG.append('text')
+	var _shadowCaption = peopleG.append('text')
 		.attr('id', 'shadowCaption')
 		.attr('font-weight', "bold")
 		.attr('font-size', captionSize.fontsize);
@@ -558,48 +512,37 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _moveCircles = function(step) {
 
-		var circles = _svg.selectAll('circle.allCircles')
+		// 	people.attr("d", d => personPath(d.x0 * circleBox, d.y0  * circleBox))
+		// .style("stroke", "none")
+		// .style("fill", d => model.getColor(d))
+		// .on('click', makeBig)
+		// .on('mouseenter', showPatientId)
+		// .on('mouseout', hidePatientId);
+		
+		var people = _svg.selectAll('path.allPeople')
 			.transition()
 			.duration(duration)
-			.attr('cx', d => {
+			.attr("d", d => {
 				var _x = d.x0;
-				if (step == 1) _x = d.x1;
-				if (step == 2) _x = d.x2;
-				if (step == 3) _x = d.x3;
-				if (step == 4) _x = d.x4;
-				if (step == 5) _x = d.x5;
+				var _y = d.y0;
+				if (step == 1) { _x = d.x1; _y = d.y1; }
+				if (step == 2) { _x = d.x2; _y = d.y2; }
+				if (step == 3) { _x = d.x3; _y = d.y3; }
+				if (step == 4) { _x = d.x4; _y = d.y4; }
+				if (step == 5) { _x = d.x5; _y = d.y5; }
 				if (step == 6) {
 					var whichLabel = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
 					
-					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _x = d.x6health;
-					else if ((isLabelActive) && (whichLabel == LABELCOST)) _x = d.x6cost;
-					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _x = d.x6emergency;
-					else _x = d.x6; 
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) { _x = d.x6health; _y = d.y6health; }
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; _y = d.y6cost; }
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; _y = d.y6emergency;}
+					else { _x = d.x6; _y = d.y6; }
 				}
-				if (step == 7) _x = d.x7health;
-				return _x * circleBox;
+				if (step == 7) { _x = d.x7health; _y = d.y7health;}
+				return personPath( _x * circleBox, _y * circleBox);
 			})
-			.attr('cy', d => {
-				var _y = d.y0;
-				if (step == 1) _y = d.y1;
-				if (step == 2) _y = d.y2;
-				if (step == 3) _y = d.y3;
-				if (step == 4) _y = d.y4;
-				if (step == 5) _y = d.y5;
-				if (step == 6) {
-					var whichLabel = model.getLabel();
-					var isLabelActive = model.getLabelApplied();
-
-					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _y = d.y6health;
-					else if ((isLabelActive) && (whichLabel == LABELCOST)) _y = d.y6cost;
-					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _y = d.y6emergency;
-					else _y = d.y6; 
-				}
-				if (step == 7) _y = d.y7health;
-				return _y * circleBox;
-			})
-			.attr('fill', d => model.getColor(d))
+			.style('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
 
 		var _raceKey = d3.selectAll('.racekey').attr('display', (step == 5) ? 'inline' : 'none')
