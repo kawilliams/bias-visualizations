@@ -11,7 +11,7 @@ var radiusH = 7;
 var algBoxSize = {height: 51, width: 44};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
-var peopleCluster = {height: 6 * personBox.height, width: 8 * personBox.width};
+var peopleCluster = {height: 4 * personBox.height, width: 8 * personBox.width};
 var peopleLine = {height: 1 * personBox.height, width: 10 * personBox.width};
 var peopleDoubleLine = {height: 2 * personBox.height, width: 10 * personBox.width};
 
@@ -151,19 +151,19 @@ var makeModel = function(data) {
 	var _personCaption = [
 	{ text: "Patients\n", 
 		x: peopleCluster.width * 0.5 - 14, 
-		y: -5 },
+		y: -10},
 	{ text: "Patients\n", 
 		x: peopleCluster.width * 0.5 + 6,  
-		y: -5 },
+		y: -10 },
 	{ text: "Predicted cost",
 		x: -30,
-		y: 9},
+		y: 14},
 	{ text: "Predicted cost",
 		x: -30,
-		y: 9},
+		y: 14},
 	{ text: "Predicted cost",
 		x: -30,
-		y: 9},
+		y: 14},
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
@@ -419,20 +419,21 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
 	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
-		.attr('x', viewBoxSize.width / 2 - radiusW - 2)
-		.attr('y', viewBoxSize.height/2 + radiusH + 2)
-		.attr('width', 2 * personBox.width)
-		.attr('height', 2 * personBox.height)
+		.attr('x', viewBoxSize.width / 2 - radiusW - 1)
+		.attr('y', viewBoxSize.height/2 + radiusH + 5)
+		.attr('width', 25)
+		.attr('height', 18)
 		.attr('fill', 'none')
 		.style('stroke', 'black');
+
 	var _raceCircles = _raceKey.selectAll('circle.racekey')
 			.data([0,1])
 			.enter()
 			.append('circle')
 			.attr('class', 'racekey')
 			.attr('cx', viewBoxSize.width / 2)
-			.attr('cy', d => (d * personBox.height) + viewBoxSize.height/2 + 10)
-			.attr('r', 4)
+			.attr('cy', d => (d * 8) + viewBoxSize.height/2 + radiusH + 10)
+			.attr('r', 3)
 			.attr('fill', d => (d == 0) ? 'black' : 'white')
 			.style('stroke', 'black')
 			.attr('opacity', 0);
@@ -442,8 +443,8 @@ var makeSVGView = function(model, data, svgID) {
 		.enter()
 		.append('text')
 		.attr('class', 'racekey')
-		.attr('x', viewBoxSize.width / 2 + radiusW + 2)
-		.attr('y', d => (d * personBox.height) + viewBoxSize.height/2 + 11)
+		.attr('x', viewBoxSize.width / 2 + radiusW + 1)
+		.attr('y', d => (d * 8) + viewBoxSize.height/2 + radiusH + 11)
 		.text(d => (d == 0) ? 'Black' : 'White')
 		.style('font-size', captionSize.fontsize)
 		.attr('opacity', 0);
@@ -481,13 +482,13 @@ var makeSVGView = function(model, data, svgID) {
 	var thresholdG = _svg.append('g')
 		.attr('class', 'allThreshold')
 		.attr('id', 'thresholdG')
-		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width - 1) +',' + ( viewBoxSize.height * 0.5 - personBox.height - topTextSize.height - radiusH) + ')');
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width - 1) +',' + ((viewBoxSize.height - topTextSize.height) * 0.5 -  thresholdShadeSize.height) + ')');
 
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
 			.attr('class', 'threshold')
-			.attr('x', 1)
-			.attr('y', -personBox.height * 0.5)
+			.attr('x', 0)
+			.attr('y', radiusH)
 			.attr("width", thresholdShadeSize.width)
 			.attr('height', thresholdShadeSize.height)
 			.style('stroke', 'lightgrey')
@@ -499,8 +500,8 @@ var makeSVGView = function(model, data, svgID) {
 	var _threshold = thresholdG.append('rect')
 			.attr('id', "threshold")
 			.attr('class', 'threshold')
-			.attr('x', 0)
-			.attr('y', -personBox.height + radiusH -1)
+			.attr('x', -1)
+			.attr('y', 0.5 * radiusH)
 			.attr('width', 2)
 			.attr('height', thresholdShadeSize.height + radiusH)
 			.attr('display', 'none');
@@ -509,7 +510,7 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
 			.attr('x', 3)
-			.attr('y', -personBox.height + 3)
+			.attr('y', 5)
 			.text('Accepted into program')
 			.attr('display', 'none')
 			.style('font-size', captionSize.fontsize);
@@ -858,7 +859,7 @@ var makeCommentaryView = function(model, data, svgID) {
 			if ((d == "Pretty good!") ||
 				(d == "Not so good") ||
 				(d == "Much better!")) {
-				return 65;
+				return 6 * personBox.height + radiusH;
 			}
 			return 75 + (i * 4);
 		})
