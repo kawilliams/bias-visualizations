@@ -1,21 +1,19 @@
 
-var margin = ({top: 3, right: 3, bottom: 3, left: 3});
-var svgSize = {height: 210, width: 300}
-var viewBoxSize = {height: 105, width: 150};
+var margin = ({top: 5, right: 3, bottom: 3, left: 3});
+var svgSize = {height: 100, width: 100}
+var viewBoxSize = {height: 157, width: 225};
 
 
 var personBox = {width: 11, height: 14};
 var radius = 5;
 var radiusW = 5; //katy: change to 5
 var radiusH = 7;
-var algBoxSize = {height: 51, width: 44};
+var labelBoxSize = {height: 15, width: 35, padding: 3};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
-var peopleCluster = {height: 4 * personBox.height, width: 8 * personBox.width};
-var peopleLine = {height: 1 * personBox.height, width: 10 * personBox.width};
-var peopleDoubleLine = {height: 2 * personBox.height, width: 10 * personBox.width};
+var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {height: 4, width: 144, fontsize: 3, space: 4};
+var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: 4, padding: 5};
 var buttonSize = {height: 8, width: 20};
 var captionSize = {fontsize: 3};
 
@@ -150,11 +148,11 @@ var makeModel = function(data) {
 
 	var _personCaption = [
 	{ text: "Patients\n", 
-		x: peopleCluster.width * 0.5 - 14, 
-		y: -10},
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize, 
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Patients\n", 
-		x: peopleCluster.width * 0.5 + 6,  
-		y: -10 },
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + 2 * personBox.width,  
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Predicted cost",
 		x: -30,
 		y: 14},
@@ -336,8 +334,23 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _svg = d3.select(svgID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
-		.attr('viewBox', "0 0 " + (viewBoxSize.width * 1.5) + " " + (viewBoxSize.height * 1.5))
-		.classed('svg-content', true);
+		.attr('viewBox', "0 0 " + viewBoxSize.width + " " + viewBoxSize.height)
+		.classed('svg-content', true)
+		.attr('style', 'outline: thin solid red;');
+
+	var _midlineV = _svg.append('line')
+		.attr('x1', viewBoxSize.width * 0.5)
+		.attr('y1', 0)
+		.attr('x2', viewBoxSize.width * 0.5)
+		.attr('y2', viewBoxSize.height)
+		.attr('stroke', 'black');
+	var _midlineH = _svg.append('line')
+		.attr('x1', 0)
+		.attr('y1', viewBoxSize.height * 0.5)
+		.attr('x2', viewBoxSize.width)
+		.attr('y2', viewBoxSize.height * 0.5)
+		.attr('stroke', 'black');
+
 
 	var _cleanSVG = function() {
 		while (_svg.firstChild) {
@@ -348,7 +361,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'allPeople')
 		.attr('id', 'peopleG');
 	// Move the patients to the right side
-	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.height) + ')');
+	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
 
 	var step = model.get(); 
 
@@ -451,7 +464,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	_raceKey.attr('display', 'none');
 
-	var _personCaption = peopleG.append('text')
+	var _personCaption = _svg.append('text')
 		.attr('id', 'personCaption')
 		.attr('font-weight', "bold");
 	_personCaption.selectAll('tspan.circlecaption')
@@ -482,7 +495,7 @@ var makeSVGView = function(model, data, svgID) {
 	var thresholdG = _svg.append('g')
 		.attr('class', 'allThreshold')
 		.attr('id', 'thresholdG')
-		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width - 1) +',' + ((viewBoxSize.height - topTextSize.height) * 0.5 -  thresholdShadeSize.height) + ')');
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5) +',' + (viewBoxSize.height * 0.5 - thresholdShadeSize.height - personBox.height) + ')');
 
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
@@ -515,14 +528,7 @@ var makeSVGView = function(model, data, svgID) {
 			.attr('display', 'none')
 			.style('font-size', captionSize.fontsize);
 
-	var _moveCircles = function(step) {
-
-		// 	people.attr("d", d => personPath(d.x0 * personBox, d.y0  * personBox))
-		// .style("stroke", "none")
-		// .style("fill", d => model.getColor(d))
-		// .on('click', makeBig)
-		// .on('mouseenter', showPatientId)
-		// .on('mouseout', hidePatientId);
+	var _movePeople = function(step) {
 
 		var people = _svg.selectAll('path.allPeople')
 			.transition()
@@ -671,7 +677,7 @@ var makeSVGView = function(model, data, svgID) {
 			var step = model.get();
 			var data = model.data();
 	
-			_moveCircles(step, data);
+			_movePeople(step, data);
 			_moveThreshold(step);
 		},
 		register: function(fxn) {
@@ -680,9 +686,9 @@ var makeSVGView = function(model, data, svgID) {
 	}
 }
 
-var makeTopTextView = function(model, data, textID) {
+var makeTopTextView = function(model, data, textID, svgID) {
 	var _observers = makeObservers();
-	var _svg = d3.select('#mySVG');
+	var _svg = d3.select(svgID);
 	var topText = _svg.append('text')
 		.attr('x', margin.left)
 		.attr('y', margin.top)
@@ -699,7 +705,7 @@ var makeTopTextView = function(model, data, textID) {
 		.attr('class', 'toptext')
 		.text(d => d)
 		.attr('x', d => margin.left)
-		.attr('y', (d,i) => i * topTextSize.space + margin.top)
+		.attr('y', (d,i) => i * topTextSize.padding + margin.top)
 		.attr('font-size', topTextSize.fontsize);
 
 	var _changeTopText = function(step, text, textID) {
@@ -713,7 +719,7 @@ var makeTopTextView = function(model, data, textID) {
 			.attr('class', 'toptext')
 			.text(d => d)
 			.attr('x', d =>  margin.left )//viewBoxSize.width * 0.5 - d.length )
-			.attr('y', (d,i) => i * topTextSize.space + margin.top)
+			.attr('y', (d,i) => i * topTextSize.padding + margin.top)
 			.attr('font-size', topTextSize.fontsize);
 	}
 
@@ -730,8 +736,8 @@ var makeTopTextView = function(model, data, textID) {
 }
 
 
-var makeInputView = function(model, inputID) {
-	var _svg = d3.select('#mySVG');
+var makeLabelView = function(model, inputID, svgID) {
+	var _svg = d3.select(svgID);
 	var _observers = makeObservers();
 	var _inputLabels = model.inputs();
 	var _inputG = _svg.append('g');
@@ -742,12 +748,12 @@ var makeInputView = function(model, inputID) {
 		.append('rect')
 		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
-		.attr('x', margin.left + 3)
+		.attr('x', margin.left + 0.5 * labelBoxSize.width)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 20 + margin.top + topTextSize.height;
+			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 3);
 		})
-		.attr('width', algBoxSize.width * 0.8)
-		.attr('height', algBoxSize.height * 0.3)
+		.attr('width', labelBoxSize.width)
+		.attr('height', labelBoxSize.height)
 		.attr('fill', d => model.getLabelColor(d.id, false)) //green
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
@@ -763,9 +769,9 @@ var makeInputView = function(model, inputID) {
 		.append('text')
 		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
-		.attr('x', margin.left + algBoxSize.width * 0.48)
+		.attr('x', margin.left + (1.5 * labelBoxSize.width) + 4)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 19 + margin.top + topTextSize.height
+			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 4);
 		})
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
@@ -789,7 +795,7 @@ var makeInputView = function(model, inputID) {
 			.attr('id', function() {
 				return this.parentElement.id;
 			})
-			.attr('x', margin.left + algBoxSize.width * 0.48)
+			.attr('x', margin.left + (1.0 * labelBoxSize.width))
 			.attr('dy', 5)
 			.attr('text-anchor', 'middle')
 			.attr("cursor", "pointer");
@@ -904,12 +910,12 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var buttonData = [{ 
 		id: nextID, 
 		text: "NEXT: 1", 
-		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 20, 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 + buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
 		id: backID, 
 		text: "BACK: 1",
-		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 10 - buttonSize.width, 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
 	var _buttons = d3.select(svgID).selectAll('rect.button')
@@ -1014,11 +1020,11 @@ document.addEventListener("DOMContentLoaded", function(event){
 	d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		story.model = makeModel(d);
-		story.views.push(makeTopTextView(story.model, d, '#textView'));
+		story.views.push(makeTopTextView(story.model, d, '#textView', '#mySVG'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, 'backButton', 'nextButton', '#mySVG'));
 		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
-		story.views.push(makeInputView(story.model, '#inputs'))
+		story.views.push(makeLabelView(story.model, '#inputs', '#mySVG'))
 		story.controller = makeController(story.model);
 		
 		for (var i=0; i < story.views.length; i++) {
