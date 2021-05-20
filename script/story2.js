@@ -330,18 +330,18 @@ var makeSVGView = function(model, data, svgID) {
 		.classed('svg-content', true)
 		.attr('style', 'outline: thin solid red;');
 
-	var _midlineV = _svg.append('line')
-		.attr('x1', viewBoxSize.width * 0.5)
-		.attr('y1', 0)
-		.attr('x2', viewBoxSize.width * 0.5)
-		.attr('y2', viewBoxSize.height)
-		.attr('stroke', 'black');
-	var _midlineH = _svg.append('line')
-		.attr('x1', 0)
-		.attr('y1', viewBoxSize.height * 0.5)
-		.attr('x2', viewBoxSize.width)
-		.attr('y2', viewBoxSize.height * 0.5)
-		.attr('stroke', 'black');
+	// var _midlineV = _svg.append('line')
+	// 	.attr('x1', viewBoxSize.width * 0.5)
+	// 	.attr('y1', 0)
+	// 	.attr('x2', viewBoxSize.width * 0.5)
+	// 	.attr('y2', viewBoxSize.height)
+	// 	.attr('stroke', 'black');
+	// var _midlineH = _svg.append('line')
+	// 	.attr('x1', 0)
+	// 	.attr('y1', viewBoxSize.height * 0.5)
+	// 	.attr('x2', viewBoxSize.width)
+	// 	.attr('y2', viewBoxSize.height * 0.5)
+	// 	.attr('stroke', 'black');
 
 
 	var _cleanSVG = function() {
