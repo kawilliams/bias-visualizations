@@ -154,59 +154,51 @@ var makeModel = function(data) {
 		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + 2 * personBox.width,  
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Predicted cost",
-		x: -30,
-		y: 14},
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: -30,
-		y: 14},
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: -30,
-		y: 14},
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
 	{ text: "Predicted\n",
-		x: 10,
-		y: margin.top + 3 },
+		x: viewBoxSize.width * 0.5 - personBox.width * 4 - radiusW,
+		y: viewBoxSize.height * 0.5 - personBox.height * 1.5},
 	{ text: "\n",
 		x: 0,
 		y: 0
 	}
 	];
-
+	
 	var _shadowCaption = [
 	{text: "\n",
 		x: margin.left,
-		y: 0
-	},
+		y: 0 },
 	{text: "\n",
 		x: margin.left,
-		y: 0
-	},
+		y: 0 },
 	{text: "\n",
 		x: margin.left,
-		y: 2 * personBox.height
-	},
+		y: 0 },
 	{text: "Actual cost\n",
-		x: -25,
-		y: 10 + 2 * personBox.height
-	},
+		x: viewBoxSize.width * 0.5 - peopleCluster.width - 8 * captionSize.fontsize,
+		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
-		x: -28,
-		y: 10 + 2 * personBox.height
-	},
-	{text: "Actual\n",
+		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontsize,
+		y: 4 + 2 * personBox.height },
+	{text: "\n",
 		x: margin.left,
-		y: 10 + 2 * personBox.height
-	},
+		y: 10 + 2 * personBox.height },
 	{text: "Actual\n",
-		x: 10,
-		y: 4 * personBox.height - 3
-	},
+		x: 5,
+		y: 2 * personBox.height + 2 },
 	{ text: "\n",
 		x: 0,
-		y: 0
-	}
+		y: 0 }
 	]
 
 
@@ -857,17 +849,17 @@ var makeCommentaryView = function(model, data, svgID) {
 			if ((d == "Pretty good!") ||
 				(d == "Not so good") ||
 				(d == "Much better!")) {
-				return 120;
+				return labelBoxSize.width + peopleCluster.width + personBox.width;
 			}
-			return 50;
+			return 0.5 * viewBoxSize.width - 3 * personBox.width;
 		})
 		.attr('y', (d, i) => {
 			if ((d == "Pretty good!") ||
 				(d == "Not so good") ||
 				(d == "Much better!")) {
-				return 6 * personBox.height + radiusH;
+				return 7 * personBox.height + 3;
 			}
-			return 75 + (i * 4);
+			return (i * captionSize.fontsize) + 8 * personBox.height;
 		})
 		.attr('font-size', captionSize.fontsize);
 	
