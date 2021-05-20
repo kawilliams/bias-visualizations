@@ -1,19 +1,19 @@
 
-var margin = ({top: 3, right: 3, bottom: 3, left: 3});
-var svgSize = {height: 210, width: 300}
-var viewBoxSize = {height: 105, width: 150};
+var margin = ({top: 5, right: 3, bottom: 3, left: 3});
+var svgSize = {height: 100, width: 100}
+var viewBoxSize = {height: 157, width: 225};
 
 
-var circleBox = 10;
-var radius = 3; //katy: change to 5
-var algBoxSize = {height: 51, width: 44};
-var thresholdShadeSize = {height: radius + circleBox, width: 5 * circleBox };
+var personBox = {width: 11, height: 14};
+var radius = 5;
+var radiusW = 5; //katy: change to 5
+var radiusH = 7;
+var labelBoxSize = {height: 15, width: 35, padding: 3};
+var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
-var circleCluster = {height: 6 * circleBox, width: 8 * circleBox};
-var circleLine = {height: 1 * circleBox, width: 10 * circleBox};
-var circleDoubleLine = {height: 2 * circleBox, width: 10 * circleBox};
+var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {height: 4, width: 144, fontsize: 3, space: 4};
+var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: 4, padding: 5};
 var buttonSize = {height: 8, width: 20};
 var captionSize = {fontsize: 3};
 
@@ -75,21 +75,21 @@ var makeModel = function(data) {
 	};
 
 	for (var i=0; i<data.length/2; i++) {
-		var circle = data[i+10];
+		var person = data[i+10];
 		var shadow = data[i];
 	
-		if (circle.problem == shadow.problem) {
-			_connectors.predActProblem.push([[circle.x4, circle.y4], [shadow.x4, shadow.y4]]);
-			_connectors.predActCostLabel.push([[circle.x6cost, circle.y6cost], [shadow.x6cost, shadow.y6cost]]);
+		if (person.problem == shadow.problem) {
+			_connectors.predActProblem.push([[person.x4, person.y4], [shadow.x4, shadow.y4]]);
+			_connectors.predActCostLabel.push([[person.x6cost, person.y6cost], [shadow.x6cost, shadow.y6cost]]);
 		}
-		if (circle.cost == shadow.cost) {
-			_connectors.predActCostInit.push([[circle.x3, circle.y3], [shadow.x3, shadow.y3]]);
+		if (person.cost == shadow.cost) {
+			_connectors.predActCostInit.push([[person.x3, person.y3], [shadow.x3, shadow.y3]]);
 		}
-		if (circle.health == shadow.health) {
-			_connectors.predActHealth.push([[circle.x6health, circle.y6health], [shadow.x6health, shadow.y6health]]);
+		if (person.health == shadow.health) {
+			_connectors.predActHealth.push([[person.x6health, person.y6health], [shadow.x6health, shadow.y6health]]);
 		}
-		if (circle.emergency == shadow.emergency) {
-			_connectors.predActEmergency.push([[circle.x6emergency, circle.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
+		if (person.emergency == shadow.emergency) {
+			_connectors.predActEmergency.push([[person.x6emergency, person.y6emergency], [shadow.x6emergency, shadow.y6emergency]]);
 		}
 	}
 	
@@ -146,67 +146,59 @@ var makeModel = function(data) {
 		
 	];
 
-	var _circleCaption = [
+	var _personCaption = [
 	{ text: "Patients\n", 
-		x: circleCluster.width * 0.5 - 14, 
-		y: -5 },
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize, 
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Patients\n", 
-		x: circleCluster.width * 0.5 + 6,  
-		y: -5 },
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + 2 * personBox.width,  
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Predicted cost",
-		x: -30,
-		y: 9},
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: -30,
-		y: 9},
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: -30,
-		y: 9},
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "\n",
 		x: margin.left,
 		y: margin.top },
 	{ text: "Predicted\n",
-		x: 10,
-		y: margin.top + 3 },
+		x: viewBoxSize.width * 0.5 - personBox.width * 4 - radiusW,
+		y: viewBoxSize.height * 0.5 - personBox.height * 1.5},
 	{ text: "\n",
 		x: 0,
 		y: 0
 	}
 	];
-
+	
 	var _shadowCaption = [
 	{text: "\n",
 		x: margin.left,
-		y: 2 * circleBox
-	},
+		y: 0 },
 	{text: "\n",
 		x: margin.left,
-		y: 2 * circleBox
-	},
+		y: 0 },
 	{text: "\n",
 		x: margin.left,
-		y: 2 * circleBox
-	},
+		y: 0 },
 	{text: "Actual cost\n",
-		x: -25,
-		y: 10 + 2 * circleBox
-	},
+		x: viewBoxSize.width * 0.5 - peopleCluster.width - 8 * captionSize.fontsize,
+		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
-		x: -28,
-		y: 10 + 2 * circleBox
-	},
-	{text: "Actual\n",
+		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontsize,
+		y: 4 + 2 * personBox.height },
+	{text: "\n",
 		x: margin.left,
-		y: 10 + 2 * circleBox
-	},
+		y: 10 + 2 * personBox.height },
 	{text: "Actual\n",
-		x: 10,
-		y: 4 * circleBox - 3
-	},
+		x: 5,
+		y: 2 * personBox.height + 2 },
 	{ text: "\n",
 		x: 0,
-		y: 0
-	}
+		y: 0 }
 	]
 
 
@@ -313,8 +305,8 @@ var makeModel = function(data) {
 			return colorScale(0.5);
 		},
 		//Get the circle labels
-		circleCaption: function() {
-			return _circleCaption;
+		personCaption: function() {
+			return _personCaption;
 		},
 		//Get the circle labels
 		shadowCaption: function() {
@@ -334,150 +326,119 @@ var makeSVGView = function(model, data, svgID) {
 
 	var _svg = d3.select(svgID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
-		.attr('viewBox', "0 0 " + (viewBoxSize.width * 1.5) + " " + (viewBoxSize.height * 1.5))
-		.classed('svg-content', true);
+		.attr('viewBox', "0 0 " + viewBoxSize.width + " " + viewBoxSize.height)
+		.classed('svg-content', true)
+		.attr('style', 'outline: thin solid red;');
+
+	var _midlineV = _svg.append('line')
+		.attr('x1', viewBoxSize.width * 0.5)
+		.attr('y1', 0)
+		.attr('x2', viewBoxSize.width * 0.5)
+		.attr('y2', viewBoxSize.height)
+		.attr('stroke', 'black');
+	var _midlineH = _svg.append('line')
+		.attr('x1', 0)
+		.attr('y1', viewBoxSize.height * 0.5)
+		.attr('x2', viewBoxSize.width)
+		.attr('y2', viewBoxSize.height * 0.5)
+		.attr('stroke', 'black');
+
 
 	var _cleanSVG = function() {
 		while (_svg.firstChild) {
 			_svg.removeChild(_svg.firstChild);
 		}
 	}
-	var circleG = _svg.append('g')
-		.attr('class', 'allCircles')
-		.attr('id', 'circleG');
+	var peopleG = _svg.append('g')
+		.attr('class', 'allPeople')
+		.attr('id', 'peopleG');
 	// Move the patients to the right side
-	circleG.attr('transform', 'translate('+ ((viewBoxSize.width - circleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - circleCluster.height) * 0.5 + topTextSize.height) + ')');
+	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
 
 	var step = model.get(); 
 
-	var _connectorLines = circleG.selectAll('line.connector')
+	var _connectorLines = peopleG.selectAll('line.connector')
 		.data(data)
 		.enter()
 		.append('line')
 		.attr('class', 'connector')
 		.attr('stroke', 'grey')
-		.attr('x1', d => d.x0 * circleBox)
-		.attr('y1', d => d.y0 * circleBox)
-		.attr('x2', d => d.x0 * circleBox) //line starts at the circle
-		.attr('y2', d => d.y0 * circleBox) //and connects to the shadow on transition
+		.attr('x1', d => d.x0 * personBox.width)
+		.attr('y1', d => d.y0 * personBox.height)
+		.attr('x2', d => d.x0 * personBox.width) //line starts at the feet
+		.attr('y2', d => d.y0 * personBox.height) //and connects to the shadow head on transition
 		.attr('opacity', 1); 
 
-	var makeBig = function(event) {
-		d3.select(this).transition().ease(d3.easeBounce)
-		.attr('r', radius + 3)
-		.transition()
-		.attr('r', radius);
-	}
+	// var makeBig = function(event) {
+	// 	d3.select(this).transition().ease(d3.easeBounce)
+	// 	.attr('r', radius + 3)
+	// 	.transition()
+	// 	.attr('r', radius);
+	// }
 
 	var showPatientId = function(event) {
-		var circleId = d3.select(this).node().id.split('circle')[1];
+		var circleId = d3.select(this).node().id.split('people')[1];
 		d3.select("#text" + circleId).attr('opacity', 1);
 	}
 	var hidePatientId = function(event) {
-		var circleId = d3.select(this).node().id.split('circle')[1];
+		var circleId = d3.select(this).node().id.split('people')[1];
 		d3.select("#text" + circleId).attr('opacity', 0);
 	}		
 
 	function personPath(startX, startY) {
 
-		//var path = "M 22.50,18.64\
-        var path = "c-1.64,0.47,-2.61,1.24,-3.06,2.38\
-        c-0.21,0.54,-0.24,1.32,-0.19,5.17\
-        c0,0,0.05,4.51,0.05,4.51\
-        c0,0,0.51,1.1,0.51,1.1\
-        c0.28,0.59,0.69,1.26,0.89,1.48\
-        c0.55,0.58,0.61,0.8,1.33,5.16\
-        c0.36,2.18,0.75,4.2,0.88,4.45\
-        c0.37,0.8,0.92,1.02,2.59,1.02\
-        c1.63,0,2.08,-0.16,2.48,-0.86\
-        c0.18,-0.28,0.54,-1.97,0.93,-4.3\
-        c0.76,-4.59,0.86,-4.97,1.36,-5.47\
-        c0.61,-0.59,1.14,-1.8,1.39,-3.08\
-        c0.31,-1.7,0.31,-7.81,-0.04,-8.93\
-        c-0.31,-1.05,-1.14,-1.89,-2.34,-2.38\
-        c-0.81,-0.31,-1.23,-0.36,-3.5,-0.41\
-        c-1.75,-0.03,-2.81,0.04,-3.28,0.16\
-        zm1.77,-11.45c-0.89,0.18,-1.52,0.53,-2.36,1.29\
-        c-2.16,2,-2.14,5.43,0.03,7.43\
-        c1.09,1.01,1.95,1.34,3.45,1.34\
-        c1.03,0,1.41,-0.08,2.13,-0.42\
-        c3.12,-1.5,3.92,-5.61,1.57,-8.11\
-        c-1.18,-1.28,-3.12,-1.89,-4.82,-1.53z";
-
+        var path = "c-0.82,0.23,-1.3,0.62,-1.53,1.19c-0.1,0.27,-0.12,0.66,-0.1,2.58c0,0,0.03,2.26,0.03,2.26c0,0,0.26,0.55,0.26,0.55c0.14,0.3,0.34,0.63,0.44,0.74c0.27,0.29,0.31,0.4,0.67,2.58c0.18,1.09,0.37,2.1,0.43,2.23c0.19,0.39,0.46,0.5,1.3,0.5c0.81,0,1.04,-0.07,1.24,-0.43c0.09,-0.14,0.27,-0.98,0.46,-2.14c0.39,-2.3,0.43,-2.49,0.68,-2.74c0.31,-0.3,0.57,-0.9,0.7,-1.54c0.15,-0.85,0.15,-3.9,-0.02,-4.47c-0.15,-0.52,-0.57,-0.94,-1.17,-1.18c-0.41,-0.16,-0.62,-0.18,-1.75,-0.21c-0.87,-0.01,-1.41,0.02,-1.64,0.08zm0.88,-5.73c-0.44,0.1,-0.75,0.27,-1.18,0.65c-1.07,1,-1.07,2.71,0.02,3.71c0.55,0.51,0.98,0.67,1.73,0.67c0.51,0,0.7,-0.03,1.06,-0.21c1.56,-0.75,1.96,-2.8,0.79,-4.05c-0.6,-0.64,-1.57,-0.95,-2.42,-0.77z";
         start = "M " + startX + " " + startY;
         path = start + " " + path; 
         return path;
     }
-	// var people = circleG
-	// 	.append('path')
-	// 	.style("stroke", "black")
-	// 	.style("fill", "none")
-	// 	.attr("d", personPath(30, 30));
-
-	// var people = circleG
-	// 	.append('path')
-	// 	.style("stroke", "black")
-	// 	.style("fill", "none")
-	// 	.attr("d", personPath(50, 30));
-
-
-	// var circles = circleG.selectAll('circle')
-	// 	.data(data)
-	// 	.enter()
-	// 	.append('circle')
-	// 	.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
-	// 	.attr('id', d => 'circle' + d.id);
-	var circles = circleG.selectAll('path')
+	var people = peopleG.selectAll('path')
 		.data(data)
 		.enter()
 		.append('path')
-		.attr('class', d => (d.id < 10) ? "patients allCircles" : "shadows allCircles")
-		.attr('id', d => "circle" + d.id);
+		.attr('class', d => (d.id < 10) ? "patients allPeople" : "shadows allPeople")
+		.attr('id', d => "people" + d.id);
 
-	var circlesToolTip = circleG.selectAll('text.tooltip')
+	var peopleToolTip = peopleG.selectAll('text.tooltip')
 		.data(data)
 		.enter()
 		.append('text')
 		.attr('class', 'tooltip')
 		.attr('id', d => 'text' + d.id)
-		.attr('x', d => d.x0 * circleBox + radius + 1)
-		.attr('y', d => d.y0 * circleBox)
+		.attr('x', d => d.x0 * personBox.width + radiusW + 1)
+		.attr('y', d => d.y0 * personBox.height)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
 		.style('font-size', 3);
 
-	var circleShadows = circleG.selectAll('.shadows')
+	var peopleShadows = peopleG.selectAll('.shadows')
 		.attr('r', 0);
 
-
-	// circles.attr('cx', d => d.x0 * circleBox )
-	// 	.attr('cy', d => d.y0 * circleBox )
-	// 	.attr('r', 20)
-	// 	.attr('fill', "url(#image)")//d => model.getColor(d))
-	// 	.on('click', makeBig)
-	// 	.on('mouseenter', showPatientId)
-	// 	.on('mouseout', hidePatientId);
-	circles.attr("d", d => personPath(d.x0 * circleBox, d.y0  * circleBox))
+	people.attr("d", d => personPath(d.x0 * personBox.width, d.y0  * personBox.height))
 		.style("stroke", "none")
-		.style("fill", d => model.getColor(d));
+		.style("fill", d => model.getColor(d))
+		// .on('click', makeBig)
+		.on('mouseenter', showPatientId)
+		.on('mouseout', hidePatientId);
 
 
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
 	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
-		.attr('x', viewBoxSize.width / 2 - radius - 2)
-		.attr('y', viewBoxSize.height/2 + radius + 2)
-		.attr('width', 2 * circleBox)
-		.attr('height', 2 * circleBox)
+		.attr('x', viewBoxSize.width / 2 - radiusW - 1)
+		.attr('y', viewBoxSize.height/2 + radiusH + 5)
+		.attr('width', 25)
+		.attr('height', 18)
 		.attr('fill', 'none')
 		.style('stroke', 'black');
+
 	var _raceCircles = _raceKey.selectAll('circle.racekey')
 			.data([0,1])
 			.enter()
 			.append('circle')
 			.attr('class', 'racekey')
 			.attr('cx', viewBoxSize.width / 2)
-			.attr('cy', d => (d * circleBox) + viewBoxSize.height/2 + 10)
-			.attr('r', radius)
+			.attr('cy', d => (d * 8) + viewBoxSize.height/2 + radiusH + 10)
+			.attr('r', 3)
 			.attr('fill', d => (d == 0) ? 'black' : 'white')
 			.style('stroke', 'black')
 			.attr('opacity', 0);
@@ -487,20 +448,20 @@ var makeSVGView = function(model, data, svgID) {
 		.enter()
 		.append('text')
 		.attr('class', 'racekey')
-		.attr('x', viewBoxSize.width / 2 + radius + 2)
-		.attr('y', d => (d * circleBox) + viewBoxSize.height/2 + 11)
+		.attr('x', viewBoxSize.width / 2 + radiusW + 1)
+		.attr('y', d => (d * 8) + viewBoxSize.height/2 + radiusH + 11)
 		.text(d => (d == 0) ? 'Black' : 'White')
 		.style('font-size', captionSize.fontsize)
 		.attr('opacity', 0);
 
 	_raceKey.attr('display', 'none');
 
-	var _circleCaption = circleG.append('text')
-		.attr('id', 'circleCaption')
+	var _personCaption = _svg.append('text')
+		.attr('id', 'personCaption')
 		.attr('font-weight', "bold");
-	_circleCaption.selectAll('tspan.circlecaption')
+	_personCaption.selectAll('tspan.circlecaption')
 		.data(d => {
-			var text = model.circleCaption();
+			var text = model.personCaption();
 			return text[step].text.split('\n');
 		})
 		.enter()
@@ -508,17 +469,17 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'circlecaption')
 		.text(d => d)
 		.attr('x', d => {
-			var text = model.circleCaption();
+			var text = model.personCaption();
 			return text[step].x;
 		})
 		.attr('y', function(d,i){
 			var step = model.get();
-			var text = model.circleCaption();
+			var text = model.personCaption();
 			return text[step].y + (i*captionSize.fontsize);
 		})
 		.attr('font-size', captionSize.fontsize);
 
-	var _shadowCaption = circleG.append('text')
+	var _shadowCaption = peopleG.append('text')
 		.attr('id', 'shadowCaption')
 		.attr('font-weight', "bold")
 		.attr('font-size', captionSize.fontsize);
@@ -526,80 +487,65 @@ var makeSVGView = function(model, data, svgID) {
 	var thresholdG = _svg.append('g')
 		.attr('class', 'allThreshold')
 		.attr('id', 'thresholdG')
-		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + circleBox - radius) +',' + ( viewBoxSize.height * 0.5 - circleBox - topTextSize.height - radius) + ')');
-	var _threshold = thresholdG.append('rect')
-			.attr('id', "threshold")
-			.attr('class', 'threshold')
-			.attr('x', 0)
-			.attr('y', -circleBox + radius -1)
-			.attr('width', 2)
-			.attr('height', 2 * circleBox)
-			.attr('display', 'none');
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5) +',' + (viewBoxSize.height * 0.5 - thresholdShadeSize.height - personBox.height) + ')');
+
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
 			.attr('class', 'threshold')
-			.attr('x', 1)
-			.attr('y', -circleBox * 0.5)
+			.attr('x', 0)
+			.attr('y', radiusH)
 			.attr("width", thresholdShadeSize.width)
 			.attr('height', thresholdShadeSize.height)
-			.style('stroke', 'black')
+			.style('stroke', 'lightgrey')
 			.style('stroke-width', '1px')
 			.attr('opacity', 0)
 			.attr('fill', 'none')
 			.attr('display', 'none');
+
+	var _threshold = thresholdG.append('rect')
+			.attr('id', "threshold")
+			.attr('class', 'threshold')
+			.attr('x', -1)
+			.attr('y', 0.5 * radiusH)
+			.attr('width', 2)
+			.attr('height', thresholdShadeSize.height + radiusH)
+			.attr('display', 'none');
+
 	var _thresholdText = thresholdG.append('text')
 			.attr('id', 'thresholdText')
 			.attr('class', 'threshold')
 			.attr('x', 3)
-			.attr('y', -circleBox + 3)
+			.attr('y', 5)
 			.text('Accepted into program')
 			.attr('display', 'none')
 			.style('font-size', captionSize.fontsize);
 
-	var _moveCircles = function(step) {
+	var _movePeople = function(step) {
 
-		var circles = _svg.selectAll('circle.allCircles')
+		var people = _svg.selectAll('path.allPeople')
 			.transition()
 			.duration(duration)
-			.attr('cx', d => {
+			.attr("d", d => {
 				var _x = d.x0;
-				if (step == 1) _x = d.x1;
-				if (step == 2) _x = d.x2;
-				if (step == 3) _x = d.x3;
-				if (step == 4) _x = d.x4;
-				if (step == 5) _x = d.x5;
+				var _y = d.y0;
+				if (step == 1) { _x = d.x1; _y = d.y1; }
+				if (step == 2) { _x = d.x2; _y = d.y2; }
+				if (step == 3) { _x = d.x3; _y = d.y3; }
+				if (step == 4) { _x = d.x4; _y = d.y4; }
+				if (step == 5) { _x = d.x5; _y = d.y5; }
 				if (step == 6) {
 					var whichLabel = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
 					
-					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _x = d.x6health;
-					else if ((isLabelActive) && (whichLabel == LABELCOST)) _x = d.x6cost;
-					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _x = d.x6emergency;
-					else _x = d.x6; 
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) { _x = d.x6health; _y = d.y6health; }
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; _y = d.y6cost; }
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; _y = d.y6emergency;}
+					else { _x = d.x6; _y = d.y6; }
 				}
-				if (step == 7) _x = d.x7health;
-				return _x * circleBox;
+				if (step == 7) { _x = d.x7health; _y = d.y7health;}
+				return personPath( _x * personBox.width, _y * personBox.height);
 			})
-			.attr('cy', d => {
-				var _y = d.y0;
-				if (step == 1) _y = d.y1;
-				if (step == 2) _y = d.y2;
-				if (step == 3) _y = d.y3;
-				if (step == 4) _y = d.y4;
-				if (step == 5) _y = d.y5;
-				if (step == 6) {
-					var whichLabel = model.getLabel();
-					var isLabelActive = model.getLabelApplied();
-
-					if ((isLabelActive) && (whichLabel == LABELHEALTH)) _y = d.y6health;
-					else if ((isLabelActive) && (whichLabel == LABELCOST)) _y = d.y6cost;
-					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) _y = d.y6emergency;
-					else _y = d.y6; 
-				}
-				if (step == 7) _y = d.y7health;
-				return _y * circleBox;
-			})
-			.attr('fill', d => model.getColor(d))
+			.style('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
 
 		var _raceKey = d3.selectAll('.racekey').attr('display', (step == 5) ? 'inline' : 'none')
@@ -609,11 +555,11 @@ var makeSVGView = function(model, data, svgID) {
 		
 		d3.selectAll('.circlecaption').remove();
 
-		var circleCaption = d3.select("#circleCaption")
+		var personCaption = d3.select("#personCaption")
 			.selectAll('tspan.circlecaption')
 			.data(d => {
 				var step = model.get();
-				var text = model.circleCaption();
+				var text = model.personCaption();
 				return text[step].text.split('\n');
 			})
 			.enter()
@@ -622,12 +568,12 @@ var makeSVGView = function(model, data, svgID) {
 			.text(d => d)
 			.attr('x', function(){
 				var step = model.get();
-				var text = model.circleCaption();
+				var text = model.personCaption();
 				return text[step].x;
 			})
 			.attr('y', function(d,i){
 				var step = model.get();
-				var text = model.circleCaption();
+				var text = model.personCaption();
 				return text[step].y + (i*5);
 			})
 			.style('font-size', captionSize.fontsize)
@@ -683,10 +629,10 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.transition()
 			.duration(duration)
-			.attr('x1', d => d[0][0] * circleBox)
-			.attr('y1', d => d[0][1] * circleBox)
-			.attr('x2', d => d[1][0] * circleBox)
-			.attr('y2', d => d[1][1] * circleBox)
+			.attr('x1', d => d[0][0] * personBox.width + 1)
+			.attr('y1', d => d[0][1] * personBox.height + 10)
+			.attr('x2', d => d[1][0] * personBox.width + 1)
+			.attr('y2', d => d[1][1] * personBox.height - 4)
 			.attr('opacity', function(){
 				var isLabelActive = model.getLabelApplied();
 				if (step == 3 || step == 4) return 1;
@@ -699,17 +645,12 @@ var makeSVGView = function(model, data, svgID) {
 
 		if (step >= 2 && step <= 5) {
 			_svg.select('#thresholdShade')
-				.attr('opacity', 0.2);
+				.attr('opacity', 1);
 			_svg.selectAll('.threshold')
 				.attr('display', 'inline')
 				.transition()
 				.duration(duration)
-				.attr('opacity', function(){
-					if (this.id == "thresholdShade") {
-						return 0.2;
-					}
-					return 1;
-				});
+				.attr('opacity',1);
 		} 
 		else {
 			_svg.selectAll('.threshold') 
@@ -728,7 +669,7 @@ var makeSVGView = function(model, data, svgID) {
 			var step = model.get();
 			var data = model.data();
 	
-			_moveCircles(step, data);
+			_movePeople(step, data);
 			_moveThreshold(step);
 		},
 		register: function(fxn) {
@@ -737,9 +678,9 @@ var makeSVGView = function(model, data, svgID) {
 	}
 }
 
-var makeTopTextView = function(model, data, textID) {
+var makeTopTextView = function(model, data, textID, svgID) {
 	var _observers = makeObservers();
-	var _svg = d3.select('#mySVG');
+	var _svg = d3.select(svgID);
 	var topText = _svg.append('text')
 		.attr('x', margin.left)
 		.attr('y', margin.top)
@@ -756,7 +697,7 @@ var makeTopTextView = function(model, data, textID) {
 		.attr('class', 'toptext')
 		.text(d => d)
 		.attr('x', d => margin.left)
-		.attr('y', (d,i) => i * topTextSize.space + margin.top)
+		.attr('y', (d,i) => i * topTextSize.padding + margin.top)
 		.attr('font-size', topTextSize.fontsize);
 
 	var _changeTopText = function(step, text, textID) {
@@ -770,7 +711,7 @@ var makeTopTextView = function(model, data, textID) {
 			.attr('class', 'toptext')
 			.text(d => d)
 			.attr('x', d =>  margin.left )//viewBoxSize.width * 0.5 - d.length )
-			.attr('y', (d,i) => i * topTextSize.space + margin.top)
+			.attr('y', (d,i) => i * topTextSize.padding + margin.top)
 			.attr('font-size', topTextSize.fontsize);
 	}
 
@@ -787,8 +728,8 @@ var makeTopTextView = function(model, data, textID) {
 }
 
 
-var makeInputView = function(model, inputID) {
-	var _svg = d3.select('#mySVG');
+var makeLabelView = function(model, inputID, svgID) {
+	var _svg = d3.select(svgID);
 	var _observers = makeObservers();
 	var _inputLabels = model.inputs();
 	var _inputG = _svg.append('g');
@@ -799,12 +740,12 @@ var makeInputView = function(model, inputID) {
 		.append('rect')
 		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
-		.attr('x', margin.left + 3)
+		.attr('x', margin.left + 0.5 * labelBoxSize.width)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 10 + margin.top + topTextSize.height
+			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 3);
 		})
-		.attr('width', algBoxSize.width * 0.8)
-		.attr('height', algBoxSize.height * 0.3)
+		.attr('width', labelBoxSize.width)
+		.attr('height', labelBoxSize.height)
 		.attr('fill', d => model.getLabelColor(d.id, false)) //green
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
@@ -820,9 +761,9 @@ var makeInputView = function(model, inputID) {
 		.append('text')
 		.attr('id', d => d.id)
 		.attr('class', 'labelClass')
-		.attr('x', margin.left + algBoxSize.width * 0.48)
+		.attr('x', margin.left + (1.5 * labelBoxSize.width) + 4)
 		.attr('y', (d, i) => {
-			return (i * algBoxSize.height * 0.35) + 9 + margin.top + topTextSize.height
+			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 4);
 		})
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
@@ -846,7 +787,7 @@ var makeInputView = function(model, inputID) {
 			.attr('id', function() {
 				return this.parentElement.id;
 			})
-			.attr('x', margin.left + algBoxSize.width * 0.48)
+			.attr('x', margin.left + (1.0 * labelBoxSize.width))
 			.attr('dy', 5)
 			.attr('text-anchor', 'middle')
 			.attr("cursor", "pointer");
@@ -908,17 +849,17 @@ var makeCommentaryView = function(model, data, svgID) {
 			if ((d == "Pretty good!") ||
 				(d == "Not so good") ||
 				(d == "Much better!")) {
-				return 120;
+				return labelBoxSize.width + peopleCluster.width + personBox.width;
 			}
-			return 50;
+			return 0.5 * viewBoxSize.width - 3 * personBox.width;
 		})
 		.attr('y', (d, i) => {
 			if ((d == "Pretty good!") ||
 				(d == "Not so good") ||
 				(d == "Much better!")) {
-				return 65;
+				return 7 * personBox.height + 3;
 			}
-			return 75 + (i * 4);
+			return (i * captionSize.fontsize) + 8 * personBox.height;
 		})
 		.attr('font-size', captionSize.fontsize);
 	
@@ -961,12 +902,12 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var buttonData = [{ 
 		id: nextID, 
 		text: "NEXT: 1", 
-		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 20, 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 + buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
 		id: backID, 
 		text: "BACK: 1",
-		x: (viewBoxSize.width - buttonSize.width) * 0.5 + 10 - buttonSize.width, 
+		x: (viewBoxSize.width - buttonSize.width) * 0.5 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
 	var _buttons = d3.select(svgID).selectAll('rect.button')
@@ -1071,11 +1012,11 @@ document.addEventListener("DOMContentLoaded", function(event){
 	d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		story.model = makeModel(d);
-		story.views.push(makeTopTextView(story.model, d, '#textView'));
+		story.views.push(makeTopTextView(story.model, d, '#textView', '#mySVG'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, 'backButton', 'nextButton', '#mySVG'));
 		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
-		story.views.push(makeInputView(story.model, '#inputs'))
+		story.views.push(makeLabelView(story.model, '#inputs', '#mySVG'))
 		story.controller = makeController(story.model);
 		
 		for (var i=0; i < story.views.length; i++) {
