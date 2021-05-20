@@ -151,7 +151,7 @@ var makeModel = function(data) {
 		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize, 
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Patients\n", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + 2 * personBox.width,  
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + personBox.width,  
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
 	{ text: "Predicted cost",
 		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
