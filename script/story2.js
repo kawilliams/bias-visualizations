@@ -373,9 +373,30 @@ var makeSVGView = function(model, data, svgID) {
 		var bigPerson = "c-0.95,0.27,-1.51,0.72,-1.78,1.38c-0.11,0.32,-0.13,0.77,-0.11,3c0,0,0.03,2.62,0.03,2.62c0,0,0.3,0.63,0.3,0.63c0.16,0.35,0.4,0.74,0.52,0.86c0.31,0.34,0.35,0.47,0.77,2.99c0.21,1.27,0.43,2.44,0.51,2.59c0.21,0.46,0.53,0.59,1.5,0.59c0.94,0,1.21,-0.09,1.44,-0.5c0.1,-0.17,0.31,-1.14,0.54,-2.5c0.44,-2.66,0.49,-2.88,0.78,-3.17c0.36,-0.34,0.67,-1.04,0.81,-1.78c0.18,-0.99,0.18,-4.53,-0.02,-5.19c-0.18,-0.6,-0.66,-1.09,-1.36,-1.37c-0.47,-0.18,-0.71,-0.21,-2.03,-0.24c-1.01,-0.02,-1.63,0.02,-1.9,0.09zm1.02,-6.64c-0.51,0.11,-0.88,0.31,-1.36,0.75c-1.25,1.16,-1.25,3.15,0.01,4.31c0.64,0.58,1.14,0.77,2.01,0.77c0.59,0,0.81,-0.04,1.23,-0.24c1.81,-0.87,2.27,-3.25,0.91,-4.7c-0.68,-0.75,-1.81,-1.1,-2.8,-0.89z";
 		var normalPerson = "c-0.82,0.23,-1.3,0.62,-1.53,1.19c-0.1,0.27,-0.12,0.66,-0.1,2.58c0,0,0.03,2.26,0.03,2.26c0,0,0.26,0.55,0.26,0.55c0.14,0.3,0.34,0.63,0.44,0.74c0.27,0.29,0.31,0.4,0.67,2.58c0.18,1.09,0.37,2.1,0.43,2.23c0.19,0.39,0.46,0.5,1.3,0.5c0.81,0,1.04,-0.07,1.24,-0.43c0.09,-0.14,0.27,-0.98,0.46,-2.14c0.39,-2.3,0.43,-2.49,0.68,-2.74c0.31,-0.3,0.57,-0.9,0.7,-1.54c0.15,-0.85,0.15,-3.9,-0.02,-4.47c-0.15,-0.52,-0.57,-0.94,-1.17,-1.18c-0.41,-0.16,-0.62,-0.18,-1.75,-0.21c-0.87,-0.01,-1.41,0.02,-1.64,0.08zm0.88,-5.73c-0.44,0.1,-0.75,0.27,-1.18,0.65c-1.07,1,-1.07,2.71,0.02,3.71c0.55,0.51,0.98,0.67,1.73,0.67c0.51,0,0.7,-0.03,1.06,-0.21c1.56,-0.75,1.96,-2.8,0.79,-4.05c-0.6,-0.64,-1.57,-0.95,-2.42,-0.77z";
         
-		var startX = d3.select(this).datum().x0 * personBox.width;
-		var startY = d3.select(this).datum().y0 * personBox.height;
+		var d = d3.select(this).datum();
+		var step = model.get();
 
+		var _x = d.x0;
+		var _y = d.y0;
+
+		if (step == 1) { _x = d.x1; _y = d.y1; }
+		if (step == 2) { _x = d.x2; _y = d.y2; }
+		if (step == 3) { _x = d.x3; _y = d.y3; }
+		if (step == 4) { _x = d.x4; _y = d.y4; }
+		if (step == 5) { _x = d.x5; _y = d.y5; }
+		if (step == 6) {
+			var whichLabel = model.getLabel();
+			var isLabelActive = model.getLabelApplied();
+			
+			if ((isLabelActive) && (whichLabel == LABELHEALTH)) { _x = d.x6health; _y = d.y6health; }
+			else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; _y = d.y6cost; }
+			else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; _y = d.y6emergency;}
+			else { _x = d.x6; _y = d.y6; }
+		}
+		if (step == 7) { _x = d.x7health; _y = d.y7health;}
+
+		var startX = _x * personBox.width;
+		var startY = _y * personBox.height; 
 		var start = "M " + startX + " " + startY;
         var bigPath = start + " " + bigPerson; 
         var normalPath = start + " " + normalPerson;
@@ -418,8 +439,8 @@ var makeSVGView = function(model, data, svgID) {
 		.append('text')
 		.attr('class', 'tooltip')
 		.attr('id', d => 'text' + d.id)
-		.attr('x', d => d.x0 * personBox.width + radiusW + 1)
-		.attr('y', d => d.y0 * personBox.height)
+		.attr('x', d => d.x0 * personBox.width - radiusW)
+		.attr('y', d => d.y0 * personBox.height - radiusH)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
 		.style('font-size', 3);
@@ -534,6 +555,48 @@ var makeSVGView = function(model, data, svgID) {
 			.style('font-size', captionSize.fontsize);
 
 	var _movePeople = function(step) {
+		var peopleToolTip = _svg.selectAll('text.tooltip')
+		.attr('x', d => {
+				var _x = d.x0;
+				if (step == 1) { _x = d.x1;  }
+				if (step == 2) { _x = d.x2;  }
+				if (step == 3) { _x = d.x3;  }
+				if (step == 4) { _x = d.x4;  }
+				if (step == 5) { _x = d.x5;  }
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					var isLabelActive = model.getLabelApplied();
+					
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) { _x = d.x6health; }
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; }
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; }
+					else { _x = d.x6; }
+				}
+				if (step == 7) { _x = d.x7health; }
+				return _x * personBox.width - radiusW;
+			})
+		.attr('y', d => { 
+				var _y = d.y0;
+				if (step == 1) { _y = d.y1; }
+				if (step == 2) { _y = d.y2; }
+				if (step == 3) { _y = d.y3; }
+				if (step == 4) { _y = d.y4; }
+				if (step == 5) { _y = d.y5; }
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					var isLabelActive = model.getLabelApplied();
+					console.log(d.y6health, d.y6cost, d.y6emergency, d.y6);
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {  _y = d.y6health; }
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _y = d.y6cost; }
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _y = d.y6emergency;}
+					else {  _y = d.y6; }
+				}
+				if (step == 7) { _y = d.y7health;}
+				return _y * personBox.height - radiusH;
+			})
+		.text(d => (d.id < 10) ? "Patient " + d.id : "")
+		.attr('opacity', 0)
+		.style('font-size', 3);
 
 		var people = _svg.selectAll('path.allPeople')
 			.transition()
