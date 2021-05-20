@@ -327,8 +327,8 @@ var makeSVGView = function(model, data, svgID) {
 	var _svg = d3.select(svgID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
 		.attr('viewBox', "0 0 " + viewBoxSize.width + " " + viewBoxSize.height)
-		.classed('svg-content', true)
-		.attr('style', 'outline: thin solid red;');
+		.classed('svg-content', true);
+		// .attr('style', 'outline: thin solid red;');
 
 	// var _midlineV = _svg.append('line')
 	// 	.attr('x1', viewBoxSize.width * 0.5)
