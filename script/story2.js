@@ -810,6 +810,34 @@ var makeLabelView = function(model, inputID, svgID) {
 	var _inputLabels = model.inputs();
 	var _inputG = _svg.append('g');
 
+	var defs = _svg.append('defs');
+	var filter = defs.append('filter')
+		.attr('id', 'drop-shadow')
+		.attr('height', '120%')
+		.attr('width', '120%');
+
+
+	filter.append('feGaussianBlur')
+		.attr('in', 'SourceAlpha')
+		.attr('stdDeviation', 1)
+		.attr('result', 'coloredBlur');
+
+	// filter.append('feOffset')
+	// 	// .attr('in', 'blur')
+	// 	.attr('dx', 1)
+	// 	.attr('dy', 1)
+	// 	.attr('result', 'offsetBlur');
+
+	var feMerge = filter.append('feMerge');
+
+	feMerge.append('feMergeNode')
+		.attr('in', 'coloredBlur');
+	feMerge.append('feMergeNode')
+		.attr('in', 'SourceGraphic');
+
+
+
+
 	var _labelRect = _inputG.selectAll('rect')
 		.data(_inputLabels)
 		.enter()
@@ -823,6 +851,8 @@ var makeLabelView = function(model, inputID, svgID) {
 		.attr('width', labelBoxSize.width)
 		.attr('height', labelBoxSize.height)
 		.attr('fill', d => model.getLabelColor(d.id, false)) //green
+		.style('rx', 2)
+		.style('filter', 'url(#drop-shadow)')
 		.attr('display', 'none')
 		.attr("cursor", "pointer")
 		.on('mouseenter', function(){
