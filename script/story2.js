@@ -1,21 +1,20 @@
 
-var margin = ({top: 5, right: 3, bottom: 3, left: 3});
-var svgSize = {height: 100, width: 100}
-var viewBoxSize = {height: 157, width: 225};
+var margin = ({top: 10, right: 10, bottom: 10, left: 10});
+var svgSize = {height: 400, width: 400}
+var viewBoxSize = {height: 207, width: 375};
 
 
 var personBox = {width: 11, height: 14};
-var radius = 5;
 var radiusW = 5;
 var radiusH = 7;
-var labelBoxSize = {height: 15, width: 35, padding: 3};
+var labelBoxSize = {height: viewBoxSize.height * 0.10, width: viewBoxSize.width * 0.1, padding: viewBoxSize.height * 0.01};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
 var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: 4, padding: 5};
-var buttonSize = {height: 8, width: 20};
-var captionSize = {fontsize: 3};
+var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: 6, padding: 10};
+var buttonSize = {height: viewBoxSize.height * 0.04, width: viewBoxSize.width * 0.05};
+var captionSize = {fontsize: 6};
 
 var padding = {text: 5};
 var duration = 750;
@@ -1043,8 +1042,8 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 		.style('fill', 'lightgrey')
 		.style('rx', 3);
 
-	var _forward = d3.select(nextID);
-	var _backward = d3.select(backID);
+	var _forward = d3.select('#'+nextID);
+	var _backward = d3.select('#'+backID);
 
 	var _buttonsText = d3.select(svgID).selectAll('text.button')
 		.data(buttonData)
@@ -1095,8 +1094,8 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	};
 
 	_forward.on('click', _fireIncrementEvent);
-	_backward.on('click', _fireDecrementEvent);
 	_forwardText.on('click', _fireIncrementEvent);
+	_backward.on('click', _fireDecrementEvent);
 	_backwardText.on('click', _fireDecrementEvent);
 
 	return {
