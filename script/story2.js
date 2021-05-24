@@ -853,7 +853,7 @@ var makeLabelView = function(model, labelID, svgID) {
 			.attr('width', labelBoxSize.width)
 			.attr('height', labelBoxSize.height)
 			.attr('fill', d => model.getLabelColor(d.id, false)) //green
-			.style('border-radius', 2)
+			.attr('rx', 2)
 			.style('filter', function(){
 				if (model.getClickedCostLabel()) return 'url(#drop-shadow)';
 				return 'none';
