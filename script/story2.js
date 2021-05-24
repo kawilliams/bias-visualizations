@@ -6,7 +6,7 @@ var viewBoxSize = {height: 157, width: 225};
 
 var personBox = {width: 11, height: 14};
 var radius = 5;
-var radiusW = 5; //katy: change to 5
+var radiusW = 5;
 var radiusH = 7;
 var labelBoxSize = {height: 15, width: 35, padding: 3};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
@@ -36,6 +36,7 @@ var story = {
 		//List of signal types
 		increment: 'INCREMENT',
 		decrement: 'DECREMENT',
+		error: 'ERROR',
 		changeColor: 'CHANGE_COLOR'
 	}
 }
@@ -124,7 +125,7 @@ var makeModel = function(data) {
 		in the highest-risk groups...\n\nThe bias attributable to label choice has impacts in algorithms used in the health sector..."
 	];
 
-	var _inputLabels = [
+	var _labels = [
 		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: LABELHEALTH},
 		{text: 'Predict\nCare\nCost', clicked: false, id: LABELCOST},
 		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: LABELEMERGENCY}
@@ -133,6 +134,8 @@ var makeModel = function(data) {
 	//Default is Predict Care Cost
 	var _label = LABELCOST; 
 	var _labelApplied = false;
+	var _clickedCostLabel = false;
+	var _errorFlag = false;
 
 	var _commentary = [
 		{text: ['Pretty good!'], step: 3, label: LABELCOST},
@@ -230,11 +233,18 @@ var makeModel = function(data) {
 			_labelApplied = false;
 			_observers.notify();
 		},
+		setClickedCostLabel: function() {
+			if (!_clickedCostLabel) {
+				_clickedCostLabel = true;
+			} 
+			_observers.notify();
+		},
 		//Change the circles' color & label
 		changeColor: function(index) {
 			_activeColor = parseInt(index);
 			_label = parseInt(index);
 			_labelApplied = true;
+			_clickedCostLabel = false;
 			_observers.notify();
 		},
 		//Get the step
@@ -249,13 +259,19 @@ var makeModel = function(data) {
 		text: function() {
 			return _text;
 		},
-		//Get the algorithm inputs
-		inputs: function() {
-			return _inputLabels;
+		//Get the algorithm label
+		labels: function() {
+			return _labels;
 		},
 		//Get the connectors 
 		connectors: function(){
 			return _connectors;
+		},
+		getClickedCostLabel: function() {
+			return _clickedCostLabel;
+		},
+		getErrorFlag: function() {
+			return _errorFlag;
 		},
 		//Get the circle color scheme
 		getColor: function(d) {
@@ -585,7 +601,6 @@ var makeSVGView = function(model, data, svgID) {
 				if (step == 6) {
 					var whichLabel = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
-					console.log(d.y6health, d.y6cost, d.y6emergency, d.y6);
 					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {  _y = d.y6health; }
 					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _y = d.y6cost; }
 					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _y = d.y6emergency;}
@@ -804,135 +819,133 @@ var makeTopTextView = function(model, data, textID, svgID) {
 }
 
 
-var makeLabelView = function(model, inputID, svgID) {
-	var _svg = d3.select(svgID);
+var makeLabelView = function(model, labelID, svgID) {
 	var _observers = makeObservers();
-	var _inputLabels = model.inputs();
-	var _inputG = _svg.append('g');
+	var _svg = d3.select(svgID);
+	var _labelG = _svg.append('g')
+			.attr('id', labelID);
 
-	var defs = _svg.append('defs');
-	var filter = defs.append('filter')
-		.attr('id', 'drop-shadow')
-		.attr('height', '120%')
-		.attr('width', '120%');
+	var _drawLabels = function() {
 
+		var _labels = model.labels();
 
-	filter.append('feGaussianBlur')
-		.attr('in', 'SourceAlpha')
-		.attr('stdDeviation', 1)
-		.attr('result', 'coloredBlur');
+		var defs = _svg.append('defs');
+		var filter = defs.append('filter')
+			.attr('id', 'drop-shadow')
+			.attr('height', '120%')
+			.attr('width', '120%');
+			filter.append('feDropShadow')
+				.attr('dx', '0')
+				.attr('dy', '0')
+				.attr('stdDeviation', 1)
+				.attr('flood-color', "red");
 
-	// filter.append('feOffset')
-	// 	// .attr('in', 'blur')
-	// 	.attr('dx', 1)
-	// 	.attr('dy', 1)
-	// 	.attr('result', 'offsetBlur');
-
-	var feMerge = filter.append('feMerge');
-
-	feMerge.append('feMergeNode')
-		.attr('in', 'coloredBlur');
-	feMerge.append('feMergeNode')
-		.attr('in', 'SourceGraphic');
-
-
-
-
-	var _labelRect = _inputG.selectAll('rect')
-		.data(_inputLabels)
-		.enter()
-		.append('rect')
-		.attr('id', d => d.id)
-		.attr('class', 'labelClass')
-		.attr('x', margin.left + 0.5 * labelBoxSize.width)
-		.attr('y', (d, i) => {
-			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 3);
-		})
-		.attr('width', labelBoxSize.width)
-		.attr('height', labelBoxSize.height)
-		.attr('fill', d => model.getLabelColor(d.id, false)) //green
-		.style('rx', 2)
-		.style('filter', 'url(#drop-shadow)')
-		.attr('display', 'none')
-		.attr("cursor", "pointer")
-		.on('mouseenter', function(){
-			d3.select(this).attr('fill', d => model.getLabelColor(d.id, true)); //light base color
-		})
-		.on('mouseout', function(){
-			d3.select(this).attr('fill', d => model.getLabelColor(d.id, false)); //base color
-		});
-	var _labelLabel = _inputG.selectAll('text.labelClass')
-		.data(_inputLabels)
-		.enter()
-		.append('text')
-		.attr('id', d => d.id)
-		.attr('class', 'labelClass')
-		.attr('x', margin.left + (1.5 * labelBoxSize.width) + 4)
-		.attr('y', (d, i) => {
-			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 4);
-		})
-		.attr('display', 'none')
-		.attr("cursor", "pointer")
-		.on('mouseenter', function(d, data){
-			var thisId = data.id;
-			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
-				.attr('fill', c => model.getLabelColor(c.id, true)); //light color
-		})
-		.on('mouseout', function(d, data){
-			var thisId = data.id;
-			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
-				.attr('fill', c => model.getLabelColor(c.id, false)); //base color
-		});
-
-		_labelLabel.selectAll('tspan.labelClass')
-			.data(d => d.text.split('\n'))
+		var _labelRect = _labelG.selectAll('rect')
+			.data(_labels)
 			.enter()
-			.append('tspan')
+			.append('rect')
+			.attr('id', d => d.id)
 			.attr('class', 'labelClass')
-			.text(d => d)
-			.attr('id', function() {
-				return this.parentElement.id;
+			.attr('x', margin.left + 0.5 * labelBoxSize.width)
+			.attr('y', (d, i) => {
+				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 3);
 			})
-			.attr('x', margin.left + (1.0 * labelBoxSize.width))
-			.attr('dy', 5)
-			.attr('text-anchor', 'middle')
-			.attr("cursor", "pointer");
-
-	function _moveInputs(step) {
-		var _allAlgLabels = _svg.selectAll('.labelClass');
-	
-		if (step == 1) {
-			_allAlgLabels.attr('display', function(){
-				return (this.id == '1') ? 'inline' : 'none';
+			.attr('width', labelBoxSize.width)
+			.attr('height', labelBoxSize.height)
+			.attr('fill', d => model.getLabelColor(d.id, false)) //green
+			.style('border-radius', 2)
+			.style('filter', function(){
+				if (model.getClickedCostLabel()) return 'url(#drop-shadow)';
+				return 'none';
+			})
+			.attr('display', 'none')
+			.attr("cursor", "pointer")
+			.on('mouseenter', function(){
+				d3.select(this).attr('fill', d => model.getLabelColor(d.id, true)); //light base color
+			})
+			.on('mouseout', function(){
+				d3.select(this).attr('fill', d => model.getLabelColor(d.id, false)); //base color
 			});
-		} 
-		else if (step == 6) {
-			_allAlgLabels.attr('display', 'inline');
-		}
-		else {
-			_allAlgLabels.attr('display', 'none');
-		}
+
+
+		var _labelLabel = _labelG.selectAll('text.labelClass')
+			.data(_labels)
+			.enter()
+			.append('text')
+			.attr('id', d => d.id)
+			.attr('class', 'labelClass')
+			.attr('x', margin.left + (1.5 * labelBoxSize.width) + 4)
+			.attr('y', (d, i) => {
+				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 4);
+			})
+			.attr('display', 'none')
+			.attr("cursor", "pointer")
+			.on('mouseenter', function(d, data){
+				var thisId = data.id;
+				d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+					.attr('fill', c => model.getLabelColor(c.id, true)); //light color
+			})
+			.on('mouseout', function(d, data){
+				var thisId = data.id;
+				d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+					.attr('fill', c => model.getLabelColor(c.id, false)); //base color
+			});
+
+			_labelLabel.selectAll('tspan.labelClass')
+				.data(d => d.text.split('\n'))
+				.enter()
+				.append('tspan')
+				.attr('class', 'labelClass')
+				.text(d => d)
+				.attr('id', function() {
+					return this.parentElement.id;
+				})
+				.attr('x', margin.left + (1.0 * labelBoxSize.width))
+				.attr('dy', 5)
+				.attr('text-anchor', 'middle')
+				.attr("cursor", "pointer");
+
+
+			// The button event passes the appropriate
+			//data to any listening controllers
+			var _fireChangeColor = function(evt) {
+				_observers.notify({
+					type: story.signals.changeColor,
+					color: evt.target.id
+				});
+			};
+
+			_labelRect.on('click', _fireChangeColor);
+			_labelLabel.on('click', _fireChangeColor);
+
+			var step = model.get();
+			var _allAlgLabels = _svg.selectAll('.labelClass');
+	
+			if (step == 1) {
+				_allAlgLabels.attr('display', function(){
+					return (this.id == '1') ? 'inline' : 'none';
+				});
+			} 
+			else if (step == 6) {
+				_allAlgLabels.attr('display', 'inline');
+			}
+			else {
+				_allAlgLabels.attr('display', 'none');
+			}
 	}
 
-	// The button event passes the appropriate
-	//data to any listening controllers
-	var _fireChangeColor = function(evt) {
-		_observers.notify({
-			type: story.signals.changeColor,
-			color: evt.target.id
-		});
-	};
 
-	_labelRect.on('click', _fireChangeColor);
-	_labelLabel.on('click', _fireChangeColor);
-
-	return {
-		render: function() {
-			var step = model.get();
-			_moveInputs(step);
-		},
+	return {		
 		register: function(fxn) {
 			_observers.add(fxn);
+		},
+		render: function() {
+			//Clear the label G for redrawing
+			var _labelG = document.getElementById(labelID);
+			while (_labelG.firstChild) {
+				_labelG.removeChild(_labelG.firstChild);
+			}
+			_drawLabels(model, svgID, labelID);
 		}
 	}
 }
@@ -1051,9 +1064,29 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	// The button event passes the appropriate
 	//data to any listening controllers
 	var _fireIncrementEvent = function() {
-		_observers.notify({
-			type: story.signals.increment
-		});
+		var step = model.get();
+		if (step == 1) {
+			if (model.getLabelApplied()) {
+				//If getLabelApplied returns true, the user clicked the 
+				//blue label button and recolored the patients
+				_observers.notify({
+					type: story.signals.increment
+				});
+			}
+			else {
+				console.log("Error, please click");
+				
+				_observers.notify({
+					type: story.signals.error
+				});
+			}
+		}
+		else {
+			_observers.notify({
+				type: story.signals.increment
+			});
+		}
+		
 	};
 	var _fireDecrementEvent = function() {
 		_observers.notify({
@@ -1085,6 +1118,9 @@ var makeController = function(model) {
 	var _decrement = function() {
 		model.decrement();
 	}
+	var _error = function() {
+		model.setClickedCostLabel();
+	}
 	var _changeColor = function(args) {
 		model.changeColor(args.color);
 	}
@@ -1097,6 +1133,9 @@ var makeController = function(model) {
 					break;
 				case story.signals.decrement:
 					_decrement();
+					break;
+				case story.signals.error:
+					_error();
 					break;
 				case story.signals.changeColor:
 					_changeColor(evt);
@@ -1122,7 +1161,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, 'backButton', 'nextButton', '#mySVG'));
 		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
-		story.views.push(makeLabelView(story.model, '#inputs', '#mySVG'))
+		story.views.push(makeLabelView(story.model, 'label', '#mySVG'))
 		story.controller = makeController(story.model);
 		
 		for (var i=0; i < story.views.length; i++) {
