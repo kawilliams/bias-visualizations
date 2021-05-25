@@ -274,7 +274,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
 				.attr('class', mySVGClass)
-				.attr('height', 100)
+				.attr('height', 127)
 				.attr('width', 280)
 				.attr('x', 90) //(event.x - 170)
 				.attr('y', 120) //(500 - event.x)
@@ -283,11 +283,13 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('opacity', '1');
 
 		var toolTipText = { instructions: "Health providers used an algorithm to determine\n\
-											which patients would get accepted into an extra\n\
-											care program. The x-axis shows how a patient's\n\
-											health score compared to others, and the y-axis\n\
-											shows how healthy the patient is, based on number\n\
-											of chronic conditions. Move the sliders to explore.",
+										  which patients would get referred for and accepted\n\
+										  into an extra care program. The x-axis shows a \n\
+										  patient's risk score, and the y-axis shows how \n\
+										  healthy the patient is, based on the number of \n\
+										  chronic conditions. A higher risk score equates to\n\
+										  a higher chance to receive extra care. \n\
+										  Move the sliders to explore.",
 					horizTextAcrossThreshold: "Two patients at this level would be \n\
 								equally sick (Y conditions), but to the\n\
 								algorithm the Black patient needed to\n\
@@ -435,6 +437,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			var whichSlider = "." + d3.select(this).attr('class').replace(' ', '.');
 			d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
 		}
+		function percentileSuffix(number) {
+			var percentileWithSuffix = number;
+			if (number % 10 == 1) {return percentileWithSuffix + "st";}
+			else if (number % 10 == 2) {return percentileWithSuffix + "nd";}
+			else if (number % 10 == 3) {return percentileWithSuffix + "rd";}
+			return percentileWithSuffix + "th";
+		}
 
 		function toolTipAppear(event, d, whichSlider, selectedCircles){
 
@@ -444,7 +453,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 219 : 225)
+			.attr('width', whichSlider.includes("horiz") ? 219 : 255)
 			.attr('height', whichSlider.includes("horiz") ? 65 : 65)
 		
 			//Get the selected circles' data
@@ -494,6 +503,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				var X = selectedCircles[1].risk_score_quantile;
 				var Y = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
 				var Z = selectedCircles[0].num_chronic_conds_mean.toFixed(2);
+				var X = percentileSuffix(X);
 				
 				var diff = (Z - Y).toFixed(2);
 				text = text.replace("X", X);
@@ -517,9 +527,11 @@ function drawMySVG(mySVGID, mySVGClass){
 						whiteApproxIndex = i;
 					}
 				});
-				var X = blackCurve[blackApproxIndex][0].toFixed(0);
+				var X = blackCurve[blackApproxIndex][0].toFixed(0); //percentile
 				var Y = whiteCurve[whiteApproxIndex][1].toFixed(2);
 				var Z = blackCurve[blackApproxIndex][1].toFixed(2);
+				var X = percentileSuffix(X);
+
 				
 				var diff = (Z - Y).toFixed(2);
 				text = text.replace("X", X);
