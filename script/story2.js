@@ -96,7 +96,7 @@ var makeModel = function(data) {
 
 	var _text = [
 		"Below are ten patients with varying levels of health, but only five of them can be referred to the high-risk care management program to help with their chronic illnesses. We want to prioritize those that need the care the most, so we'll line them up from sickest to healthiest. We'll use an algorithm to help us determine who should get into the program.",
-		"We have data from insurance claims - demographics, medications, visits, cost, and treatment.n. We'll begin by having the algorithm predict which patients will cost the most in the coming year, as this seems a reasonable way to determine who needs the program the most. High healthcare costs are correlated with high healthcare needs.",
+		"We have data from insurance claims - demographics, medications, visits, cost, and treatment. We'll begin by having the algorithm predict which patients will cost the most in the coming year, as this seems a reasonable way to determine who needs the program the most. High healthcare costs are correlated with high healthcare needs.",
 		"We apply the algorithm and align the circles from lowest predicted cost to highest predicted cost, or what we assume is healthiest to sickest, with the sickest on the right. The five sickest patients (the darkest blue circles) are accepted into the care management program.",
 		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should be very close to the actual care costs. Did our algorithm accurately predict cost?",
 		"But what we truly care about is predicting patient health, not predicting future care costs. Remember, we want to determine the best patients for our extra care program. How well did the algorithm predict actual health?",
@@ -187,7 +187,7 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: 0 },
 	{text: "Actual cost\n",
-		x: viewBoxSize.width * 0.5 - peopleCluster.width - 8 * captionSize.fontsize,
+		x: 0.5 * viewBoxSize.width - 8 * captionSize.fontsize,
 		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
 		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontsize,
@@ -368,7 +368,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'allPeople')
 		.attr('id', 'peopleG');
 	// Move the patients to the right side
-	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
+	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left - 0.5 * radiusW - 1) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
 
 	var step = model.get(); 
 
