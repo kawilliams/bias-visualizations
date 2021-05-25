@@ -1,21 +1,20 @@
 
-var margin = ({top: 5, right: 3, bottom: 3, left: 3});
-var svgSize = {height: 100, width: 100}
-var viewBoxSize = {height: 157, width: 225};
+var margin = ({top: 10, right: 10, bottom: 10, left: 10});
+var svgSize = {height: 100, width: 150}
+var viewBoxSize = {height: 300, width: 450};
 
 
-var personBox = {width: 11, height: 14};
-var radius = 5;
-var radiusW = 5; //katy: change to 5
-var radiusH = 7;
-var labelBoxSize = {height: 15, width: 35, padding: 3};
+var personBox = {width: 15, height: 22};
+var radiusW = 7;
+var radiusH = 11;
+var labelBoxSize = {height: viewBoxSize.height * 0.10, width: viewBoxSize.width * 0.1, padding: viewBoxSize.height * 0.01, fontsize: '10px'};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
 var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: 4, padding: 5};
-var buttonSize = {height: 8, width: 20};
-var captionSize = {fontsize: 3};
+var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: '12px', padding: 10};
+var buttonSize = {height: 20, width: 40, fontsize: '12px'};
+var captionSize = {fontsize: '10px', fontHeight: 8};
 
 var padding = {text: 5};
 var duration = 750;
@@ -36,6 +35,7 @@ var story = {
 		//List of signal types
 		increment: 'INCREMENT',
 		decrement: 'DECREMENT',
+		error: 'ERROR',
 		changeColor: 'CHANGE_COLOR'
 	}
 }
@@ -95,26 +95,13 @@ var makeModel = function(data) {
 	
 
 	var _text = [
-		"Below are ten patients with varying levels of health and only five of them can be accepted into the high-risk\n\
-		care management program to help with their chronic illnesses. We want to prioritize those that are sickest, so\n\
-		we'll line them up from sickest to healthiest. We'll use an algorithm to help us score health levels.",
-		"We have health record data, like diagnosis and procedure codes, insurance type, medications, care costs, and\n\
-		the age and sex of the person. We'll use these data to predict future health care costs - a commonly-used prediction\n\
-		label that is correlated with health.",
-		"We apply the algorithm and align the circles from healthiest to sickest, with the sickest on the right. The five\n\
-		sickest patients (the darkest blue circles) are accepted into the care management program.",
-		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should\n\
-		be very close to the actual care costs.",
-		"But we care more about predicting patient health than predicting future care costs.\n\
-		How well did the algorithm predict actual health?",
-		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random\n\
-		with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care\n\
-		costs for Black patients will be lower than the care costs for a similarly ill White patient. Even though the algorithm\n\
-		did not include race as an input, these societal inequalities produced dramatically different algorithmic scores and so\n\
-		sicker people were excluded from the care program.",
-		"We can fix this by changing our label to target from care costs to something that might be a closer approximation of \n\
-		actual health for all patients. Click on the different labels (the colored rectangles) to see how closely the predictions\n\
-		match the actual health.",
+		"Below are ten patients with varying levels of health, but only five of them can be referred to the high-risk care management program to help with their chronic illnesses. We want to prioritize those that need the care the most, so we'll line them up from sickest to healthiest. We'll use an algorithm to help us determine who should get into the program.",
+		"We have data from insurance claims - demographics, medications, visits, cost, and treatment. We'll begin by having the algorithm predict which patients will cost the most in the coming year, as this seems a reasonable way to determine who needs the program the most. High healthcare costs are correlated with high healthcare needs.",
+		"We apply the algorithm and align the circles from lowest predicted cost to highest predicted cost, or what we assume is healthiest to sickest, with the sickest on the right. The five sickest patients (the darkest blue circles) are accepted into the care management program.",
+		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should be very close to the actual care costs. Did our algorithm accurately predict cost?",
+		"But what we truly care about is predicting patient health, not predicting future care costs. Remember, we want to determine the best patients for our extra care program. How well did the algorithm predict actual health?",
+		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care costs for Black patients will be lower than the care costs for a similarly-ill White patient. Even though the algorithm did not include race as an input, these societal inequalities produced dramatically different algorithmic scores and so Black people who were equally as sick as White people were excluded from the care program.",
+		"Why did this happen? The value we truly care about - which patients most need extra care - was not the same as what the algorithm was finding. We can fix this by changing our label from care costs to something that might be a closer approximation of actual health for all patients. Click on the different labels (the colored rectangles) to see how closely the predictions match the actual health.",
 		"\n\nResearchers conducted experiments on the patient data to see which of the three label choices - active chronic\n\
 		conditions, total care costs, emergency care cost - did the best job of (1) predicting the sickest patients, and\n\
 		(2) mitigating bias in label choice. All three labels notably perform the same at predicting the 97th percentile\n\
@@ -124,7 +111,7 @@ var makeModel = function(data) {
 		in the highest-risk groups...\n\nThe bias attributable to label choice has impacts in algorithms used in the health sector..."
 	];
 
-	var _inputLabels = [
+	var _labels = [
 		{text: 'Predict\nHealth & Care\nCost', clicked: false, id: LABELHEALTH},
 		{text: 'Predict\nCare\nCost', clicked: false, id: LABELCOST},
 		{text: 'Predict\nEmergency Care\nCost', clicked: false, id: LABELEMERGENCY}
@@ -133,34 +120,49 @@ var makeModel = function(data) {
 	//Default is Predict Care Cost
 	var _label = LABELCOST; 
 	var _labelApplied = false;
+	var _clickedCostLabel = false;
+	var _errorFlag = false;
 
 	var _commentary = [
-		{text: ['Pretty good!'], step: 3, label: LABELCOST},
+		{text: ['Pretty close!'], step: 3, label: LABELCOST},
 		{text: ['Not so good'], step: 4, label: LABELCOST},
 		{text: ["Much better!"], step: 6, label: LABELHEALTH},
-		{text: ["The number of chronic conditions", "is similar to the actual health."], step: 6, label: LABELHEALTH},
+		{text: ["We predict a patient’s health in a given year by measuring the number of chronic conditions that ", 
+		"flare up that year. Because the care program operates to improve the management of chronic conditions, patients with the most doctor’s appointments and hospitalizations related to chronic ", 
+		"conditions could be a promising group to prioritize for this preventative intervention.", 
+		"This label produces accurate cost predictions, while also accurately predicting health with ",
+		"minimal bias."], step: 6, label: LABELHEALTH},
 		{text: ["Not so good"], step: 6, label: LABELCOST},
-		{text: ["Using total care cost is not a fair","label."], step: 6, label: LABELCOST},
+		{text: ["We score a patient based on the total cost of their care for a year, such as costs of in- and ",
+		"out-patient procedures, surgical costs, and insurance costs. From a statistical perspective, this ",
+		"value is useful (and used industry-wide) because it is correlated with health and it is a real-world ",
+		"number that is easy to calculate. While the care cost label accurately predicts costs, it does not do ",
+		"a great job of predicting health. This severely disadvantages Black patients when the variable we ",
+		"care about is health. "], step: 6, label: LABELCOST},
 		{text: ["Not so good"], step: 6, label: LABELEMERGENCY},
-		{text: ["Emergency costs is not a fair","label."], step: 6, label: LABELEMERGENCY}
+		{text: ["We predict only emergency medicine costs due to emergency visits and hospitalizations, rather ",
+		"than all other costs generated by care, to more closely represent catastrophic health events that ",
+		"come from lack of caring for chronic conditions. This label does a good job of predicting cost, and ",
+		"does better at lowering the amount of bias, but again, different populations use emergency care ",
+		"differently and this leads to significant bias still existing in our results."], step: 6, label: LABELEMERGENCY}
 		
 	];
 
 	var _personCaption = [
 	{ text: "Patients\n", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize, 
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontHeight, 
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
 	{ text: "Patients\n", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + 2 * personBox.width,  
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontHeight + personBox.width,  
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
 	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontHeight,
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontHeight,
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontHeight,
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "\n",
 		x: margin.left,
@@ -185,10 +187,10 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: 0 },
 	{text: "Actual cost\n",
-		x: viewBoxSize.width * 0.5 - peopleCluster.width - 8 * captionSize.fontsize,
+		x: 0.5 * viewBoxSize.width - 8 * captionSize.fontHeight,
 		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
-		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontsize,
+		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontHeight,
 		y: 4 + 2 * personBox.height },
 	{text: "\n",
 		x: margin.left,
@@ -230,11 +232,18 @@ var makeModel = function(data) {
 			_labelApplied = false;
 			_observers.notify();
 		},
+		setClickedCostLabel: function() {
+			if (!_clickedCostLabel) {
+				_clickedCostLabel = true;
+			} 
+			_observers.notify();
+		},
 		//Change the circles' color & label
 		changeColor: function(index) {
 			_activeColor = parseInt(index);
 			_label = parseInt(index);
 			_labelApplied = true;
+			_clickedCostLabel = false;
 			_observers.notify();
 		},
 		//Get the step
@@ -249,13 +258,19 @@ var makeModel = function(data) {
 		text: function() {
 			return _text;
 		},
-		//Get the algorithm inputs
-		inputs: function() {
-			return _inputLabels;
+		//Get the algorithm label
+		labels: function() {
+			return _labels;
 		},
 		//Get the connectors 
 		connectors: function(){
 			return _connectors;
+		},
+		getClickedCostLabel: function() {
+			return _clickedCostLabel;
+		},
+		getErrorFlag: function() {
+			return _errorFlag;
 		},
 		//Get the circle color scheme
 		getColor: function(d) {
@@ -353,7 +368,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'allPeople')
 		.attr('id', 'peopleG');
 	// Move the patients to the right side
-	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
+	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + margin.left - 0.5 * radiusW - 1) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
 
 	var step = model.get(); 
 
@@ -369,12 +384,46 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y2', d => d.y0 * personBox.height) //and connects to the shadow head on transition
 		.attr('opacity', 1); 
 
-	// var makeBig = function(event) {
-	// 	d3.select(this).transition().ease(d3.easeBounce)
-	// 	.attr('r', radius + 3)
-	// 	.transition()
-	// 	.attr('r', radius);
-	// }
+	var makeBig = function(event) {
+		var bigPerson = "c-1.58,0.45,-2.5,1.19,-2.94,2.29c-0.2,0.52,-0.23,1.27,-0.18,4.96c0,0,0.04,4.33,0.04,4.33c0,0,0.5,1.05,0.5,1.05c0.27,0.57,0.66,1.22,0.86,1.43c0.52,0.55,0.58,0.76,1.27,4.95c0.35,2.1,0.72,4.03,0.84,4.27c0.36,0.77,0.89,0.98,2.49,0.98c1.56,0,1.99,-0.15,2.39,-0.83c0.16,-0.27,0.51,-1.89,0.88,-4.12c0.73,-4.41,0.82,-4.77,1.3,-5.25c0.59,-0.57,1.1,-1.73,1.34,-2.95c0.3,-1.64,0.3,-7.51,-0.03,-8.59c-0.3,-1,-1.09,-1.81,-2.25,-2.28c-0.78,-0.3,-1.18,-0.34,-3.36,-0.39c-1.68,-0.03,-2.7,0.03,-3.15,0.15zm1.7,-10.99c-0.86,0.18,-1.46,0.51,-2.27,1.25c-2.07,1.91,-2.06,5.2,0.03,7.12c1.05,0.97,1.87,1.29,3.32,1.29c0.99,0,1.34,-0.08,2.04,-0.41c3,-1.44,3.76,-5.38,1.51,-7.78c-1.14,-1.23,-3,-1.82,-4.63,-1.47z";
+		var normalPerson = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+        
+		var d = d3.select(this).datum();
+		var step = model.get();
+
+		var _x = d.x0;
+		var _y = d.y0;
+
+		if (step == 1) { _x = d.x1; _y = d.y1; }
+		if (step == 2) { _x = d.x2; _y = d.y2; }
+		if (step == 3) { _x = d.x3; _y = d.y3; }
+		if (step == 4) { _x = d.x4; _y = d.y4; }
+		if (step == 5) { _x = d.x5; _y = d.y5; }
+		if (step == 6) {
+			var whichLabel = model.getLabel();
+			var isLabelActive = model.getLabelApplied();
+			
+			if ((isLabelActive) && (whichLabel == LABELHEALTH)) { _x = d.x6health; _y = d.y6health; }
+			else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; _y = d.y6cost; }
+			else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; _y = d.y6emergency;}
+			else { _x = d.x6; _y = d.y6; }
+		}
+		if (step == 7) { _x = d.x7health; _y = d.y7health;}
+
+		var startX = _x * personBox.width;
+		var startY = _y * personBox.height; 
+		var start = "M " + startX + " " + startY;
+        var bigPath = start + " " + bigPerson; 
+        var normalPath = start + " " + normalPerson;
+  
+		d3.select(this)
+		.transition()
+		.ease(d3.easeBounce)
+		.attr("d", bigPath)
+		.transition()
+		.ease(d3.easeBounce)
+		.attr("d", normalPath);
+	}
 
 	var showPatientId = function(event) {
 		var circleId = d3.select(this).node().id.split('people')[1];
@@ -387,8 +436,8 @@ var makeSVGView = function(model, data, svgID) {
 
 	function personPath(startX, startY) {
 
-        var path = "c-0.82,0.23,-1.3,0.62,-1.53,1.19c-0.1,0.27,-0.12,0.66,-0.1,2.58c0,0,0.03,2.26,0.03,2.26c0,0,0.26,0.55,0.26,0.55c0.14,0.3,0.34,0.63,0.44,0.74c0.27,0.29,0.31,0.4,0.67,2.58c0.18,1.09,0.37,2.1,0.43,2.23c0.19,0.39,0.46,0.5,1.3,0.5c0.81,0,1.04,-0.07,1.24,-0.43c0.09,-0.14,0.27,-0.98,0.46,-2.14c0.39,-2.3,0.43,-2.49,0.68,-2.74c0.31,-0.3,0.57,-0.9,0.7,-1.54c0.15,-0.85,0.15,-3.9,-0.02,-4.47c-0.15,-0.52,-0.57,-0.94,-1.17,-1.18c-0.41,-0.16,-0.62,-0.18,-1.75,-0.21c-0.87,-0.01,-1.41,0.02,-1.64,0.08zm0.88,-5.73c-0.44,0.1,-0.75,0.27,-1.18,0.65c-1.07,1,-1.07,2.71,0.02,3.71c0.55,0.51,0.98,0.67,1.73,0.67c0.51,0,0.7,-0.03,1.06,-0.21c1.56,-0.75,1.96,-2.8,0.79,-4.05c-0.6,-0.64,-1.57,-0.95,-2.42,-0.77z";
-        start = "M " + startX + " " + startY;
+        var path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+        var start = "M " + startX + " " + startY;
         path = start + " " + path; 
         return path;
     }
@@ -405,11 +454,11 @@ var makeSVGView = function(model, data, svgID) {
 		.append('text')
 		.attr('class', 'tooltip')
 		.attr('id', d => 'text' + d.id)
-		.attr('x', d => d.x0 * personBox.width + radiusW + 1)
-		.attr('y', d => d.y0 * personBox.height)
+		.attr('x', d => d.x0 * personBox.width - radiusW - 8)
+		.attr('y', d => d.y0 * personBox.height - radiusH)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
-		.style('font-size', 3);
+		.style('font-size', 10);
 
 	var peopleShadows = peopleG.selectAll('.shadows')
 		.attr('r', 0);
@@ -417,7 +466,8 @@ var makeSVGView = function(model, data, svgID) {
 	people.attr("d", d => personPath(d.x0 * personBox.width, d.y0  * personBox.height))
 		.style("stroke", "none")
 		.style("fill", d => model.getColor(d))
-		// .on('click', makeBig)
+		.attr('cursor', 'pointer')
+		.on('click', makeBig)
 		.on('mouseenter', showPatientId)
 		.on('mouseout', hidePatientId);
 
@@ -475,7 +525,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y', function(d,i){
 			var step = model.get();
 			var text = model.personCaption();
-			return text[step].y + (i*captionSize.fontsize);
+			return text[step].y + (i*captionSize.fontHeight);
 		})
 		.attr('font-size', captionSize.fontsize);
 
@@ -521,6 +571,47 @@ var makeSVGView = function(model, data, svgID) {
 			.style('font-size', captionSize.fontsize);
 
 	var _movePeople = function(step) {
+		var peopleToolTip = _svg.selectAll('text.tooltip')
+		.attr('x', d => {
+				var _x = d.x0;
+				if (step == 1) { _x = d.x1;  }
+				if (step == 2) { _x = d.x2;  }
+				if (step == 3) { _x = d.x3;  }
+				if (step == 4) { _x = d.x4;  }
+				if (step == 5) { _x = d.x5;  }
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					var isLabelActive = model.getLabelApplied();
+					
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) { _x = d.x6health; }
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; }
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; }
+					else { _x = d.x6; }
+				}
+				if (step == 7) { _x = d.x7health; }
+				return _x * personBox.width - radiusW;
+			})
+		.attr('y', d => { 
+				var _y = d.y0;
+				if (step == 1) { _y = d.y1; }
+				if (step == 2) { _y = d.y2; }
+				if (step == 3) { _y = d.y3; }
+				if (step == 4) { _y = d.y4; }
+				if (step == 5) { _y = d.y5; }
+				if (step == 6) {
+					var whichLabel = model.getLabel();
+					var isLabelActive = model.getLabelApplied();
+					if ((isLabelActive) && (whichLabel == LABELHEALTH)) {  _y = d.y6health; }
+					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _y = d.y6cost; }
+					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _y = d.y6emergency;}
+					else {  _y = d.y6; }
+				}
+				if (step == 7) { _y = d.y7health;}
+				return _y * personBox.height - radiusH;
+			})
+		.text(d => (d.id < 10) ? "Patient " + d.id : "")
+		.attr('opacity', 0)
+		.style('font-size', 3);
 
 		var people = _svg.selectAll('path.allPeople')
 			.transition()
@@ -629,9 +720,9 @@ var makeSVGView = function(model, data, svgID) {
 			})
 			.transition()
 			.duration(duration)
-			.attr('x1', d => d[0][0] * personBox.width + 1)
+			.attr('x1', d => d[0][0] * personBox.width + 2)
 			.attr('y1', d => d[0][1] * personBox.height + 10)
-			.attr('x2', d => d[1][0] * personBox.width + 1)
+			.attr('x2', d => d[1][0] * personBox.width + 2)
 			.attr('y2', d => d[1][1] * personBox.height - 4)
 			.attr('opacity', function(){
 				var isLabelActive = model.getLabelApplied();
@@ -728,105 +819,134 @@ var makeTopTextView = function(model, data, textID, svgID) {
 }
 
 
-var makeLabelView = function(model, inputID, svgID) {
-	var _svg = d3.select(svgID);
+var makeLabelView = function(model, labelID, svgID) {
 	var _observers = makeObservers();
-	var _inputLabels = model.inputs();
-	var _inputG = _svg.append('g');
+	var _svg = d3.select(svgID);
+	var _labelG = _svg.append('g')
+			.attr('id', labelID);
 
-	var _labelRect = _inputG.selectAll('rect')
-		.data(_inputLabels)
-		.enter()
-		.append('rect')
-		.attr('id', d => d.id)
-		.attr('class', 'labelClass')
-		.attr('x', margin.left + 0.5 * labelBoxSize.width)
-		.attr('y', (d, i) => {
-			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 3);
-		})
-		.attr('width', labelBoxSize.width)
-		.attr('height', labelBoxSize.height)
-		.attr('fill', d => model.getLabelColor(d.id, false)) //green
-		.attr('display', 'none')
-		.attr("cursor", "pointer")
-		.on('mouseenter', function(){
-			d3.select(this).attr('fill', d => model.getLabelColor(d.id, true)); //light base color
-		})
-		.on('mouseout', function(){
-			d3.select(this).attr('fill', d => model.getLabelColor(d.id, false)); //base color
-		});
-	var _labelLabel = _inputG.selectAll('text.labelClass')
-		.data(_inputLabels)
-		.enter()
-		.append('text')
-		.attr('id', d => d.id)
-		.attr('class', 'labelClass')
-		.attr('x', margin.left + (1.5 * labelBoxSize.width) + 4)
-		.attr('y', (d, i) => {
-			return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 4);
-		})
-		.attr('display', 'none')
-		.attr("cursor", "pointer")
-		.on('mouseenter', function(d, data){
-			var thisId = data.id;
-			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
-				.attr('fill', c => model.getLabelColor(c.id, true)); //light color
-		})
-		.on('mouseout', function(d, data){
-			var thisId = data.id;
-			d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
-				.attr('fill', c => model.getLabelColor(c.id, false)); //base color
-		});
+	var _drawLabels = function() {
 
-		_labelLabel.selectAll('tspan.labelClass')
-			.data(d => d.text.split('\n'))
+		var _labels = model.labels();
+
+		var defs = _svg.append('defs');
+		var filter = defs.append('filter')
+			.attr('id', 'drop-shadow')
+			.attr('height', '120%')
+			.attr('width', '120%');
+			filter.append('feDropShadow')
+				.attr('dx', '0')
+				.attr('dy', '0')
+				.attr('stdDeviation', 2)
+				.attr('flood-color', "red");
+
+		var _labelRect = _labelG.selectAll('rect')
+			.data(_labels)
 			.enter()
-			.append('tspan')
+			.append('rect')
+			.attr('id', d => d.id)
 			.attr('class', 'labelClass')
-			.text(d => d)
-			.attr('id', function() {
-				return this.parentElement.id;
+			.attr('x', margin.left + labelBoxSize.width)
+			.attr('y', (d, i) => {
+				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
 			})
-			.attr('x', margin.left + (1.0 * labelBoxSize.width))
-			.attr('dy', 5)
-			.attr('text-anchor', 'middle')
-			.attr("cursor", "pointer");
-
-	function _moveInputs(step) {
-		var _allAlgLabels = _svg.selectAll('.labelClass');
-	
-		if (step == 1) {
-			_allAlgLabels.attr('display', function(){
-				return (this.id == '1') ? 'inline' : 'none';
+			.attr('width', labelBoxSize.width)
+			.attr('height', labelBoxSize.height)
+			.attr('fill', d => model.getLabelColor(d.id, false)) //green
+			.attr('rx', 2)
+			.style('filter', function(){
+				if (model.getClickedCostLabel()) return 'url(#drop-shadow)';
+				return 'none';
+			})
+			.attr('display', 'none')
+			.attr("cursor", "pointer")
+			.on('mouseenter', function(){
+				d3.select(this).attr('fill', d => model.getLabelColor(d.id, true)); //light base color
+			})
+			.on('mouseout', function(){
+				d3.select(this).attr('fill', d => model.getLabelColor(d.id, false)); //base color
 			});
-		} 
-		else if (step == 6) {
-			_allAlgLabels.attr('display', 'inline');
-		}
-		else {
-			_allAlgLabels.attr('display', 'none');
-		}
+
+
+		var _labelLabel = _labelG.selectAll('text.labelClass')
+			.data(_labels)
+			.enter()
+			.append('text')
+			.attr('id', d => d.id)
+			.attr('class', 'labelClass')
+			.attr('x', margin.left + (2*labelBoxSize.width) + labelBoxSize.padding)
+			.attr('y', (d, i) => {
+				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
+			})
+			.attr('display', 'none')
+			.attr("cursor", "pointer")
+			.on('mouseenter', function(d, data){
+				var thisId = data.id;
+				d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+					.attr('fill', c => model.getLabelColor(c.id, true)); //light color
+			})
+			.on('mouseout', function(d, data){
+				var thisId = data.id;
+				d3.selectAll('rect.labelClass').filter( c => (c.id == thisId))
+					.attr('fill', c => model.getLabelColor(c.id, false)); //base color
+			});
+
+			_labelLabel.selectAll('tspan.labelClass')
+				.data(d => d.text.split('\n'))
+				.enter()
+				.append('tspan')
+				.attr('class', 'labelClass')
+				.text(d => d)
+				.attr('id', function() {
+					return this.parentElement.id;
+				})
+				.attr('x', margin.left + (1.5 * labelBoxSize.width))
+				.attr('dy', labelBoxSize.fontsize)
+				.attr('text-anchor', 'middle')
+				.attr("cursor", "pointer")
+				.attr("font-size", labelBoxSize.fontsize);
+
+
+			// The button event passes the appropriate
+			//data to any listening controllers
+			var _fireChangeColor = function(evt) {
+				_observers.notify({
+					type: story.signals.changeColor,
+					color: evt.target.id
+				});
+			};
+
+			_labelRect.on('click', _fireChangeColor);
+			_labelLabel.on('click', _fireChangeColor);
+
+			var step = model.get();
+			var _allAlgLabels = _svg.selectAll('.labelClass');
+	
+			if (step == 1) {
+				_allAlgLabels.attr('display', function(){
+					return (this.id == '1') ? 'inline' : 'none';
+				});
+			} 
+			else if (step == 6) {
+				_allAlgLabels.attr('display', 'inline');
+			}
+			else {
+				_allAlgLabels.attr('display', 'none');
+			}
 	}
 
-	// The button event passes the appropriate
-	//data to any listening controllers
-	var _fireChangeColor = function(evt) {
-		_observers.notify({
-			type: story.signals.changeColor,
-			color: evt.target.id
-		});
-	};
 
-	_labelRect.on('click', _fireChangeColor);
-	_labelLabel.on('click', _fireChangeColor);
-
-	return {
-		render: function() {
-			var step = model.get();
-			_moveInputs(step);
-		},
+	return {		
 		register: function(fxn) {
 			_observers.add(fxn);
+		},
+		render: function() {
+			//Clear the label G for redrawing
+			var _labelG = document.getElementById(labelID);
+			while (_labelG.firstChild) {
+				_labelG.removeChild(_labelG.firstChild);
+			}
+			_drawLabels(model, svgID, labelID);
 		}
 	}
 }
@@ -859,7 +979,7 @@ var makeCommentaryView = function(model, data, svgID) {
 				(d == "Much better!")) {
 				return 7 * personBox.height + 3;
 			}
-			return (i * captionSize.fontsize) + 8 * personBox.height;
+			return (i * captionSize.fontHeight) + 8 * personBox.height;
 		})
 		.attr('font-size', captionSize.fontsize);
 	
@@ -901,12 +1021,12 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var _observers = makeObservers();
 	var buttonData = [{ 
 		id: nextID, 
-		text: "NEXT: 1", 
+		text: "NEXT", 
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 + buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
 		id: backID, 
-		text: "BACK: 1",
+		text: "BACK",
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
@@ -924,8 +1044,8 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 		.style('fill', 'lightgrey')
 		.style('rx', 3);
 
-	var _forward = d3.select(nextID);
-	var _backward = d3.select(backID);
+	var _forward = d3.select('#'+nextID);
+	var _backward = d3.select('#'+backID);
 
 	var _buttonsText = d3.select(svgID).selectAll('text.button')
 		.data(buttonData)
@@ -933,11 +1053,11 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 		.append('text')
 		.attr('id', d => d.id + 'text')
 		.attr('class', 'button')
-		.attr('x', d => d.x + 3)
-		.attr('y', d => d.y + 5)
+		.attr('x', d => d.x + 4)
+		.attr('y', d => d.y + 13)
 		.text(d => d.text)
 		.attr('cursor', 'pointer')
-		.style('font-size', '4px');
+		.style('font-size', buttonSize.fontsize);
 
 	var _forwardText = d3.select('#' + nextID + 'text');
 	var _backwardText = d3.select('#' + backID + 'text');
@@ -945,9 +1065,29 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	// The button event passes the appropriate
 	//data to any listening controllers
 	var _fireIncrementEvent = function() {
-		_observers.notify({
-			type: story.signals.increment
-		});
+		var step = model.get();
+		if (step == 1) {
+			if (model.getLabelApplied()) {
+				//If getLabelApplied returns true, the user clicked the 
+				//blue label button and recolored the patients
+				_observers.notify({
+					type: story.signals.increment
+				});
+			}
+			else {
+				console.log("Error, please click");
+				
+				_observers.notify({
+					type: story.signals.error
+				});
+			}
+		}
+		else {
+			_observers.notify({
+				type: story.signals.increment
+			});
+		}
+		
 	};
 	var _fireDecrementEvent = function() {
 		_observers.notify({
@@ -956,14 +1096,14 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	};
 
 	_forward.on('click', _fireIncrementEvent);
-	_backward.on('click', _fireDecrementEvent);
 	_forwardText.on('click', _fireIncrementEvent);
+	_backward.on('click', _fireDecrementEvent);
 	_backwardText.on('click', _fireDecrementEvent);
 
 	return {
 		render: function() {
-			_forwardText.text("NEXT: " + (model.get() + 1));
-			_backwardText.text("BACK: " + (model.get() + 1));
+			_forwardText.text("NEXT");
+			_backwardText.text("BACK");
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
@@ -979,6 +1119,9 @@ var makeController = function(model) {
 	var _decrement = function() {
 		model.decrement();
 	}
+	var _error = function() {
+		model.setClickedCostLabel();
+	}
 	var _changeColor = function(args) {
 		model.changeColor(args.color);
 	}
@@ -991,6 +1134,9 @@ var makeController = function(model) {
 					break;
 				case story.signals.decrement:
 					_decrement();
+					break;
+				case story.signals.error:
+					_error();
 					break;
 				case story.signals.changeColor:
 					_changeColor(evt);
@@ -1016,7 +1162,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, 'backButton', 'nextButton', '#mySVG'));
 		story.views.push(makeCommentaryView(story.model, d, '#mySVG'));
-		story.views.push(makeLabelView(story.model, '#inputs', '#mySVG'))
+		story.views.push(makeLabelView(story.model, 'label', '#mySVG'))
 		story.controller = makeController(story.model);
 		
 		for (var i=0; i < story.views.length; i++) {
