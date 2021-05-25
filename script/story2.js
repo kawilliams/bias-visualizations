@@ -7,14 +7,14 @@ var viewBoxSize = {height: 300, width: 450};
 var personBox = {width: 15, height: 22};
 var radiusW = 7;
 var radiusH = 11;
-var labelBoxSize = {height: viewBoxSize.height * 0.10, width: viewBoxSize.width * 0.1, padding: viewBoxSize.height * 0.01, fontsize: 5};
+var labelBoxSize = {height: viewBoxSize.height * 0.10, width: viewBoxSize.width * 0.1, padding: viewBoxSize.height * 0.01, fontsize: '10px'};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
 var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: 6, padding: 10};
-var buttonSize = {height: viewBoxSize.height * 0.04, width: viewBoxSize.width * 0.05};
-var captionSize = {fontsize: 6};
+var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: '12px', padding: 10};
+var buttonSize = {height: 20, width: 40, fontsize: '12px'};
+var captionSize = {fontsize: '10px', fontHeight: 8};
 
 var padding = {text: 5};
 var duration = 750;
@@ -150,19 +150,19 @@ var makeModel = function(data) {
 
 	var _personCaption = [
 	{ text: "Patients\n", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize, 
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontHeight, 
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
 	{ text: "Patients\n", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontsize + personBox.width,  
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 5},
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontHeight + personBox.width,  
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
 	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontHeight,
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontHeight,
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontsize,
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontHeight,
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
 	{ text: "\n",
 		x: margin.left,
@@ -187,10 +187,10 @@ var makeModel = function(data) {
 		x: margin.left,
 		y: 0 },
 	{text: "Actual cost\n",
-		x: 0.5 * viewBoxSize.width - 8 * captionSize.fontsize,
+		x: 0.5 * viewBoxSize.width - 8 * captionSize.fontHeight,
 		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
-		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontsize,
+		x: viewBoxSize.width * 0.5 - peopleCluster.width - 9 * captionSize.fontHeight,
 		y: 4 + 2 * personBox.height },
 	{text: "\n",
 		x: margin.left,
@@ -345,18 +345,18 @@ var makeSVGView = function(model, data, svgID) {
 		.classed('svg-content', true);
 		// .attr('style', 'outline: thin solid red;');
 
-	var _midlineV = _svg.append('line')
-		.attr('x1', viewBoxSize.width * 0.5)
-		.attr('y1', 0)
-		.attr('x2', viewBoxSize.width * 0.5)
-		.attr('y2', viewBoxSize.height)
-		.attr('stroke', 'black');
-	var _midlineH = _svg.append('line')
-		.attr('x1', 0)
-		.attr('y1', viewBoxSize.height * 0.5)
-		.attr('x2', viewBoxSize.width)
-		.attr('y2', viewBoxSize.height * 0.5)
-		.attr('stroke', 'black');
+	// var _midlineV = _svg.append('line')
+	// 	.attr('x1', viewBoxSize.width * 0.5)
+	// 	.attr('y1', 0)
+	// 	.attr('x2', viewBoxSize.width * 0.5)
+	// 	.attr('y2', viewBoxSize.height)
+	// 	.attr('stroke', 'black');
+	// var _midlineH = _svg.append('line')
+	// 	.attr('x1', 0)
+	// 	.attr('y1', viewBoxSize.height * 0.5)
+	// 	.attr('x2', viewBoxSize.width)
+	// 	.attr('y2', viewBoxSize.height * 0.5)
+	// 	.attr('stroke', 'black');
 
 
 	var _cleanSVG = function() {
@@ -454,11 +454,11 @@ var makeSVGView = function(model, data, svgID) {
 		.append('text')
 		.attr('class', 'tooltip')
 		.attr('id', d => 'text' + d.id)
-		.attr('x', d => d.x0 * personBox.width - radiusW)
+		.attr('x', d => d.x0 * personBox.width - radiusW - 8)
 		.attr('y', d => d.y0 * personBox.height - radiusH)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
-		.style('font-size', 3);
+		.style('font-size', 10);
 
 	var peopleShadows = peopleG.selectAll('.shadows')
 		.attr('r', 0);
@@ -466,6 +466,7 @@ var makeSVGView = function(model, data, svgID) {
 	people.attr("d", d => personPath(d.x0 * personBox.width, d.y0  * personBox.height))
 		.style("stroke", "none")
 		.style("fill", d => model.getColor(d))
+		.attr('cursor', 'pointer')
 		.on('click', makeBig)
 		.on('mouseenter', showPatientId)
 		.on('mouseout', hidePatientId);
@@ -524,7 +525,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y', function(d,i){
 			var step = model.get();
 			var text = model.personCaption();
-			return text[step].y + (i*captionSize.fontsize);
+			return text[step].y + (i*captionSize.fontHeight);
 		})
 		.attr('font-size', captionSize.fontsize);
 
@@ -831,12 +832,12 @@ var makeLabelView = function(model, labelID, svgID) {
 		var defs = _svg.append('defs');
 		var filter = defs.append('filter')
 			.attr('id', 'drop-shadow')
-			.attr('height', '130%')
-			.attr('width', '130%');
+			.attr('height', '120%')
+			.attr('width', '120%');
 			filter.append('feDropShadow')
 				.attr('dx', '0')
 				.attr('dy', '0')
-				.attr('stdDeviation', 4)
+				.attr('stdDeviation', 2)
 				.attr('flood-color', "red");
 
 		var _labelRect = _labelG.selectAll('rect')
@@ -978,7 +979,7 @@ var makeCommentaryView = function(model, data, svgID) {
 				(d == "Much better!")) {
 				return 7 * personBox.height + 3;
 			}
-			return (i * captionSize.fontsize) + 8 * personBox.height;
+			return (i * captionSize.fontHeight) + 8 * personBox.height;
 		})
 		.attr('font-size', captionSize.fontsize);
 	
@@ -1020,12 +1021,12 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 	var _observers = makeObservers();
 	var buttonData = [{ 
 		id: nextID, 
-		text: "NEXT: 1", 
+		text: "NEXT", 
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 + buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	},{ 
 		id: backID, 
-		text: "BACK: 1",
+		text: "BACK",
 		x: (viewBoxSize.width - buttonSize.width) * 0.5 - buttonSize.width, 
 		y: viewBoxSize.height - margin.bottom - buttonSize.height
 	}];
@@ -1052,11 +1053,11 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 		.append('text')
 		.attr('id', d => d.id + 'text')
 		.attr('class', 'button')
-		.attr('x', d => d.x + 3)
-		.attr('y', d => d.y + 5)
+		.attr('x', d => d.x + 4)
+		.attr('y', d => d.y + 13)
 		.text(d => d.text)
 		.attr('cursor', 'pointer')
-		.style('font-size', '4px');
+		.style('font-size', buttonSize.fontsize);
 
 	var _forwardText = d3.select('#' + nextID + 'text');
 	var _backwardText = d3.select('#' + backID + 'text');
@@ -1101,8 +1102,8 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 
 	return {
 		render: function() {
-			_forwardText.text("NEXT: " + (model.get() + 1));
-			_backwardText.text("BACK: " + (model.get() + 1));
+			_forwardText.text("NEXT");
+			_backwardText.text("BACK");
 		},
 		register: function(fxn) {
 			_observers.add(fxn);
