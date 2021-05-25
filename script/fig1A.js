@@ -274,7 +274,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
 				.attr('class', mySVGClass)
-				.attr('height', 100)
+				.attr('height', 127)
 				.attr('width', 280)
 				.attr('x', 90) //(event.x - 170)
 				.attr('y', 120) //(500 - event.x)
@@ -283,11 +283,13 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('opacity', '1');
 
 		var toolTipText = { instructions: "Health providers used an algorithm to determine\n\
-											which patients would get accepted into an extra\n\
-											care program. The x-axis shows how a patient's\n\
-											health score compared to others, and the y-axis\n\
-											shows how healthy the patient is, based on number\n\
-											of chronic conditions. Move the sliders to explore.",
+										  which patients would get referred for and accepted\n\
+										  into an extra care program. The x-axis shows a \n\
+										  patient's risk score, and the y-axis shows how \n\
+										  healthy the patient is, based on the number of \n\
+										  chronic conditions. A higher risk score equates to\n\
+										  a higher chance to receive extra care. \n\
+										  Move the sliders to explore.",
 					horizTextAcrossThreshold: "Two patients at this level would be \n\
 								equally sick (Y conditions), but to the\n\
 								algorithm the Black patient needed to\n\
