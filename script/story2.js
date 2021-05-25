@@ -4,10 +4,10 @@ var svgSize = {height: 400, width: 400}
 var viewBoxSize = {height: 207, width: 375};
 
 
-var personBox = {width: 11, height: 14};
-var radiusW = 5;
-var radiusH = 7;
-var labelBoxSize = {height: viewBoxSize.height * 0.10, width: viewBoxSize.width * 0.1, padding: viewBoxSize.height * 0.01};
+var personBox = {width: 15, height: 22};
+var radiusW = 7;
+var radiusH = 11;
+var labelBoxSize = {height: viewBoxSize.height * 0.10, width: viewBoxSize.width * 0.1, padding: viewBoxSize.height * 0.01, fontsize: 5};
 var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
 var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
@@ -95,26 +95,13 @@ var makeModel = function(data) {
 	
 
 	var _text = [
-		"Below are ten patients with varying levels of health and only five of them can be accepted into the high-risk\n\
-		care management program to help with their chronic illnesses. We want to prioritize those that are sickest, so\n\
-		we'll line them up from sickest to healthiest. We'll use an algorithm to help us score health levels.",
-		"We have health record data, like diagnosis and procedure codes, insurance type, medications, care costs, and\n\
-		the age and sex of the person. We'll use these data to predict future health care costs - a commonly-used prediction\n\
-		label that is correlated with health.",
-		"We apply the algorithm and align the circles from healthiest to sickest, with the sickest on the right. The five\n\
-		sickest patients (the darkest blue circles) are accepted into the care management program.",
-		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should\n\
-		be very close to the actual care costs.",
-		"But we care more about predicting patient health than predicting future care costs.\n\
-		How well did the algorithm predict actual health?",
-		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random\n\
-		with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care\n\
-		costs for Black patients will be lower than the care costs for a similarly ill White patient. Even though the algorithm\n\
-		did not include race as an input, these societal inequalities produced dramatically different algorithmic scores and so\n\
-		sicker people were excluded from the care program.",
-		"We can fix this by changing our label to target from care costs to something that might be a closer approximation of \n\
-		actual health for all patients. Click on the different labels (the colored rectangles) to see how closely the predictions\n\
-		match the actual health.",
+		"Below are ten patients with varying levels of health, but only five of them can be referred to the high-risk care management program to help with their chronic illnesses. We want to prioritize those that need the care the most, so we'll line them up from sickest to healthiest. We'll use an algorithm to help us determine who should get into the program.",
+		"We have data from insurance claims - demographics, medications, visits, cost, and treatment.n. We'll begin by having the algorithm predict which patients will cost the most in the coming year, as this seems a reasonable way to determine who needs the program the most. High healthcare costs are correlated with high healthcare needs.",
+		"We apply the algorithm and align the circles from lowest predicted cost to highest predicted cost, or what we assume is healthiest to sickest, with the sickest on the right. The five sickest patients (the darkest blue circles) are accepted into the care management program.",
+		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should be very close to the actual care costs. Did our algorithm accurately predict cost?",
+		"But what we truly care about is predicting patient health, not predicting future care costs. Remember, we want to determine the best patients for our extra care program. How well did the algorithm predict actual health?",
+		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care costs for Black patients will be lower than the care costs for a similarly-ill White patient. Even though the algorithm did not include race as an input, these societal inequalities produced dramatically different algorithmic scores and so Black people who were equally as sick as White people were excluded from the care program.",
+		"Why did this happen? The value we truly care about - which patients most need extra care - was not the same as what the algorithm was finding. We can fix this by changing our label from care costs to something that might be a closer approximation of actual health for all patients. Click on the different labels (the colored rectangles) to see how closely the predictions match the actual health.",
 		"\n\nResearchers conducted experiments on the patient data to see which of the three label choices - active chronic\n\
 		conditions, total care costs, emergency care cost - did the best job of (1) predicting the sickest patients, and\n\
 		(2) mitigating bias in label choice. All three labels notably perform the same at predicting the 97th percentile\n\
@@ -137,14 +124,27 @@ var makeModel = function(data) {
 	var _errorFlag = false;
 
 	var _commentary = [
-		{text: ['Pretty good!'], step: 3, label: LABELCOST},
+		{text: ['Pretty close!'], step: 3, label: LABELCOST},
 		{text: ['Not so good'], step: 4, label: LABELCOST},
 		{text: ["Much better!"], step: 6, label: LABELHEALTH},
-		{text: ["The number of chronic conditions", "is similar to the actual health."], step: 6, label: LABELHEALTH},
+		{text: ["We predict a patient’s health in a given year by measuring the number of chronic conditions that ", 
+		"flare up that year. Because the care program operates to improve the management of chronic conditions, patients with the most doctor’s appointments and hospitalizations related to chronic ", 
+		"conditions could be a promising group to prioritize for this preventative intervention.", 
+		"This label produces accurate cost predictions, while also accurately predicting health with ",
+		"minimal bias."], step: 6, label: LABELHEALTH},
 		{text: ["Not so good"], step: 6, label: LABELCOST},
-		{text: ["Using total care cost is not a fair","label."], step: 6, label: LABELCOST},
+		{text: ["We score a patient based on the total cost of their care for a year, such as costs of in- and ",
+		"out-patient procedures, surgical costs, and insurance costs. From a statistical perspective, this ",
+		"value is useful (and used industry-wide) because it is correlated with health and it is a real-world ",
+		"number that is easy to calculate. While the care cost label accurately predicts costs, it does not do ",
+		"a great job of predicting health. This severely disadvantages Black patients when the variable we ",
+		"care about is health. "], step: 6, label: LABELCOST},
 		{text: ["Not so good"], step: 6, label: LABELEMERGENCY},
-		{text: ["Emergency costs is not a fair","label."], step: 6, label: LABELEMERGENCY}
+		{text: ["We predict only emergency medicine costs due to emergency visits and hospitalizations, rather ",
+		"than all other costs generated by care, to more closely represent catastrophic health events that ",
+		"come from lack of caring for chronic conditions. This label does a good job of predicting cost, and ",
+		"does better at lowering the amount of bias, but again, different populations use emergency care ",
+		"differently and this leads to significant bias still existing in our results."], step: 6, label: LABELEMERGENCY}
 		
 	];
 
@@ -345,18 +345,18 @@ var makeSVGView = function(model, data, svgID) {
 		.classed('svg-content', true);
 		// .attr('style', 'outline: thin solid red;');
 
-	// var _midlineV = _svg.append('line')
-	// 	.attr('x1', viewBoxSize.width * 0.5)
-	// 	.attr('y1', 0)
-	// 	.attr('x2', viewBoxSize.width * 0.5)
-	// 	.attr('y2', viewBoxSize.height)
-	// 	.attr('stroke', 'black');
-	// var _midlineH = _svg.append('line')
-	// 	.attr('x1', 0)
-	// 	.attr('y1', viewBoxSize.height * 0.5)
-	// 	.attr('x2', viewBoxSize.width)
-	// 	.attr('y2', viewBoxSize.height * 0.5)
-	// 	.attr('stroke', 'black');
+	var _midlineV = _svg.append('line')
+		.attr('x1', viewBoxSize.width * 0.5)
+		.attr('y1', 0)
+		.attr('x2', viewBoxSize.width * 0.5)
+		.attr('y2', viewBoxSize.height)
+		.attr('stroke', 'black');
+	var _midlineH = _svg.append('line')
+		.attr('x1', 0)
+		.attr('y1', viewBoxSize.height * 0.5)
+		.attr('x2', viewBoxSize.width)
+		.attr('y2', viewBoxSize.height * 0.5)
+		.attr('stroke', 'black');
 
 
 	var _cleanSVG = function() {
@@ -436,7 +436,7 @@ var makeSVGView = function(model, data, svgID) {
 
 	function personPath(startX, startY) {
 
-        var path = "c-0.82,0.23,-1.3,0.62,-1.53,1.19c-0.1,0.27,-0.12,0.66,-0.1,2.58c0,0,0.03,2.26,0.03,2.26c0,0,0.26,0.55,0.26,0.55c0.14,0.3,0.34,0.63,0.44,0.74c0.27,0.29,0.31,0.4,0.67,2.58c0.18,1.09,0.37,2.1,0.43,2.23c0.19,0.39,0.46,0.5,1.3,0.5c0.81,0,1.04,-0.07,1.24,-0.43c0.09,-0.14,0.27,-0.98,0.46,-2.14c0.39,-2.3,0.43,-2.49,0.68,-2.74c0.31,-0.3,0.57,-0.9,0.7,-1.54c0.15,-0.85,0.15,-3.9,-0.02,-4.47c-0.15,-0.52,-0.57,-0.94,-1.17,-1.18c-0.41,-0.16,-0.62,-0.18,-1.75,-0.21c-0.87,-0.01,-1.41,0.02,-1.64,0.08zm0.88,-5.73c-0.44,0.1,-0.75,0.27,-1.18,0.65c-1.07,1,-1.07,2.71,0.02,3.71c0.55,0.51,0.98,0.67,1.73,0.67c0.51,0,0.7,-0.03,1.06,-0.21c1.56,-0.75,1.96,-2.8,0.79,-4.05c-0.6,-0.64,-1.57,-0.95,-2.42,-0.77z";
+        var path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
         var start = "M " + startX + " " + startY;
         path = start + " " + path; 
         return path;
@@ -831,12 +831,12 @@ var makeLabelView = function(model, labelID, svgID) {
 		var defs = _svg.append('defs');
 		var filter = defs.append('filter')
 			.attr('id', 'drop-shadow')
-			.attr('height', '120%')
-			.attr('width', '120%');
+			.attr('height', '130%')
+			.attr('width', '130%');
 			filter.append('feDropShadow')
 				.attr('dx', '0')
 				.attr('dy', '0')
-				.attr('stdDeviation', 1)
+				.attr('stdDeviation', 4)
 				.attr('flood-color', "red");
 
 		var _labelRect = _labelG.selectAll('rect')
@@ -845,9 +845,9 @@ var makeLabelView = function(model, labelID, svgID) {
 			.append('rect')
 			.attr('id', d => d.id)
 			.attr('class', 'labelClass')
-			.attr('x', margin.left + 0.5 * labelBoxSize.width)
+			.attr('x', margin.left + labelBoxSize.width)
 			.attr('y', (d, i) => {
-				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 3);
+				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
 			})
 			.attr('width', labelBoxSize.width)
 			.attr('height', labelBoxSize.height)
@@ -873,9 +873,9 @@ var makeLabelView = function(model, labelID, svgID) {
 			.append('text')
 			.attr('id', d => d.id)
 			.attr('class', 'labelClass')
-			.attr('x', margin.left + (1.5 * labelBoxSize.width) + 4)
+			.attr('x', margin.left + (2*labelBoxSize.width) + labelBoxSize.padding)
 			.attr('y', (d, i) => {
-				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height - 4);
+				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
 			})
 			.attr('display', 'none')
 			.attr("cursor", "pointer")
@@ -899,10 +899,11 @@ var makeLabelView = function(model, labelID, svgID) {
 				.attr('id', function() {
 					return this.parentElement.id;
 				})
-				.attr('x', margin.left + (1.0 * labelBoxSize.width))
-				.attr('dy', 5)
+				.attr('x', margin.left + (1.5 * labelBoxSize.width))
+				.attr('dy', labelBoxSize.fontsize)
 				.attr('text-anchor', 'middle')
-				.attr("cursor", "pointer");
+				.attr("cursor", "pointer")
+				.attr("font-size", labelBoxSize.fontsize);
 
 
 			// The button event passes the appropriate
