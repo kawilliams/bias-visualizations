@@ -453,7 +453,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 219 : 255)
+			.attr('width', whichSlider.includes("horiz") ? 219 : 259)
 			.attr('height', whichSlider.includes("horiz") ? 65 : 65)
 		
 			//Get the selected circles' data
