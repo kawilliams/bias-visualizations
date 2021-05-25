@@ -437,6 +437,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			var whichSlider = "." + d3.select(this).attr('class').replace(' ', '.');
 			d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
 		}
+		function percentileSuffix(number) {
+			var percentileWithSuffix = number;
+			if (number % 10 == 1) {return percentileWithSuffix + "st";}
+			else if (number % 10 == 2) {return percentileWithSuffix + "nd";}
+			else if (number % 10 == 3) {return percentileWithSuffix + "rd";}
+			return percentileWithSuffix + "th";
+		}
 
 		function toolTipAppear(event, d, whichSlider, selectedCircles){
 
@@ -446,7 +453,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 219 : 225)
+			.attr('width', whichSlider.includes("horiz") ? 219 : 255)
 			.attr('height', whichSlider.includes("horiz") ? 65 : 65)
 		
 			//Get the selected circles' data
@@ -496,6 +503,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				var X = selectedCircles[1].risk_score_quantile;
 				var Y = selectedCircles[1].num_chronic_conds_mean.toFixed(2);
 				var Z = selectedCircles[0].num_chronic_conds_mean.toFixed(2);
+				var X = percentileSuffix(X);
 				
 				var diff = (Z - Y).toFixed(2);
 				text = text.replace("X", X);
@@ -519,9 +527,11 @@ function drawMySVG(mySVGID, mySVGClass){
 						whiteApproxIndex = i;
 					}
 				});
-				var X = blackCurve[blackApproxIndex][0].toFixed(0);
+				var X = blackCurve[blackApproxIndex][0].toFixed(0); //percentile
 				var Y = whiteCurve[whiteApproxIndex][1].toFixed(2);
 				var Z = blackCurve[blackApproxIndex][1].toFixed(2);
+				var X = percentileSuffix(X);
+
 				
 				var diff = (Z - Y).toFixed(2);
 				text = text.replace("X", X);
