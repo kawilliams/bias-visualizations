@@ -12,7 +12,7 @@ var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.wid
 
 var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: '12px', padding: 10};
+var topTextSize = {maxHeight: 4, maxWidth: 144, fontsize: '12px', padding: 14};
 var buttonSize = {height: 20, width: 40, fontsize: '12px'};
 var captionSize = {fontsize: '10px', fontHeight: 8};
 
@@ -38,6 +38,27 @@ var story = {
 		error: 'ERROR',
 		changeColor: 'CHANGE_COLOR'
 	}
+}
+
+/* Useful function to split text for tspan. 
+Gives the effect of text wrapping. */
+function wrapText(rectText, widthCap) {
+	var wrappedText = [];
+	var startOfLastWord = 0;
+	var startOfLine = 0;
+	for (var i=1; i<rectText.length; i++) {
+		if (rectText[i] == ' ') {
+			startOfLastWord = i;
+		}
+		if (i % widthCap == 0) {
+			wrappedText.push(rectText.substring(startOfLine, startOfLastWord).trim());
+			startOfLine = startOfLastWord;
+		}
+		else if (i == rectText.length - 1) {
+			wrappedText.push(rectText.substring(startOfLine, rectText.length).trim());
+		}
+	}
+	return wrappedText;
 }
 
 var makeObservers = function() {
@@ -782,7 +803,7 @@ var makeTopTextView = function(model, data, textID, svgID) {
 	var text = model.text();
 
 	topText.selectAll('tspan.toptext')
-		.data(d => text[0].split('\n'))
+		.data(d => wrapText(text[0], 70))
 		.enter()
 		.append('tspan')
 		.attr('class', 'toptext')
@@ -794,9 +815,7 @@ var makeTopTextView = function(model, data, textID, svgID) {
 	var _changeTopText = function(step, text, textID) {
 		d3.select(textID).selectAll('tspan.toptext').remove();
 		d3.select(textID).selectAll('tspan.toptext')
-			.data(d => {
-				return text[step].split('\n');
-			})
+			.data(d => wrapText(text[step], 70))
 			.enter()
 			.append('tspan')
 			.attr('class', 'toptext')
