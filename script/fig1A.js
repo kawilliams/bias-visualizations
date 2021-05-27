@@ -1,9 +1,31 @@
-var height = 500,
-	width = 500;
+var height = 600,
+	width = 600;
 
 var radius = 3;
 var margin = ({top: 50, right: 10, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
+var font = {height: 12, width: 7};
+
+/* Useful function to split text for tspan. 
+Gives the effect of text wrapping. */
+function wrapText(rectText, widthCap) {
+	var wrappedText = [];
+	var startOfLastWord = 0;
+	var startOfLine = 0;
+	for (var i=1; i<rectText.length; i++) {
+		if (rectText[i] == ' ') {
+			startOfLastWord = i;
+		}
+		if (i % widthCap == 0) {
+			wrappedText.push(rectText.substring(startOfLine, startOfLastWord).trim());
+			startOfLine = startOfLastWord;
+		}
+		else if (i == rectText.length - 1) {
+			wrappedText.push(rectText.substring(startOfLine, rectText.length).trim());
+		}
+	}
+	return wrappedText;
+}
 
 function drawMySVG(mySVGID, mySVGClass){
 	// Load the data and run the graph
@@ -54,8 +76,12 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		var svg = d3.select(mySVGID)
 		.attr('class', mySVGClass)
-		.attr('height', height)
-		.attr('width', width);
+		.attr('preserveAspectRatio', 'xMidYMid meet')
+		.attr('viewBox', "0 0 " + width + " " + height)
+		.classed('svg-content', true)
+		.attr('class', mySVGClass);
+		// .attr('height', height)
+		// .attr('width', width);
 
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
@@ -116,10 +142,11 @@ function drawMySVG(mySVGID, mySVGClass){
 			.append('text')
 			.attr('id', 'xAxisLabel')
 			.attr('class', mySVGClass)
-			.attr('x', 270)
-			.attr('y', 30)
+			.attr('x', 0.54 * width)
+			.attr('y', 0.06 * height)
 			.attr('fill', 'black')
-			.text('Percentile of Algorithm Risk Score');
+			.text('Percentile of Algorithm Risk Score')
+			.attr('font-size', '12px');
 
 		svg.append('g')
 			.attr('id', 'yAxisGroup')
@@ -131,10 +158,11 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('id', 'yAxisLabel')
 			.attr('class', mySVGClass)
 			.attr('transform', 'rotate(-90)')
-			.attr('x', -180)
-			.attr('y', -30)
+			.attr('x', -0.36 * width)
+			.attr('y', -0.06 * height)
 			.attr('fill', 'black')
-			.text('Number of Active Chronic Conditions');
+			.text('Number of Active Chronic Conditions')
+			.attr('font-size', '12px');
 
 
 		// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
@@ -274,49 +302,33 @@ function drawMySVG(mySVGID, mySVGClass){
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
 				.attr('class', mySVGClass)
-				.attr('height', 127)
-				.attr('width', 280)
-				.attr('x', 90) //(event.x - 170)
-				.attr('y', 120) //(500 - event.x)
+				.attr('height', 13 * font.height)
+				.attr('width', 50 * font.width)
+				.attr('x', 0.18 * width) //(event.x - 170)
+				.attr('y', 0.26 * height) //(500 - event.x)
 				.attr('fill', 'lightsteelblue')
 				.attr('rx', 5)
 				.attr('opacity', '1');
 
-		var toolTipText = { instructions: "Health providers used an algorithm to determine\n\
-										  which patients would get referred for and accepted\n\
-										  into an extra care program. The x-axis shows a \n\
-										  patient's risk score, and the y-axis shows how \n\
-										  healthy the patient is, based on the number of \n\
-										  chronic conditions. A higher risk score equates to\n\
-										  a higher chance to receive extra care. \n\
-										  Move the sliders to explore.",
-					horizTextAcrossThreshold: "Two patients at this level would be \n\
-								equally sick (Y conditions), but to the\n\
-								algorithm the Black patient needed to\n\
-								be more sick to be referred.",
-					horizTextSameSide: "Two patients at this level would be \n\
-								equally sick (Y conditions), but to the\n\
-								algorithm the Black patient needed to\n\
-								be more sick to be scored higher.",
-					vertText:  "Both patients at this point received the\n\
-								same score from the algorithm (X percentile)\n\
-								but the Black patient would have diff more\n\
-								conditions than the White patient."
+		var toolTipText = { instructions: "Health providers used an algorithm to determine which patients would get referred for and accepted into an extra care program. The x-axis shows a patient's risk score, and the y-axis shows how healthy the patient is, based on the number of chronic conditions. A higher risk score equates to a higher chance to receive extra care. Move the sliders to explore.",
+					horizTextAcrossThreshold: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be referred.",
+					horizTextSameSide: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be scored higher.",
+					vertText:  "Both patients at this point received the same score from the algorithm (X percentile) but the Black patient would have diff more conditions than the White patient."
 					};
 		var toolTipTextElement = toolTipG.selectAll('text.'+mySVGClass)
-				.data(d => toolTipText.instructions.split("\n"))
+				.data(d => wrapText(toolTipText.instructions, 50))
 				.enter()
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', 95) //(event.x - 170)
-				.attr('y', 130) //(500 - event.x)
-				.attr('font-size', 12);
+				.attr('x', 0.18 * width + font.width) //(event.x - 170)
+				.attr('y', 0.26 * height + 1.5 * font.height); //(500 - event.x)
+				
 			toolTipTextElement
 				.append('tspan')
 				.attr('class', 'tiptext '+mySVGClass)
 				.text(d => d)
-				.attr('x',95)
-				.attr('y', (d,i) => i * 15 + 135);
+				.attr('x', 0.18 * width + font.width)
+				.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
 				
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
@@ -325,8 +337,8 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		var sliderX = (mySVGClass.includes('vert')) ? x(82) : x(-1.5);
 		var sliderY = (mySVGClass.includes('vert')) ? y(5.3) : y(1.2);
-		var sliderHeight = (mySVGClass.includes('vert')) ? 460 : slider.bar;
-		var sliderWidth = (mySVGClass.includes('vert')) ? slider.bar : 450;
+		var sliderHeight = (mySVGClass.includes('vert')) ? 560 : slider.bar;
+		var sliderWidth = (mySVGClass.includes('vert')) ? slider.bar : 550;
 		
 		var handleX = (mySVGClass.includes('vert')) ? x(82)-2 : x(55)-25;
 		var handleY = (mySVGClass.includes('vert')) ? y(2.5)-25 : y(1.2)-2;
@@ -453,8 +465,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 219 : 259)
-			.attr('height', whichSlider.includes("horiz") ? 65 : 65)
+			.attr('width', whichSlider.includes("horiz") ? 48 * font.width : 48 * font.width)
+			.attr('height', whichSlider.includes("horiz") ? 5 * font.height : 6.5 * font.height)
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
@@ -540,19 +552,19 @@ function drawMySVG(mySVGID, mySVGClass){
 
 
 			var toolTipTextElement = toolTipG.selectAll('text')
-					.data(d => text.split("\n"))
+					.data(d => wrapText(text, 50))
 					.enter()
 					.append("text")
 					.attr('class', 'tiptext')
-					.attr('x', 95) //(event.x - 170)
-					.attr('y', 135) //(500 - event.x)
+					.attr('x', 0.19 * width) //(event.x - 170)
+					.attr('y', 0.27 * height) //(500 - event.x)
 					.attr('font-size', 12);
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
 					.text(d => d)
-					.attr('x',95)
-					.attr('y', (d,i) => i * 15 + 135);
+					.attr('x', 0.18 * width + font.width)
+					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
 		}
 
 		function showDotToolTip(event, d) {
