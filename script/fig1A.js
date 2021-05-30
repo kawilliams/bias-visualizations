@@ -1,7 +1,7 @@
 var height = 600,
 	width = 600;
 
-var radius = 3;
+var radius = 4;
 var margin = ({top: 50, right: 10, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
 var font = {height: 12, width: 7};
@@ -75,7 +75,6 @@ function drawMySVG(mySVGID, mySVGClass){
 
 
 		var svg = d3.select(mySVGID)
-		.attr('class', mySVGClass)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
 		.attr('viewBox', "0 0 " + width + " " + height)
 		.classed('svg-content', true)
@@ -260,13 +259,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			.enter()
 			.append('rect')
 			.attr('class', d =>  "labels label"+d.id+" "+mySVGClass)
-			.attr('width', 80)
-			.attr('height', 40)
+			.attr('width', 110)
+			.attr('height', 56)
 			.attr('fill', 'lightgrey')
 			.attr('rx', 2)
 			.attr('display', 'none') 
-			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 80 : x(d.risk_score_quantile))
-			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 40 : y(d.num_chronic_conds_mean));
+			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) - 5)
+			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) - 5);
 
 		var labelText = allLabelsG.selectAll('text')
 			.data(d)
@@ -274,8 +273,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.append('text')
 			.attr('class', d =>  "labels label"+d.id+" "+mySVGClass)
 			.attr('display', 'none')
-			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 80 : x(d.risk_score_quantile))
-			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 40 : y(d.num_chronic_conds_mean));
+			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) - 5)
+			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) - 5);
 
 			labelText.selectAll('tspan')
 			.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
@@ -293,8 +292,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('dy', '1.2em')
 
 		dataCircles
-			.on('mouseover', showDotToolTip)
-			.on('mouseout', hideDotToolTip);
+			.on('mouseovertouchstart', showDotToolTip)
+			.on('mouseout touchend', hideDotToolTip);
 
 		var toolTipG = svg.append('g')
 				.attr('class', mySVGClass);
@@ -348,7 +347,7 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		var dragSlider = d3.drag()
 				.on('start', dragstarted)
-				.on('drag', draggedVert)
+				.on('drag', draggingSlider)
 				.on('end', dragend);
 
 		var sliderBar = svg.append('rect')
@@ -361,7 +360,8 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('width', sliderWidth)
 				.attr('fill', 'lightsteelblue')
 				.attr('opacity', 0.7)
-				.attr('cursor', 'pointer');
+				.attr('cursor', 'pointer')
+				.call(dragSlider);
 		var circleHorizIds = [];
 		svg.append('rect')
 				.attr('class', sliderClass + " " + mySVGClass)
@@ -379,37 +379,37 @@ function drawMySVG(mySVGID, mySVGClass){
 			var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
 			d3.selectAll(whichSlider).raise().attr('fill', 'steelblue');
 		}
-		function draggedVert(event){
+		function draggingSlider(event){
 			
-			var whichSlider = d3.select(this).attr('id').split('Handle')[0];
+			var whichSlider = d3.select(this).attr('id').split('Slider')[0];
 			if (whichSlider.includes('vert')){
 				//Prevent slider from going off screen left
 				if (event.x < margin.left){
-					d3.select("#" + whichSlider + "Bar").attr('x', margin.left);
-					d3.select("#" + whichSlider + "Handle").attr('x', margin.left-2);	
+					d3.select("#" + whichSlider + "SliderBar").attr('x', margin.left);
+					d3.select("#" + whichSlider + "SliderHandle").attr('x', margin.left-2);	
 				}
 				// Prevent slider from going off screen right 
 				else if (event.x > width-margin.right) {
-					d3.select("#" + whichSlider + "Bar").attr('x', width-margin.right);
-					d3.select("#" + whichSlider + "Handle").attr('x', width-margin.right-2);
+					d3.select("#" + whichSlider + "SliderBar").attr('x', width-margin.right);
+					d3.select("#" + whichSlider + "SliderHandle").attr('x', width-margin.right-2);
 				} else{
-					d3.select("#" + whichSlider + "Bar").attr('x', event.x);
-					d3.select("#" + whichSlider + "Handle").attr('x', event.x-2);
+					d3.select("#" + whichSlider + "SliderBar").attr('x', event.x);
+					d3.select("#" + whichSlider + "SliderHandle").attr('x', event.x-2);
 				}
 			} else {
 				//Prevent slider from going off the bottom
 				if (event.y > (height - margin.bottom)) {
-					d3.select("#" + whichSlider + "Bar").attr('y', height-margin.bottom);
-					d3.select("#" + whichSlider + "Handle").attr('y', height-margin.bottom-2);
+					d3.select("#" + whichSlider + "SliderBar").attr('y', height-margin.bottom);
+					d3.select("#" + whichSlider + "SliderHandle").attr('y', height-margin.bottom-2);
 				} 
 				//Prevent slider from going off the top
 				else if (event.y < margin.top){
-					d3.select("#" + whichSlider + "Bar").attr('y', margin.top);
-					d3.select("#" + whichSlider + "Handle").attr('y', margin.top-2);
+					d3.select("#" + whichSlider + "SliderBar").attr('y', margin.top);
+					d3.select("#" + whichSlider + "SliderHandle").attr('y', margin.top-2);
 				}
 				else {		
-					d3.select("#" + whichSlider + "Bar").attr('y', event.y);
-					d3.select("#" + whichSlider + "Handle").attr('y', event.y-2);
+					d3.select("#" + whichSlider + "SliderBar").attr('y', event.y);
+					d3.select("#" + whichSlider + "SliderHandle").attr('y', event.y-2);
 				}
 			}
 			
@@ -567,15 +567,12 @@ function drawMySVG(mySVGID, mySVGClass){
 					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
 		}
 
-		function showDotToolTip(event, d) {
-			var whichLabel = "label" + d3.select(this).attr('id').split('circle')[1] + " " + mySVGClass;
-			var allPartsOfDotToolTip = document.getElementsByClassName(whichLabel);
-			
-			for (var i = 0; i<allPartsOfDotToolTip.length; i++) {
-				allPartsOfDotToolTip[i].setAttribute("display", "inline");
-			}
+		function showDotToolTip(event) {
+			var whichLabel = ".label" + d3.select(this).attr('id').split('circle')[1] + "." + mySVGClass;
+			var allPartsOfDotToolTip = d3.selectAll(whichLabel);
+			allPartsOfDotToolTip.attr('display', 'inline');
 		}
-		function hideDotToolTip(event, d) {
+		function hideDotToolTip(event) {
 			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 		}
 
