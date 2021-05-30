@@ -292,7 +292,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('dy', '1.2em')
 
 		dataCircles
-			.on('mouseovertouchstart', showDotToolTip)
+			.on('mouseover touchstart', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
 
 		var toolTipG = svg.append('g')
