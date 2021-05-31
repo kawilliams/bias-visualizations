@@ -2,7 +2,7 @@ var height = 600,
 	width = 600;
 
 var radius = 4;
-var margin = ({top: 50, right: 10, bottom: 40, left: 50});
+var margin = ({top: 50, right: 20, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
 var font = {height: 12, width: 7};
 
@@ -119,7 +119,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.style("stroke", "purple")
 			.style("fill", "none")
 			.style('stroke-width', "1px")
-			.style('stroke-dasharray', '5')
+			.style('stroke-dasharray', '8')
 		
 	 	// orange/White line of best fit
 		svg.append("path")
@@ -178,7 +178,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('y2', 20)
 				.attr('stroke', d => 'black')
 				.attr('stroke-width', 2)
-				.attr('stroke-dasharray', 5);
+				.attr('stroke-dasharray', 8);
 
 		// Add percentile cutoff lines' labels
 		svg.append('g')
@@ -462,6 +462,7 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		function toolTipAppear(event, d, whichSlider, selectedCircles){
 			hideDotToolTip(event);
+
 			var text = whichSlider.includes("horiz") ? toolTipText.horizTextSameSide : toolTipText.vertText;
 
 			toolTipG.selectAll('text').remove();
@@ -562,6 +563,7 @@ function drawMySVG(mySVGID, mySVGClass){
 					.attr('x', 0.19 * width) //(event.x - 170)
 					.attr('y', 0.27 * height) //(500 - event.x)
 					.attr('font-size', 12);
+					//katy
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
