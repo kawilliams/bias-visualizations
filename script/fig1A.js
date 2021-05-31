@@ -253,6 +253,41 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('fill', d => (d.race == 'Black') ? '#764885' : '#ffa600')
 				.attr('stroke', d => (d.race == 'Black') ? '#764885' : '#ffa600');
 
+		var toolTipG = svg.append('g')
+				.attr('class', mySVGClass);
+
+		var toolTip = toolTipG.append('rect')
+				.attr('id', 'tooltip')
+				.attr('class', mySVGClass)
+				.attr('height', 13 * font.height)
+				.attr('width', 50 * font.width)
+				.attr('x', 0.18 * width) //(event.x - 170)
+				.attr('y', 0.26 * height) //(500 - event.x)
+				.attr('fill', 'lightsteelblue')
+				.attr('rx', 5)
+				.attr('opacity', '1');
+
+		var toolTipText = { instructions: "Health providers used an algorithm to determine which patients would get referred for and accepted into an extra care program. The x-axis shows a patient's risk score, and the y-axis shows how healthy the patient is, based on the number of chronic conditions. A higher risk score equates to a higher chance to receive extra care. Move the sliders to explore.",
+					horizTextAcrossThreshold: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be referred.",
+					horizTextSameSide: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be scored higher.",
+					vertText:  "Both patients at this point received the same score from the algorithm (X percentile) but the Black patient would have diff more conditions than the White patient."
+					};
+		var toolTipTextElement = toolTipG.selectAll('text.'+mySVGClass)
+				.data(d => wrapText(toolTipText.instructions, 50))
+				.enter()
+				.append("text")
+				.attr('class', 'tiptext ' +mySVGClass)
+				.attr('x', 0.18 * width + font.width) //(event.x - 170)
+				.attr('y', 0.26 * height + 1.5 * font.height); //(500 - event.x)
+				
+		toolTipTextElement
+			.append('tspan')
+			.attr('class', 'tiptext '+mySVGClass)
+			.text(d => d)
+			.attr('x', 0.18 * width + font.width)
+			.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
+
+		// Add individual labels for each point (tooltips)
 		var allLabelsG = svg.append('g');
 		var label = allLabelsG.selectAll('rect')
 			.data(d)
@@ -283,7 +318,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('class', function(d){ return this.parentElement.className.baseVal; })
 			.text(function(d){
 				if (d == "Black" | d == "White") { return "Race: " + d; }
-				if (+d >= 10) { return "Percentile: " + d; }
+				if (+d >= 10) { return "Percentile: " + percentileSuffix(d); }
 				if (d < 5) { return "Conditions: " + d.toFixed(2); }
 				return d;
 			})
@@ -295,39 +330,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.on('mouseover touchstart', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
 
-		var toolTipG = svg.append('g')
-				.attr('class', mySVGClass);
-
-		var toolTip = toolTipG.append('rect')
-				.attr('id', 'tooltip')
-				.attr('class', mySVGClass)
-				.attr('height', 13 * font.height)
-				.attr('width', 50 * font.width)
-				.attr('x', 0.18 * width) //(event.x - 170)
-				.attr('y', 0.26 * height) //(500 - event.x)
-				.attr('fill', 'lightsteelblue')
-				.attr('rx', 5)
-				.attr('opacity', '1');
-
-		var toolTipText = { instructions: "Health providers used an algorithm to determine which patients would get referred for and accepted into an extra care program. The x-axis shows a patient's risk score, and the y-axis shows how healthy the patient is, based on the number of chronic conditions. A higher risk score equates to a higher chance to receive extra care. Move the sliders to explore.",
-					horizTextAcrossThreshold: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be referred.",
-					horizTextSameSide: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be scored higher.",
-					vertText:  "Both patients at this point received the same score from the algorithm (X percentile) but the Black patient would have diff more conditions than the White patient."
-					};
-		var toolTipTextElement = toolTipG.selectAll('text.'+mySVGClass)
-				.data(d => wrapText(toolTipText.instructions, 50))
-				.enter()
-				.append("text")
-				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', 0.18 * width + font.width) //(event.x - 170)
-				.attr('y', 0.26 * height + 1.5 * font.height); //(500 - event.x)
-				
-			toolTipTextElement
-				.append('tspan')
-				.attr('class', 'tiptext '+mySVGClass)
-				.text(d => d)
-				.attr('x', 0.18 * width + font.width)
-				.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
+		
 				
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
