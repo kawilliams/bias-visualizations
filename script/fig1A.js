@@ -264,8 +264,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('fill', 'lightgrey')
 			.attr('rx', 2)
 			.attr('display', 'none') 
-			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) - 5)
-			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) - 5);
+			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) + radius + 3)
+			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) + radius + 3 );
 
 		var labelText = allLabelsG.selectAll('text')
 			.data(d)
@@ -273,8 +273,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.append('text')
 			.attr('class', d =>  "labels label"+d.id+" "+mySVGClass)
 			.attr('display', 'none')
-			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) - 5)
-			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) - 5);
+			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) + radius + 3)
+			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) + radius + 3);
 
 			labelText.selectAll('tspan')
 			.data(d => [d.num_chronic_conds_mean, d.risk_score_quantile, d.race])
