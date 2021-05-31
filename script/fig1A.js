@@ -461,7 +461,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 
 		function toolTipAppear(event, d, whichSlider, selectedCircles){
-
+			hideDotToolTip(event);
 			var text = whichSlider.includes("horiz") ? toolTipText.horizTextSameSide : toolTipText.vertText;
 
 			toolTipG.selectAll('text').remove();
