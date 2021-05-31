@@ -1,4 +1,4 @@
-.svg-container {
+/*.svg-container {
 	display: inline-block;
     position: relative;
     width: 100%;
@@ -12,11 +12,8 @@
     position: absolute;
     top: 0;
     left: 0;
-}
+}*/
 
-circle {
-	stroke: none;
-}
 
 #nextButton {
 	fill: lightsteelblue;
@@ -25,14 +22,26 @@ circle {
 
 }
 
-text {
+.svgtext {
 	font-family: Arial, sans-serif;
 	font-size: 12pt;
-
 }
-text.labelClass {
+
+.commentary {
+    fill: #3a3b3c;
+}
+
+.toptext {
+    fill: #3a3b3c;
+}
+
+.caption {
+    fill: #3a3b3c;
+}
+
+/*text.labelClass {
     font-size: 4px;
 }
 text.label {
 	font-size: 4px;
-}
+}*/
