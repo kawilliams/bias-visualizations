@@ -240,6 +240,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('stroke', 'black')
 			.attr('stroke-width', 1);
 
+		//Add dummy circle so that tabbing works
+		svg.append('circle')
+			.attr('id', 'circle-1')
+			.attr('cx', 10)
+			.attr('cy', 10)
+			.attr('r', 0)
+			.attr('tabindex', '0');
 		//Add data points
 		var dataCircles = svg.append('g')
 			.selectAll('circle')
@@ -250,11 +257,12 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('cx', d => x(+d.risk_score_quantile))
 				.attr('cy', d => y(+d.num_chronic_conds_mean))
 				.attr('r', radius)
+				.attr('tabindex', '0')
 				.attr('fill', d => (d.race == 'Black') ? '#764885' : '#ffa600')
 				.attr('stroke', d => (d.race == 'Black') ? '#764885' : '#ffa600');
 
 		var toolTipG = svg.append('g')
-				.attr('class', mySVGClass);
+				.attr('class', "tooltip " + mySVGClass);
 
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
@@ -329,7 +337,20 @@ function drawMySVG(mySVGID, mySVGClass){
 		dataCircles
 			.on('mouseover touchstart', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
-
+		document.addEventListener('keydown', (event) => {
+			const keyName = event.key;
+			if (keyName == 'Tab') {
+				showDotToolTip(event);
+			}
+			else if ((keyName == 'ArrowDown') || (keyName == 'ArrowUp') || (keyName == 'ArrowLeft') || (keyName == 'ArrowRight')) {
+				dragstarted(event);
+				draggingSlider(event);
+			}
+			else {
+				dragend(event);
+			}
+		});
+		
 		
 				
 		// Slider
@@ -363,6 +384,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('width', sliderWidth)
 				.attr('fill', 'lightsteelblue')
 				.attr('opacity', 0.7)
+				.attr('tabindex', '0')
 				.attr('cursor', 'pointer')
 				.call(dragSlider);
 		var circleHorizIds = [];
@@ -379,12 +401,34 @@ function drawMySVG(mySVGID, mySVGClass){
 				.call(dragSlider);
 
 		function dragstarted(event){
-			var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
+			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
+				var whichSlider = ".horizSlider.horizGraph";
+			} 
+			else if ((event.key == 'ArrowLeft') || (event.key == 'ArrowRight')) {
+				var whichSlider = ".vertSlider.vertGraph";
+			} 
+			else {
+				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
+			}
+			
 			d3.selectAll(whichSlider).raise().attr('fill', 'steelblue');
 		}
 		function draggingSlider(event){
-			
-			var whichSlider = d3.select(this).attr('id').split('Slider')[0];
+			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
+				var whichSlider = "horiz";
+				event.x = +d3.select('#horizSliderBar').attr('x');
+				// Y-axis is runs 0 to 600 top to bottom
+				(event.key == 'ArrowDown') ? event.y = +d3.select('#horizSliderBar').attr('y') + 10 : event.y = +d3.select('#horizSliderBar').attr('y') - 10;
+				
+			} 
+			else if ((event.key == 'ArrowLeft') || (event.key == 'ArrowRight')){
+				var whichSlider = "vert";
+				(event.key == 'ArrowLeft') ? event.x = +d3.select('#vertSliderBar').attr('x') - 10 : event.x = +d3.select('#vertSliderBar').attr('x') + 10;
+				event.y = +d3.select('#vertSliderBar').attr('y');
+			}
+			else {
+				var whichSlider = d3.select(this).attr('id').split('Slider')[0];
+			}
 			if (whichSlider.includes('vert')){
 				//Prevent slider from going off screen left
 				if (event.x < margin.left){
@@ -449,7 +493,15 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 		
 		function dragend(event, d){
-			var whichSlider = "." + d3.select(this).attr('class').replace(' ', '.');
+			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
+				var whichSlider = ".horizSlider.horizGraph";
+			} 
+			else if ((event.key == 'ArrowLeft') || (event.key == 'ArrowRight')) {
+				var whichSlider = ".vertSlider.vertGraph";
+			} 
+			else {
+				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
+			}
 			d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
 		}
 		function percentileSuffix(number) {
@@ -464,7 +516,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			hideDotToolTip(event);
 
 			var text = whichSlider.includes("horiz") ? toolTipText.horizTextSameSide : toolTipText.vertText;
-
+			var toolTipG = d3.select('g.tooltip.' + whichSlider + 'Graph');
+			
 			toolTipG.selectAll('text').remove();
 			toolTipG.select("rect")
 			.transition()
@@ -554,7 +607,6 @@ function drawMySVG(mySVGID, mySVGClass){
 				text = text.replace("diff", diff);
 			}
 
-
 			var toolTipTextElement = toolTipG.selectAll('text')
 					.data(d => wrapText(text, 50))
 					.enter()
@@ -563,23 +615,35 @@ function drawMySVG(mySVGID, mySVGClass){
 					.attr('x', 0.19 * width) //(event.x - 170)
 					.attr('y', 0.27 * height) //(500 - event.x)
 					.attr('font-size', 12);
-					//katy
+				
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
-					.text(d => d)
+					.text(d => {
+						return d;
+					})
 					.attr('x', 0.18 * width + font.width)
 					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
 		}
 
 		function showDotToolTip(event) {
-			var whichLabel = ".label" + d3.select(this).attr('id').split('circle')[1] + "." + mySVGClass;
+			if (event.key == 'Tab') {
+				//Clear labels/tooltips first if using tabs
+				d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
+				var whichLabel = ".label" + (+(document.activeElement.id.split('circle')[1]) + 1) + "." + mySVGClass;
+			}
+			else {
+				var whichLabel = ".label" + d3.select(this).attr('id').split('circle')[1] + "." + mySVGClass;
+			}
 			var allPartsOfDotToolTip = d3.selectAll(whichLabel);
 			allPartsOfDotToolTip.attr('display', 'inline');
+			
 		}
 		function hideDotToolTip(event) {
 			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 		}
+
+
 
 	})
 	.catch(function(error){
