@@ -1,3 +1,4 @@
+/* bias-vis */
 var height = 600,
 	width = 600;
 
@@ -75,12 +76,12 @@ function drawMySVG(mySVGID, mySVGClass){
 
 
 		var svg = d3.select(mySVGID)
-		.attr('preserveAspectRatio', 'xMidYMid meet')
-		.attr('viewBox', "0 0 " + width + " " + height)
-		.classed('svg-content', true)
-		.attr('class', mySVGClass);
-		// .attr('height', height)
-		// .attr('width', width);
+			.attr('preserveAspectRatio', 'xMidYMid meet')
+			.attr('viewBox', "0 0 " + width + " " + height)
+			.classed('svg-content', true)
+			.attr('class', mySVGClass);
+			// .attr('height', height)
+			// .attr('width', width);
 
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
@@ -308,7 +309,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('rx', 2)
 			.attr('display', 'none') 
 			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) + radius + 3)
-			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) + radius + 3 );
+			.attr('y', d => (d.orient == "left") ? y(d.num_chronic_conds_mean) - 60 : y(d.num_chronic_conds_mean) + radius + 3);
 
 		var labelText = allLabelsG.selectAll('text')
 			.data(d)
@@ -332,7 +333,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			})
 			.attr('display', 'none')
 			.attr('x', function() { return this.parentElement.x.baseVal[0].value + 3; })
-			.attr('dy', '1.2em')
+			.attr('dy', '1.2em');
 
 		dataCircles
 			.on('mouseover touchstart', showDotToolTip)
@@ -351,8 +352,6 @@ function drawMySVG(mySVGID, mySVGClass){
 			}
 		});
 		
-		
-				
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
 		var sliderId = (mySVGClass.includes('vert')) ? 'vertSliderBar' : 'horizSliderBar';
@@ -612,16 +611,14 @@ function drawMySVG(mySVGID, mySVGClass){
 					.enter()
 					.append("text")
 					.attr('class', 'tiptext')
-					.attr('x', 0.19 * width) //(event.x - 170)
-					.attr('y', 0.27 * height) //(500 - event.x)
+					.attr('x', 0.19 * width) 
+					.attr('y', 0.27 * height)
 					.attr('font-size', 12);
 				
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
-					.text(d => {
-						return d;
-					})
+					.text(d => d)
 					.attr('x', 0.18 * width + font.width)
 					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
 		}
