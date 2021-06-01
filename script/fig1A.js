@@ -76,11 +76,11 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		var svg = d3.select(mySVGID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
-		.attr('viewBox', "0 0 " + width + " " + height)
-		.classed('svg-content', true)
-		.attr('class', mySVGClass);
-		// .attr('height', height)
-		// .attr('width', width);
+		// .attr('viewBox', "0 0 " + width + " " + height)
+		// .classed('svg-content', true)
+		.attr('class', mySVGClass)
+		.attr('height', height)
+		.attr('width', width);
 
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
@@ -243,7 +243,6 @@ function drawMySVG(mySVGID, mySVGClass){
 		//Add dummy circle so that tabbing works
 		svg.append('circle')
 			.attr('id', 'circle-1')
-			.attr('class', mySVGClass)
 			.attr('cx', 10)
 			.attr('cy', 10)
 			.attr('r', 0)
@@ -263,7 +262,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('stroke', d => (d.race == 'Black') ? '#764885' : '#ffa600');
 
 		var toolTipG = svg.append('g')
-				.attr('class', mySVGClass);
+				.attr('class', "tooltip " + mySVGClass);
 
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
@@ -517,7 +516,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			hideDotToolTip(event);
 
 			var text = whichSlider.includes("horiz") ? toolTipText.horizTextSameSide : toolTipText.vertText;
-
+			var toolTipG = d3.select('g.tooltip.' + whichSlider + 'Graph');
+			
 			toolTipG.selectAll('text').remove();
 			toolTipG.select("rect")
 			.transition()
@@ -607,7 +607,6 @@ function drawMySVG(mySVGID, mySVGClass){
 				text = text.replace("diff", diff);
 			}
 
-
 			var toolTipTextElement = toolTipG.selectAll('text')
 					.data(d => wrapText(text, 50))
 					.enter()
@@ -616,11 +615,13 @@ function drawMySVG(mySVGID, mySVGClass){
 					.attr('x', 0.19 * width) //(event.x - 170)
 					.attr('y', 0.27 * height) //(500 - event.x)
 					.attr('font-size', 12);
-					//katy
+				
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
-					.text(d => d)
+					.text(d => {
+						return d;
+					})
 					.attr('x', 0.18 * width + font.width)
 					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
 		}
