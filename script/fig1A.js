@@ -240,14 +240,15 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('stroke', 'black')
 			.attr('stroke-width', 1);
 
-		//Add data points
+		//Add dummy circle so that tabbing works
 		svg.append('circle')
 			.attr('id', 'circle-1')
 			.attr('class', mySVGClass)
-			.attr('cx', 40)
-			.attr('cy', 40)
+			.attr('cx', 10)
+			.attr('cy', 10)
 			.attr('r', 0)
 			.attr('tabindex', '0');
+		//Add data points
 		var dataCircles = svg.append('g')
 			.selectAll('circle')
 				.data(d)
@@ -342,13 +343,12 @@ function drawMySVG(mySVGID, mySVGClass){
 			if (keyName == 'Tab') {
 				showDotToolTip(event);
 			}
-			else if (keyName == 'ArrowDown') {
+			else if ((keyName == 'ArrowDown') || (keyName == 'ArrowUp') || (keyName == 'ArrowLeft') || (keyName == 'ArrowRight')) {
 				dragstarted(event);
-				// .on('drag', draggingSlider)
-				// .on('end', dragend);
+				draggingSlider(event);
 			}
-			else if (keyName == 'ArrowUp') {
-
+			else {
+				dragend(event);
 			}
 		});
 		
@@ -403,18 +403,33 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		function dragstarted(event){
 			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
-				console.log(document.activeElement, document.activeElement.id);
-				var bar = document.activeElement.id;
-				if (bar.length > 0) var whichSlider = "." + d3.select("#" + bar).attr('class').replace(" ", ".");
-			} else {
+				var whichSlider = ".horizSlider.horizGraph";
+			} 
+			else if ((event.key == 'ArrowLeft') || (event.key == 'ArrowRight')) {
+				var whichSlider = ".vertSlider.vertGraph";
+			} 
+			else {
 				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
 			}
 			
 			d3.selectAll(whichSlider).raise().attr('fill', 'steelblue');
 		}
 		function draggingSlider(event){
-			
-			var whichSlider = d3.select(this).attr('id').split('Slider')[0];
+			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
+				var whichSlider = "horiz";
+				event.x = +d3.select('#horizSliderBar').attr('x');
+				// Y-axis is runs 0 to 600 top to bottom
+				(event.key == 'ArrowDown') ? event.y = +d3.select('#horizSliderBar').attr('y') + 10 : event.y = +d3.select('#horizSliderBar').attr('y') - 10;
+				
+			} 
+			else if ((event.key == 'ArrowLeft') || (event.key == 'ArrowRight')){
+				var whichSlider = "vert";
+				(event.key == 'ArrowLeft') ? event.x = +d3.select('#vertSliderBar').attr('x') - 10 : event.x = +d3.select('#vertSliderBar').attr('x') + 10;
+				event.y = +d3.select('#vertSliderBar').attr('y');
+			}
+			else {
+				var whichSlider = d3.select(this).attr('id').split('Slider')[0];
+			}
 			if (whichSlider.includes('vert')){
 				//Prevent slider from going off screen left
 				if (event.x < margin.left){
@@ -479,7 +494,15 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 		
 		function dragend(event, d){
-			var whichSlider = "." + d3.select(this).attr('class').replace(' ', '.');
+			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
+				var whichSlider = ".horizSlider.horizGraph";
+			} 
+			else if ((event.key == 'ArrowLeft') || (event.key == 'ArrowRight')) {
+				var whichSlider = ".vertSlider.vertGraph";
+			} 
+			else {
+				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
+			}
 			d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
 		}
 		function percentileSuffix(number) {
