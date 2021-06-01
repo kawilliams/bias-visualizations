@@ -76,11 +76,11 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		var svg = d3.select(mySVGID)
 		.attr('preserveAspectRatio', 'xMidYMid meet')
-		// .attr('viewBox', "0 0 " + width + " " + height)
-		// .classed('svg-content', true)
-		.attr('class', mySVGClass)
-		.attr('height', height)
-		.attr('width', width);
+		.attr('viewBox', "0 0 " + width + " " + height)
+		.classed('svg-content', true)
+		.attr('class', mySVGClass);
+		// .attr('height', height)
+		// .attr('width', width);
 
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
