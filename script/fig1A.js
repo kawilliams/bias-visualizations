@@ -342,6 +342,14 @@ function drawMySVG(mySVGID, mySVGClass){
 			if (keyName == 'Tab') {
 				showDotToolTip(event);
 			}
+			else if (keyName == 'ArrowDown') {
+				dragstarted(event);
+				// .on('drag', draggingSlider)
+				// .on('end', dragend);
+			}
+			else if (keyName == 'ArrowUp') {
+
+			}
 		});
 		
 		
@@ -377,6 +385,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('width', sliderWidth)
 				.attr('fill', 'lightsteelblue')
 				.attr('opacity', 0.7)
+				.attr('tabindex', '0')
 				.attr('cursor', 'pointer')
 				.call(dragSlider);
 		var circleHorizIds = [];
@@ -393,7 +402,14 @@ function drawMySVG(mySVGID, mySVGClass){
 				.call(dragSlider);
 
 		function dragstarted(event){
-			var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
+			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
+				console.log(document.activeElement, document.activeElement.id);
+				var bar = document.activeElement.id;
+				if (bar.length > 0) var whichSlider = "." + d3.select("#" + bar).attr('class').replace(" ", ".");
+			} else {
+				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
+			}
+			
 			d3.selectAll(whichSlider).raise().attr('fill', 'steelblue');
 		}
 		function draggingSlider(event){
