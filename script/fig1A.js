@@ -241,6 +241,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('stroke-width', 1);
 
 		//Add data points
+		svg.append('circle')
+			.attr('id', 'circle-1')
+			.attr('class', mySVGClass)
+			.attr('cx', 40)
+			.attr('cy', 40)
+			.attr('r', 0)
+			.attr('tabindex', '0');
 		var dataCircles = svg.append('g')
 			.selectAll('circle')
 				.data(d)
