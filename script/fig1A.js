@@ -250,6 +250,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('cx', d => x(+d.risk_score_quantile))
 				.attr('cy', d => y(+d.num_chronic_conds_mean))
 				.attr('r', radius)
+				.attr('tabindex', '0')
 				.attr('fill', d => (d.race == 'Black') ? '#764885' : '#ffa600')
 				.attr('stroke', d => (d.race == 'Black') ? '#764885' : '#ffa600');
 
@@ -329,7 +330,13 @@ function drawMySVG(mySVGID, mySVGClass){
 		dataCircles
 			.on('mouseover touchstart', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
-
+		document.addEventListener('keydown', (event) => {
+			const keyName = event.key;
+			if (keyName == 'Tab') {
+				showDotToolTip(event);
+			}
+		});
+		
 		
 				
 		// Slider
@@ -573,13 +580,23 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 
 		function showDotToolTip(event) {
-			var whichLabel = ".label" + d3.select(this).attr('id').split('circle')[1] + "." + mySVGClass;
+			if (event.key == 'Tab') {
+				//Clear labels/tooltips first if using tabs
+				d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
+				var whichLabel = ".label" + (+(document.activeElement.id.split('circle')[1]) + 1) + "." + mySVGClass;
+			}
+			else {
+				var whichLabel = ".label" + d3.select(this).attr('id').split('circle')[1] + "." + mySVGClass;
+			}
 			var allPartsOfDotToolTip = d3.selectAll(whichLabel);
 			allPartsOfDotToolTip.attr('display', 'inline');
+			
 		}
 		function hideDotToolTip(event) {
 			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 		}
+
+
 
 	})
 	.catch(function(error){
