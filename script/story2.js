@@ -119,7 +119,7 @@ var makeModel = function(data) {
 	var _text = [
 		"Below are ten patients with varying levels of health, but only five of them can be referred to the high-risk care management program to help with their chronic illnesses. We want to prioritize those that need the care the most, so we'll line them up from sickest to healthiest. We'll use an algorithm to help us determine who should get into the program.",
 		"We have data from insurance claims - demographics, medications, visits, cost, and treatment. We'll begin by having the algorithm predict which patients will cost the most in the coming year, as this seems a reasonable way to determine who needs the program the most. High healthcare costs are correlated with high healthcare needs.",
-		"We apply the algorithm and align the patients from lowest predicted cost to highest predicted cost, or what we assume is healthiest to sickest, with the sickest on the right. The five sickest patients (the darkest blue glyphs are accepted into the care management program.",
+		"We apply the algorithm and align the patients from lowest predicted cost to highest predicted cost, or what we assume is healthiest to sickest, with the sickest on the right. The five sickest patients (the darkest blue glyphs) are accepted into the care management program.",
 		"Let's examine the accuracy of our algorithm. Since we used care costs as our label, the predicted care costs should be very close to the actual care costs. Did our algorithm accurately predict cost?",
 		"But what we truly care about is predicting patient health, not predicting future care costs. Remember, we want to determine the best patients for our extra care program. How well did the algorithm predict actual health?",
 		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care costs for Black patients are lower than the care costs for similarly-ill White patients. Although race was not an input, these societal inequalities produced dramatically different algorithmic scores for equally-sick patients.",
@@ -170,11 +170,11 @@ var makeModel = function(data) {
 		
 	];
 
-	var _personCaption = [
-	{ text: "Patients\n", 
+	var _mainRowCaptions = [
+	{ text: "Patients", 
 		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace, 
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
-	{ text: "Patients\n", 
+	{ text: "Patients", 
 		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace + personBox.width,  
 		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
 	{ text: "Predicted cost",
@@ -189,7 +189,7 @@ var makeModel = function(data) {
 	{ text: "\n",
 		x: svgMargin.left,
 		y: svgMargin.top },
-	{ text: "Predicted\n",
+	{ text: "Predicted",
 		x: viewBoxSize.width * 0.5 - personBox.width * 6 - 5,
 		y: viewBoxSize.height * 0.5 - personBox.height * 1.5},
 	{ text: "\n",
@@ -198,7 +198,7 @@ var makeModel = function(data) {
 	}
 	];
 	
-	var _shadowCaption = [
+	var _comparisonRowCaptions = [
 	{text: "\n",
 		x: svgMargin.left,
 		y: 0 },
@@ -348,12 +348,12 @@ var makeModel = function(data) {
 			return colorScale(0.5);
 		},
 		//Get the main row labels
-		personCaption: function() {
-			return _personCaption;
+		mainRowCaptions: function() {
+			return _mainRowCaptions;
 		},
 		//Get the comparison row labels
-		shadowCaption: function() {
-			return _shadowCaption;
+		comparisonRowCaptions: function() {
+			return _comparisonRowCaptions;
 		},
 		//Add an observer to the model
 		register: function(fxn) {
@@ -534,33 +534,48 @@ var makeSVGView = function(model, data, svgID) {
 
 	_raceKey.attr('display', 'none');
 
-	var _personCaption = _svg.append('text')
+	var _mainRowCaptions = _svg.append('text')
 		.attr('class', 'caption svgtext')
-		.attr('id', 'personCaption')
+		.attr('id', 'mainRowCaptions')
 		.attr('font-weight', "bold");
-	_personCaption.selectAll('tspan.personcaption')
-		.data(d => {
-			var text = model.personCaption();
-			return text[step].text.split('\n');
+	// _mainRowCaptions.selectAll('tspan.personcaption')
+	// 	.data(d => {
+	// 		var text = model.personCaption();
+	// 		return text[step].text.split('\n');
+	// 	})
+	// 	.enter()
+	// 	.append('tspan')
+	// 	.attr('class', 'personcaption')
+	// 	.text(d => d)
+	// 	.attr('x', d => {
+	// 		var text = model.personCaption();
+	// 		return text[step].x;
+	// 	})
+	// 	.attr('y', function(d,i){
+	// 		var step = model.get();
+	// 		var text = model.personCaption();
+	// 		return text[step].y + (i*captionSize.fontSpace);
+	// 	})
+	// 	.attr('font-size', captionSize.fontSize);
+	_mainRowCaptions.text(function() {
+			var step = model.get();
+			var text = model.mainRowCaptions();
+			return text[step].text;
 		})
-		.enter()
-		.append('tspan')
-		.attr('class', 'personcaption')
-		.text(d => d)
-		.attr('x', d => {
-			var text = model.personCaption();
+		.attr('x', function(){
+			var step = model.get();
+			var text = model.mainRowCaptions();
 			return text[step].x;
-		})
+		}) 
 		.attr('y', function(d,i){
 			var step = model.get();
-			var text = model.personCaption();
+			var text = model.mainRowCaptions();
 			return text[step].y + (i*captionSize.fontSpace);
 		})
-		.attr('font-size', captionSize.fontSize);
-
-	var _shadowCaption = peopleG.append('text')
-		.attr('class', 'svgtext')
-		.attr('id', 'shadowCaption')
+		.style('font-size', captionSize.fontSize);
+	var _comparisonRowCaptions = peopleG.append('text')
+		.attr('class', 'svgtext caption')
+		.attr('id', 'comparisonRowCaptions')
 		.attr('font-weight', "bold")
 		.attr('font-size', captionSize.fontSize);
 
@@ -604,11 +619,11 @@ var makeSVGView = function(model, data, svgID) {
 		var peopleToolTip = _svg.selectAll('text.tooltip')
 		.attr('x', d => {
 				var _x = d.x0;
-				if (step == 1) { _x = d.x1;  }
-				if (step == 2) { _x = d.x2;  }
-				if (step == 3) { _x = d.x3;  }
-				if (step == 4) { _x = d.x4;  }
-				if (step == 5) { _x = d.x5;  }
+				if (step == 1) { _x = d.x1; }
+				if (step == 2) { _x = d.x2; }
+				if (step == 3) { _x = d.x3; }
+				if (step == 4) { _x = d.x4; }
+				if (step == 5) { _x = d.x5; }
 				if (step == 6) {
 					var whichLabel = model.getLabel();
 					var isLabelActive = model.getLabelApplied();
@@ -674,52 +689,51 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', 1);
 		
-		d3.selectAll('.personcaption').remove();
+		//d3.selectAll('.personcaption').remove();
 
-		var personCaption = d3.select("#personCaption")
-			.selectAll('tspan.circlecaption')
-			.data(d => {
+		var mainRowCaptions = d3.select("#mainRowCaptions")
+			.text(d => {
 				var step = model.get();
-				var text = model.personCaption();
+				var text = model.mainRowCaptions();
 				return text[step].text.split('\n');
 			})
-			.enter()
-			.append('tspan')
-			.attr('class', 'circlecaption')
-			.text(d => d)
 			.attr('x', function(){
 				var step = model.get();
-				var text = model.personCaption();
+				var text = model.mainRowCaptions();
 				return text[step].x;
 			})
 			.attr('y', function(d,i){
 				var step = model.get();
-				var text = model.personCaption();
+				var text = model.mainRowCaptions();
 				return text[step].y + (i*5);
 			})
 			.style('font-size', captionSize.fontSize)
 			.transition()
-			.duration(duration)
+			.duration(function(){
+				var step = model.get();
+				if (step == 1) return duration/2;
+				else return duration;
+			})
 			.attr('opacity', function() {
 				if ((!model.getLabelApplied())&& (step == 6)) return 0;
 				return 1;
 			});
 
 
-		var shadowCaption = d3.select("#shadowCaption")
+		var comparisonRowCaptions = d3.select("#comparisonRowCaptions")
 			.text(function() {
 				var step = model.get();
-				var text = model.shadowCaption();
+				var text = model.comparisonRowCaptions();
 				return text[step].text;
 			})
 			.attr('x', function(){
 				var step = model.get();
-				var text = model.shadowCaption();
+				var text = model.comparisonRowCaptions();
 				return text[step].x;
 			})
 			.attr('y', function(){
 				var step = model.get();
-				var text = model.shadowCaption();
+				var text = model.comparisonRowCaptions();
 				return text[step].y;
 			})
 			.style('font-size', captionSize.fontSize)
