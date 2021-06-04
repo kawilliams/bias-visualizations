@@ -7,6 +7,16 @@ var margin = ({top: 50, right: 20, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
 var font = {height: 12, width: 7};
 
+/* 
+Colors
+CAII
+#48A9C5 light blue
+#1B365D dark blue
+Booth
+#800000 maroon
+#676E73 Booth gray
+*/
+
 /* Useful function to split text for tspan. 
 Gives the effect of text wrapping. */
 function wrapText(rectText, widthCap) {
@@ -91,7 +101,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('y', y(5.5))
 			.attr('width', x(100) - x(55) + 10)
 			.attr('height', height - margin.top + 12)
-			.attr('fill', 'lightsteelblue')
+			.attr('fill', 'grey')
 			.attr('opacity', 0.3); //0.6
 
 		var blackPoints = [];
@@ -112,22 +122,22 @@ function drawMySVG(mySVGID, mySVGClass){
 			.x(d => x(d[0]))
 			.y(d => y(d[1]));
 
-		// purple/Black line of best fit
+		// dark blue/Black line of best fit
 		svg.append("path")
 			.data(blackCurve)
 			.attr("d", lineGenerator(blackCurve))
 			.attr('class', mySVGClass)
-			.style("stroke", "purple")
+			.style("stroke", "#1B365D") 
 			.style("fill", "none")
 			.style('stroke-width', "1px")
 			.style('stroke-dasharray', '8')
 		
-	 	// orange/White line of best fit
+	 	// light blue/White line of best fit
 		svg.append("path")
 			.data(whiteCurve)
 			.attr("d", lineGenerator(whiteCurve))
 			.attr('class', mySVGClass)
-			.style("stroke", "orange")
+			.style("stroke", "#48A9C5")
 			.style("fill", "none")
 			.style('stroke-width', "1px")
 			.style('stroke-dasharray', '0')
@@ -193,10 +203,10 @@ function drawMySVG(mySVGID, mySVGClass){
 				.text(d => d.text)
 				.attr('text-anchor', 'end');
 			
-		// Add legend (Black: purple, White; orange)
-		var legendColors = [{color: "orange" , path: "M60,55 l45,0" , 
+		// Add legend (Black: dark blue, White: light blue)
+		var legendColors = [{color: "#48A9C5" , path: "M60,55 l45,0" , 
 							dasharray: "0", race: "White"},
-							{color: "purple" , path: "M60,70 l50,0" , 
+							{color: "#1B365D" , path: "M60,70 l50,0" , 
 							dasharray: "5 5", race: "Black"}];
 		// Add legend 
 		svg.append('g')
@@ -259,8 +269,8 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('cy', d => y(+d.num_chronic_conds_mean))
 				.attr('r', radius)
 				.attr('tabindex', '0')
-				.attr('fill', d => (d.race == 'Black') ? '#764885' : '#ffa600')
-				.attr('stroke', d => (d.race == 'Black') ? '#764885' : '#ffa600');
+				.attr('fill', d => (d.race == 'Black') ? '#1B365D' : '#48A9C5')
+				.attr('stroke', d => (d.race == 'Black') ? '#1B365D' : '#48A9C5');
 
 		var toolTipG = svg.append('g')
 				.attr('class', "tooltip " + mySVGClass);
@@ -272,9 +282,9 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('width', 50 * font.width)
 				.attr('x', 0.18 * width) //(event.x - 170)
 				.attr('y', 0.26 * height) //(500 - event.x)
-				.attr('fill', 'lightsteelblue')
+				.attr('fill', 'black')
 				.attr('rx', 5)
-				.attr('opacity', '1');
+				.attr('opacity', '0.7');
 
 		var toolTipText = { instructions: "Health providers used an algorithm to determine which patients would get referred for and accepted into an extra care program. The x-axis shows a patient's risk score, and the y-axis shows how healthy the patient is, based on the number of chronic conditions. A higher risk score equates to a higher chance to receive extra care. Move the sliders to explore.",
 					horizTextAcrossThreshold: "Two patients at this level would be equally sick (Y conditions), but to the algorithm the Black patient needed to be more sick to be referred.",
@@ -294,7 +304,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('class', 'tiptext '+mySVGClass)
 			.text(d => d)
 			.attr('x', 0.18 * width + font.width)
-			.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
+			.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height)
+			.attr('fill', 'white');
 
 		// Add individual labels for each point (tooltips)
 		var allLabelsG = svg.append('g');
@@ -305,7 +316,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('class', d =>  "labels label"+d.id+" "+mySVGClass)
 			.attr('width', 110)
 			.attr('height', 56)
-			.attr('fill', 'lightgrey')
+			.attr('fill', 'black')
+			.attr('opacity', '0.7')
 			.attr('rx', 2)
 			.attr('display', 'none') 
 			.attr('x', d => (d.orient == "left") ? x(d.risk_score_quantile) - 115 : x(d.risk_score_quantile) + radius + 3)
@@ -333,7 +345,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			})
 			.attr('display', 'none')
 			.attr('x', function() { return this.parentElement.x.baseVal[0].value + 3; })
-			.attr('dy', '1.2em');
+			.attr('dy', '1.2em')
+			.attr('fill', 'white');
 
 		dataCircles
 			.on('mouseover touchstart', showDotToolTip)
@@ -358,8 +371,8 @@ function drawMySVG(mySVGID, mySVGClass){
 		var handleId = (mySVGClass.includes('vert')) ? 'vertSliderHandle' : 'horizSliderHandle';
 
 		var sliderX = (mySVGClass.includes('vert')) ? x(82) : x(-1.5);
-		var sliderY = (mySVGClass.includes('vert')) ? y(5.3) : y(1.2);
-		var sliderHeight = (mySVGClass.includes('vert')) ? 560 : slider.bar;
+		var sliderY = (mySVGClass.includes('vert')) ? y(5.5) : y(1.2);
+		var sliderHeight = (mySVGClass.includes('vert')) ? 570 : slider.bar;
 		var sliderWidth = (mySVGClass.includes('vert')) ? slider.bar : 550;
 		
 		var handleX = (mySVGClass.includes('vert')) ? x(82)-2 : x(55)-25;
@@ -381,7 +394,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('rx', 5)
 				.attr('height', sliderHeight)
 				.attr('width', sliderWidth)
-				.attr('fill', 'lightsteelblue')
+				.attr('fill', 'grey')
 				.attr('opacity', 0.7)
 				.attr('tabindex', '0')
 				.attr('cursor', 'pointer')
@@ -395,7 +408,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('rx', 8)
 				.attr('height', handleHeight)
 				.attr('width', handleWidth)
-				.attr('fill', 'lightsteelblue')
+				.attr('fill', 'grey')
 				.attr('cursor', 'pointer')
 				.call(dragSlider);
 
@@ -410,7 +423,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
 			}
 			
-			d3.selectAll(whichSlider).raise().attr('fill', 'steelblue');
+			d3.selectAll(whichSlider).raise().attr('fill', 'darkgrey');
 		}
 		function draggingSlider(event){
 			if ((event.key == 'ArrowDown') || (event.key == 'ArrowUp')) {
@@ -501,7 +514,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			else {
 				var whichSlider = "." + d3.select(this).attr('class').replace(" ", ".");
 			}
-			d3.selectAll(whichSlider).raise().attr('fill', 'lightsteelblue');
+			d3.selectAll(whichSlider).raise().attr('fill', 'grey');
 		}
 		function percentileSuffix(number) {
 			var percentileWithSuffix = number;
@@ -620,7 +633,8 @@ function drawMySVG(mySVGID, mySVGClass){
 					.attr('class', 'tiptext')
 					.text(d => d)
 					.attr('x', 0.18 * width + font.width)
-					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height);
+					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height)
+					.attr('fill', 'white');
 		}
 
 		function showDotToolTip(event) {
