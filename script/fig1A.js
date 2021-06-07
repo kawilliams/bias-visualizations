@@ -12,9 +12,6 @@ Colors
 CAII
 #48A9C5 light blue
 #1B365D dark blue
-Booth
-#800000 maroon
-#676E73 Booth gray
 */
 
 /* Useful function to split text for tspan. 
@@ -86,12 +83,12 @@ function drawMySVG(mySVGID, mySVGClass){
 
 
 		var svg = d3.select(mySVGID)
-			.attr('preserveAspectRatio', 'xMidYMid meet')
-			.attr('viewBox', "0 0 " + width + " " + height)
-			.classed('svg-content', true)
-			.attr('class', mySVGClass);
-			// .attr('height', height)
-			// .attr('width', width);
+				.attr('preserveAspectRatio', 'xMidYMid meet')
+				.attr('viewBox', "0 0 " + width + " " + height)
+				.classed('svg-content', true)
+				.attr('class', mySVGClass);
+				// .attr('height', height)
+				// .attr('width', width);
 
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
