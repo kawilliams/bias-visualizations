@@ -5,7 +5,17 @@ var height = 600,
 var radius = 4;
 var margin = ({top: 50, right: 20, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
-var font = {height: 12, width: 7};
+var font = {height: 12, width: 7, size: 14};
+var toolTipCoordinates = {x: 0.18 * width, y: 0.26 * height};
+var toolTipWrap = 50;
+
+//Adjust sizes for mobile
+if (screen.width < screen.height) {
+	radius = 6;
+	font = {height: 16, width: 9, size: 18};
+	toolTipCoordinates = {x: 0.15 * width, y: 0.32 * height};
+	toolTipWrap = 45;
+} 
 
 /* 
 Colors
@@ -16,23 +26,12 @@ CAII
 
 /* Useful function to split text for tspan. 
 Gives the effect of text wrapping. */
-function wrapText(rectText, widthCap) {
-	var wrappedText = [];
-	var startOfLastWord = 0;
-	var startOfLine = 0;
-	for (var i=1; i<rectText.length; i++) {
-		if (rectText[i] == ' ') {
-			startOfLastWord = i;
-		}
-		if (i % widthCap == 0) {
-			wrappedText.push(rectText.substring(startOfLine, startOfLastWord).trim());
-			startOfLine = startOfLastWord;
-		}
-		else if (i == rectText.length - 1) {
-			wrappedText.push(rectText.substring(startOfLine, rectText.length).trim());
-		}
-	}
-	return wrappedText;
+function wrapText(rectText, w) {
+	var wrap = rectText.replace(
+		new RegExp(`(?![^\\n]{1,${w}}$)([^\\n]{1,${w}})\\s`, 'g'), '$1\n'
+	);
+	var wrapList = wrap.split('\n');
+	return wrapList;
 }
 
 function drawMySVG(mySVGID, mySVGClass){
@@ -93,7 +92,6 @@ function drawMySVG(mySVGID, mySVGClass){
 		// Add rect to show shading past the 55%ile threshold
 		svg.append('rect')
 			.attr('class', mySVGClass)
-			.attr('id', "katy")
 			.attr('x', x(55))
 			.attr('y', y(5.5))
 			.attr('width', x(100) - x(55) + 10)
@@ -124,7 +122,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.data(blackCurve)
 			.attr("d", lineGenerator(blackCurve))
 			.attr('class', mySVGClass)
-			.style("stroke", "#1B365D") 
+			.style("stroke", "#1B365D")
 			.style("fill", "none")
 			.style('stroke-width', "1px")
 			.style('stroke-dasharray', '8')
@@ -153,7 +151,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('y', 0.06 * height)
 			.attr('fill', 'black')
 			.text('Percentile of Algorithm Risk Score')
-			.attr('font-size', '12px');
+			.style('font-size', font.size);
 
 		svg.append('g')
 			.attr('id', 'yAxisGroup')
@@ -169,7 +167,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('y', -0.06 * height)
 			.attr('fill', 'black')
 			.text('Number of Active Chronic Conditions')
-			.attr('font-size', '12px');
+			.style('font-size', font.size);
 
 
 		// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
@@ -198,7 +196,8 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('transform', d => 'translate('+(x(d.percentile)-5)+', 10) rotate(-90)')
 				.attr('fill', d => 'black')
 				.text(d => d.text)
-				.attr('text-anchor', 'end');
+				.attr('text-anchor', 'end')
+				.style('font-size', font.size);
 			
 		// Add legend (Black: dark blue, White: light blue)
 		var legendColors = [{color: "#48A9C5" , path: "M60,55 l45,0" , 
@@ -224,7 +223,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('class', mySVGClass)
 			.attr('x', 110)
 			.attr('y', d => (d.race == 'Black') ? 72 : 57)
-			.text(d => d.race);
+			.text(d => d.race)
+			.style('font-size', font.size);
 
 		// Add confidence intervals at dots
 		var confInterval = svg.append('g')
@@ -255,6 +255,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('cy', 10)
 			.attr('r', 0)
 			.attr('tabindex', '0');
+
 		//Add data points
 		var dataCircles = svg.append('g')
 			.selectAll('circle')
@@ -277,8 +278,8 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('class', mySVGClass)
 				.attr('height', 13 * font.height)
 				.attr('width', 50 * font.width)
-				.attr('x', 0.18 * width) //(event.x - 170)
-				.attr('y', 0.26 * height) //(500 - event.x)
+				.attr('x', toolTipCoordinates.x)
+				.attr('y', toolTipCoordinates.y)
 				.attr('fill', 'black')
 				.attr('rx', 5)
 				.attr('opacity', '0.7');
@@ -289,20 +290,21 @@ function drawMySVG(mySVGID, mySVGClass){
 					vertText:  "Both patients at this point received the same score from the algorithm (X percentile) but the Black patient would have diff more conditions than the White patient."
 					};
 		var toolTipTextElement = toolTipG.selectAll('text.'+mySVGClass)
-				.data(d => wrapText(toolTipText.instructions, 50))
+				.data(d => wrapText(toolTipText.instructions, toolTipWrap))
 				.enter()
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', 0.18 * width + font.width) //(event.x - 170)
-				.attr('y', 0.26 * height + 1.5 * font.height); //(500 - event.x)
+				.attr('x', toolTipCoordinates.x + font.width) //(event.x - 170)
+				.attr('y', toolTipCoordinates.y + 1.5 * font.height); //(500 - event.x)
 				
 		toolTipTextElement
 			.append('tspan')
 			.attr('class', 'tiptext '+mySVGClass)
 			.text(d => d)
-			.attr('x', 0.18 * width + font.width)
-			.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height)
-			.attr('fill', 'white');
+			.attr('x', toolTipCoordinates.x + font.width)
+			.attr('y', (d,i) => i * (1.5 * font.height) + toolTipCoordinates.y + 1.5 * font.height)
+			.attr('fill', 'white')
+			.style('font-size', font.size);
 
 		// Add individual labels for each point (tooltips)
 		var allLabelsG = svg.append('g');
@@ -346,7 +348,11 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('fill', 'white');
 
 		dataCircles
-			.on('mouseover touchstart', showDotToolTip)
+			.on('touchstart', function(event){
+				showDotToolTip(event);
+				event.preventDefault();
+			})
+			.on('mouseover', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
 		document.addEventListener('keydown', (event) => {
 			const keyName = event.key;
@@ -361,7 +367,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				dragend(event);
 			}
 		});
-		
+
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
 		var sliderId = (mySVGClass.includes('vert')) ? 'vertSliderBar' : 'horizSliderBar';
@@ -617,13 +623,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			}
 
 			var toolTipTextElement = toolTipG.selectAll('text')
-					.data(d => wrapText(text, 50))
+					.data(d => wrapText(text, toolTipWrap))
 					.enter()
 					.append("text")
 					.attr('class', 'tiptext')
 					.attr('x', 0.19 * width) 
 					.attr('y', 0.27 * height)
-					.attr('font-size', 12);
+					.style('font-size', font.size);
 				
 				toolTipTextElement
 					.append('tspan')
@@ -631,13 +637,14 @@ function drawMySVG(mySVGID, mySVGClass){
 					.text(d => d)
 					.attr('x', 0.18 * width + font.width)
 					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height)
-					.attr('fill', 'white');
+					.attr('fill', 'white')
+					.style('font-size', font.size);
 		}
 
 		function showDotToolTip(event) {
+			//Clear labels/tooltips first if using tabs
+			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 			if (event.key == 'Tab') {
-				//Clear labels/tooltips first if using tabs
-				d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 				var whichLabel = ".label" + (+(document.activeElement.id.split('circle')[1]) + 1) + "." + mySVGClass;
 			}
 			else {
