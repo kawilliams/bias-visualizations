@@ -355,6 +355,9 @@ function drawMySVG(mySVGID, mySVGClass){
 			.on('mouseover', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
 		document.addEventListener('keydown', (event) => {
+			if (['ArrowDown','ArrowUp'].indexOf(event.code) > -1){
+				event.preventDefault();
+			}
 			const keyName = event.key;
 			if (keyName == 'Tab') {
 				showDotToolTip(event);
@@ -362,6 +365,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			else if ((keyName == 'ArrowDown') || (keyName == 'ArrowUp') || (keyName == 'ArrowLeft') || (keyName == 'ArrowRight')) {
 				dragstarted(event);
 				draggingSlider(event);
+
 			}
 			else {
 				dragend(event);
