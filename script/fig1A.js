@@ -135,13 +135,12 @@ function drawMySVG(mySVGID, mySVGClass){
 			(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
 		}
 
-		var exponentialRegression = d3.regressionLoess()
+		var exponentialRegression = d3.regressionExp()
 				.x(d => d[0])
 				.y(d => d[1])
-				.bandwidth(0.3)
 				.domain([0, 100]);
 		var blackCurve = exponentialRegression(blackPoints);
-		var whiteCurve = exponentialRegression(whitePoints);
+		var whiteCurve = exponentialRegression(whitePoints);		
 
 		var lineGenerator = d3.line()
 			.x(d => x(d[0]))
