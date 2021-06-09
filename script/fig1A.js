@@ -2,19 +2,29 @@
 var height = 600,
 	width = 600;
 
+var viewBoxDimensions = {height: 600, width: 600, x: 0, y:0};
+var graphDimensions = {x: 0, y: 0};
+
 var radius = 4;
 var margin = ({top: 50, right: 20, bottom: 40, left: 50});
 var slider = {handle: 8, bar: 4};
 var font = {height: 12, width: 7, size: 14};
-var toolTipCoordinates = {x: 0.18 * width, y: 0.26 * height};
-var toolTipWrap = 50;
+var toolTipDimensions = {x: 0.18 * width, 
+	y: 0.26 * height, 
+	width: 363, 
+	height: 135};
+var toolTipWrap = 56;
+var graphOffset = 0;
 
 //Adjust sizes for mobile
 if (screen.width < screen.height) {
 	radius = 6;
 	font = {height: 16, width: 9, size: 18};
-	toolTipCoordinates = {x: 0.15 * width, y: 0.32 * height};
-	toolTipWrap = 45;
+	viewBoxDimensions = {height: 800, width: 600, x: 0, y:0};
+	graphDimensions = {x: 0, y: 0};
+	graphOffset = 170;
+	toolTipDimensions = {x: 10, y: -170, width: 570, height: 160};
+	toolTipWrap = 70;
 } 
 
 /* 
@@ -83,14 +93,18 @@ function drawMySVG(mySVGID, mySVGClass){
 
 		var svg = d3.select(mySVGID)
 				.attr('preserveAspectRatio', 'xMidYMid meet')
-				.attr('viewBox', "0 0 " + width + " " + height)
+				.attr('viewBox', viewBoxDimensions.x + " " + viewBoxDimensions.y + " " + viewBoxDimensions.width + " " + viewBoxDimensions.height)
 				.classed('svg-content', true)
 				.attr('class', mySVGClass);
 				// .attr('height', height)
 				// .attr('width', width);
 
+		var graphG = svg.append('g')
+			.attr('class', mySVGClass)
+			.attr('transform', 'translate(0, ' + graphOffset + ')');
+
 		// Add rect to show shading past the 55%ile threshold
-		svg.append('rect')
+		graphG.append('rect')
 			.attr('class', mySVGClass)
 			.attr('x', x(55))
 			.attr('y', y(5.5))
@@ -118,7 +132,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.y(d => y(d[1]));
 
 		// dark blue/Black line of best fit
-		svg.append("path")
+		graphG.append("path")
 			.data(blackCurve)
 			.attr("d", lineGenerator(blackCurve))
 			.attr('class', mySVGClass)
@@ -128,7 +142,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.style('stroke-dasharray', '8')
 		
 	 	// light blue/White line of best fit
-		svg.append("path")
+		graphG.append("path")
 			.data(whiteCurve)
 			.attr("d", lineGenerator(whiteCurve))
 			.attr('class', mySVGClass)
@@ -137,13 +151,13 @@ function drawMySVG(mySVGID, mySVGClass){
 			.style('stroke-width', "1px")
 			.style('stroke-dasharray', '0')
 
-		svg.append('g')
+		graphG.append('g')
 			.attr('id', 'xAxisGroup')
 			.attr('class', mySVGClass)
 			.call(xAxis);
 
 		//xAxis label
-		svg.select('#xAxisGroup')
+		graphG.select('#xAxisGroup')
 			.append('text')
 			.attr('id', 'xAxisLabel')
 			.attr('class', mySVGClass)
@@ -153,12 +167,12 @@ function drawMySVG(mySVGID, mySVGClass){
 			.text('Percentile of Algorithm Risk Score')
 			.style('font-size', font.size);
 
-		svg.append('g')
+		graphG.append('g')
 			.attr('id', 'yAxisGroup')
 			.attr('class', mySVGClass)
 			.call(yAxis);
 		//yAxis label
-		svg.select('#yAxisGroup')
+		graphG.select('#yAxisGroup')
 			.append('text')
 			.attr('id', 'yAxisLabel')
 			.attr('class', mySVGClass)
@@ -173,7 +187,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		// Add percentile lines marking "defaulted" (97%) and "referred" (55%)
 		var cutoffLines = [{percentile: 55, text: 'Referred for screening'},
 							{percentile: 97, text: 'Defaulted into program'}];
-		svg.append('g')
+		graphG.append('g')
 			.selectAll('line')
 			.data(cutoffLines)
 			.join('line')
@@ -187,7 +201,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('stroke-dasharray', 8);
 
 		// Add percentile cutoff lines' labels
-		svg.append('g')
+		graphG.append('g')
 			.selectAll('text')
 			.data(cutoffLines)
 			.enter()
@@ -205,7 +219,7 @@ function drawMySVG(mySVGID, mySVGClass){
 							{color: "#1B365D" , path: "M60,70 l50,0" , 
 							dasharray: "5 5", race: "Black"}];
 		// Add legend 
-		svg.append('g')
+		graphG.append('g')
 			.selectAll('path')
 			.data(legendColors)
 			.join('path')
@@ -215,7 +229,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('stroke-dasharray', d => d.dasharray)
 			.attr('stroke-width', 2)
 			.attr('fill', 'none');
-		svg.append('g')
+		graphG.append('g')
 			.selectAll('text')
 			.data(legendColors)
 			.enter()
@@ -227,7 +241,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.style('font-size', font.size);
 
 		// Add confidence intervals at dots
-		var confInterval = svg.append('g')
+		var confInterval = graphG.append('g')
 			.selectAll('g')
 			.data(d)
 			.join('g');
@@ -249,7 +263,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('stroke-width', 1);
 
 		//Add dummy circle so that tabbing works
-		svg.append('circle')
+		graphG.append('circle')
 			.attr('id', 'circle-1')
 			.attr('cx', 10)
 			.attr('cy', 10)
@@ -257,7 +271,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			.attr('tabindex', '0');
 
 		//Add data points
-		var dataCircles = svg.append('g')
+		var dataCircles = graphG.append('g')
 			.selectAll('circle')
 				.data(d)
 				.join('circle')
@@ -270,16 +284,16 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('fill', d => (d.race == 'Black') ? '#1B365D' : '#48A9C5')
 				.attr('stroke', d => (d.race == 'Black') ? '#1B365D' : '#48A9C5');
 
-		var toolTipG = svg.append('g')
+		var toolTipG = graphG.append('g')
 				.attr('class', "tooltip " + mySVGClass);
 
 		var toolTip = toolTipG.append('rect')
 				.attr('id', 'tooltip')
 				.attr('class', mySVGClass)
-				.attr('height', 13 * font.height)
-				.attr('width', 50 * font.width)
-				.attr('x', toolTipCoordinates.x)
-				.attr('y', toolTipCoordinates.y)
+				.attr('height', toolTipDimensions.height)
+				.attr('width', toolTipDimensions.width)
+				.attr('x', toolTipDimensions.x)
+				.attr('y', toolTipDimensions.y)
 				.attr('fill', 'black')
 				.attr('rx', 5)
 				.attr('opacity', '0.7');
@@ -294,20 +308,20 @@ function drawMySVG(mySVGID, mySVGClass){
 				.enter()
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', toolTipCoordinates.x + font.width) //(event.x - 170)
-				.attr('y', toolTipCoordinates.y + 1.5 * font.height); //(500 - event.x)
+				.attr('x', toolTipDimensions.x + font.width) //(event.x - 170)
+				.attr('y', toolTipDimensions.y + 1.5 * font.height); //(500 - event.x)
 				
 		toolTipTextElement
 			.append('tspan')
 			.attr('class', 'tiptext '+mySVGClass)
 			.text(d => d)
-			.attr('x', toolTipCoordinates.x + font.width)
-			.attr('y', (d,i) => i * (1.5 * font.height) + toolTipCoordinates.y + 1.5 * font.height)
+			.attr('x', toolTipDimensions.x + font.width)
+			.attr('y', (d,i) => i * (1.5 * font.height) + toolTipDimensions.y + 1.5 * font.height)
 			.attr('fill', 'white')
 			.style('font-size', font.size);
 
 		// Add individual labels for each point (tooltips)
-		var allLabelsG = svg.append('g');
+		var allLabelsG = graphG.append('g');
 		var label = allLabelsG.selectAll('rect')
 			.data(d)
 			.enter()
@@ -354,23 +368,7 @@ function drawMySVG(mySVGID, mySVGClass){
 			})
 			.on('mouseover', showDotToolTip)
 			.on('mouseout touchend', hideDotToolTip);
-		document.addEventListener('keydown', (event) => {
-			if (['ArrowDown','ArrowUp'].indexOf(event.code) > -1){
-				event.preventDefault();
-			}
-			const keyName = event.key;
-			if (keyName == 'Tab') {
-				showDotToolTip(event);
-			}
-			else if ((keyName == 'ArrowDown') || (keyName == 'ArrowUp') || (keyName == 'ArrowLeft') || (keyName == 'ArrowRight')) {
-				dragstarted(event);
-				draggingSlider(event);
-
-			}
-			else {
-				dragend(event);
-			}
-		});
+		
 
 		// Slider
 		var sliderClass = (mySVGClass.includes('vert')) ? 'vertSlider' : 'horizSlider';
@@ -393,7 +391,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.on('drag', draggingSlider)
 				.on('end', dragend);
 
-		var sliderBar = svg.append('rect')
+		var sliderBar = graphG.append('rect')
 				.attr('class', sliderClass + " " + mySVGClass)
 				.attr('id', sliderId)
 				.attr('x', sliderX)
@@ -407,7 +405,7 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('cursor', 'pointer')
 				.call(dragSlider);
 		var circleHorizIds = [];
-		svg.append('rect')
+		graphG.append('rect')
 				.attr('class', sliderClass + " " + mySVGClass)
 				.attr('id', handleId)
 				.attr('x', handleX)
@@ -662,6 +660,23 @@ function drawMySVG(mySVGID, mySVGClass){
 			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 		}
 
+		document.addEventListener('keydown', (event) => {
+			if (['ArrowDown','ArrowUp'].indexOf(event.code) > -1){
+				event.preventDefault();
+			}
+			const keyName = event.key;
+			if (keyName == 'Tab') {
+				showDotToolTip(event);
+			}
+			else if ((keyName == 'ArrowDown') || (keyName == 'ArrowUp') || (keyName == 'ArrowLeft') || (keyName == 'ArrowRight')) {
+				dragstarted(event);
+				draggingSlider(event);
+
+			}
+			else {
+				dragend(event);
+			}
+		});
 
 
 	})
