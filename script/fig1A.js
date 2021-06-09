@@ -7,12 +7,19 @@ var graphDimensions = {x: 0, y: 0};
 
 var radius = 4;
 var margin = ({top: 50, right: 20, bottom: 40, left: 50});
-var slider = {handle: 8, bar: 4};
+var slider = {handle: 10, bar: 5};
 var font = {height: 12, width: 7, size: 14};
-var toolTipDimensions = {x: 0.18 * width, 
-	y: 0.26 * height, 
+var toolTipDimensions = {x: 108, 
+	y: 156, 
 	width: 363, 
-	height: 135};
+	height: 135,
+	activeX: 0.18 * width + 3,
+	activeY: 0.26 * height + 5,
+	activeHorizWidth: 340,
+	activeHorizHeight: 60,
+	activeVertWidth: 360,
+	activeVertHeight: 60
+	};
 var toolTipWrap = 56;
 var graphOffset = 0;
 
@@ -23,8 +30,16 @@ if (screen.width < screen.height) {
 	viewBoxDimensions = {height: 800, width: 600, x: 0, y:0};
 	graphDimensions = {x: 0, y: 0};
 	graphOffset = 170;
-	toolTipDimensions = {x: 10, y: -170, width: 570, height: 160};
+	toolTipDimensions = {x: 10, y: -170, width: 570, 
+		height: 160, activeX: 13, activeY: -90,
+		activeHorizWidth: 570,
+		activeHorizHeight: 80,
+		activeVertWidth: 570,
+		activeVertHeight: 80
+	};
 	toolTipWrap = 70;
+	slider.handle = 15;
+	slider.bar = 10;
 } 
 
 /* 
@@ -539,8 +554,10 @@ function drawMySVG(mySVGID, mySVGClass){
 			toolTipG.select("rect")
 			.transition()
 			.duration(35)
-			.attr('width', whichSlider.includes("horiz") ? 48 * font.width : 48 * font.width)
-			.attr('height', whichSlider.includes("horiz") ? 5 * font.height : 6.5 * font.height)
+			.attr('width', whichSlider.includes("horiz") ? toolTipDimensions.activeHorizWidth : toolTipDimensions.activeVertWidth)
+			.attr('height', whichSlider.includes("horiz") ? toolTipDimensions.activeHorizHeight : toolTipDimensions.activeVertHeight)
+			.attr('x', toolTipDimensions.activeX)
+			.attr('y', toolTipDimensions.activeY);
 		
 			//Get the selected circles' data
 			if (selectedCircles.length == 2 && whichSlider.includes("horiz")) {
@@ -629,16 +646,16 @@ function drawMySVG(mySVGID, mySVGClass){
 					.enter()
 					.append("text")
 					.attr('class', 'tiptext')
-					.attr('x', 0.19 * width) 
-					.attr('y', 0.27 * height)
+					.attr('x', toolTipDimensions.activeX) 
+					.attr('y', toolTipDimensions.activeY)
 					.style('font-size', font.size);
 				
 				toolTipTextElement
 					.append('tspan')
 					.attr('class', 'tiptext')
 					.text(d => d)
-					.attr('x', 0.18 * width + font.width)
-					.attr('y', (d,i) => i * (1.5 * font.height) + 0.26 * height + 1.5 * font.height)
+					.attr('x', toolTipDimensions.activeX + font.width)
+					.attr('y', (d,i) => i * (1.5 * font.height) + toolTipDimensions.activeY + 1.5 * font.height)
 					.attr('fill', 'white')
 					.style('font-size', font.size);
 		}
