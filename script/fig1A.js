@@ -135,9 +135,10 @@ function drawMySVG(mySVGID, mySVGClass){
 			(i % 2 == 0) ? blackPoints.push(t) : whitePoints.push(t);
 		}
 
-		var exponentialRegression = d3.regressionExp()
+		var exponentialRegression = d3.regressionLoess()
 				.x(d => d[0])
 				.y(d => d[1])
+				.bandwidth(0.3)
 				.domain([0, 100]);
 		var blackCurve = exponentialRegression(blackPoints);
 		var whiteCurve = exponentialRegression(whitePoints);
@@ -274,7 +275,8 @@ function drawMySVG(mySVGID, mySVGClass){
 			})
 			.attr('x2', d => x(d.risk_score_quantile))
 			.attr('y2', d => y(d.num_chronic_conds_mean - d.ci))
-			.attr('stroke', 'black')
+			.attr('stroke', d => (d.race == 'Black') ? '#1B365D' : '#48A9C5')
+			.attr('stroke-dasharray', d => (d.race == 'Black') ? 3 : 0)
 			.attr('stroke-width', 1);
 
 		//Add dummy circle so that tabbing works
