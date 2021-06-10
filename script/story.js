@@ -269,6 +269,13 @@ var makeModel = function(data) {
 		},
 		setOrientation: function(direction){
 			_orientation = direction;
+			if (direction == 'PORTRAIT') {
+				viewBoxSize.width = 300;
+				viewBoxSize.height = 450;
+				topTextSize.widthCap = 53;
+				topTextSize.fontsize = '12px';
+			}
+			
 		},
 		//Get the step
 		get: function() {
