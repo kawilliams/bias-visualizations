@@ -111,8 +111,6 @@ function drawMySVG(mySVGID, mySVGClass){
 				.attr('viewBox', viewBoxDimensions.x + " " + viewBoxDimensions.y + " " + viewBoxDimensions.width + " " + viewBoxDimensions.height)
 				.classed('svg-content', true)
 				.attr('class', mySVGClass);
-				// .attr('height', height)
-				// .attr('width', width);
 
 		var graphG = svg.append('g')
 			.attr('class', mySVGClass)
@@ -324,8 +322,8 @@ function drawMySVG(mySVGID, mySVGClass){
 				.enter()
 				.append("text")
 				.attr('class', 'tiptext ' +mySVGClass)
-				.attr('x', toolTipDimensions.x + font.width) //(event.x - 170)
-				.attr('y', toolTipDimensions.y + 1.5 * font.height); //(500 - event.x)
+				.attr('x', toolTipDimensions.x + font.width) 
+				.attr('y', toolTipDimensions.y + 1.5 * font.height);
 				
 		toolTipTextElement
 			.append('tspan')
@@ -662,7 +660,7 @@ function drawMySVG(mySVGID, mySVGClass){
 		}
 
 		function showDotToolTip(event) {
-			//Clear labels/tooltips first if using tabs
+			//Clear labels/tooltips first
 			d3.selectAll('.labels.' + mySVGClass).attr('display', 'none');
 			if (event.key == 'Tab') {
 				var whichLabel = ".label" + (+(document.activeElement.id.split('circle')[1]) + 1) + "." + mySVGClass;
