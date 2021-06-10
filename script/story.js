@@ -43,23 +43,12 @@ var story = {
 
 /* Useful function to split text for tspan. 
 Gives the effect of text wrapping. */
-function wrapText(rectText, widthCap) {
-	var wrappedText = [];
-	var startOfLastWord = 0;
-	var startOfLine = 0;
-	for (var i=1; i<rectText.length; i++) {
-		if (rectText[i] == ' ') {
-			startOfLastWord = i;
-		}
-		if (i % widthCap == 0) {
-			wrappedText.push(rectText.substring(startOfLine, startOfLastWord).trim());
-			startOfLine = startOfLastWord;
-		}
-		else if (i == rectText.length - 1) {
-			wrappedText.push(rectText.substring(startOfLine, rectText.length).trim());
-		}
-	}
-	return wrappedText;
+function wrapText(rectText, w) {
+	var wrap = rectText.replace(
+		new RegExp(`(?![^\\n]{1,${w}}$)([^\\n]{1,${w}})\\s`, 'g'), '$1\n'
+	);
+	var wrapList = wrap.split('\n');
+	return wrapList;
 }
 
 var makeObservers = function() {
