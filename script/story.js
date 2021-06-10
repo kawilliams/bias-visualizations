@@ -72,6 +72,10 @@ var makeModel = function(data) {
 	// The storyboard step (0 - STEPCOUNT)
 	var _step = 0;
 
+	//The orientation of the vis
+	var _orientation = 'PORTRAIT';
+	if (window.screen.width > window.screen.height) _orientation = 'LANDSCAPE';
+
 	// To determine what coloring scheme to use
 	var _activeColor = LABELNONE;
 
@@ -263,6 +267,9 @@ var makeModel = function(data) {
 			_clickedCostLabel = false;
 			_observers.notify();
 		},
+		setOrientation: function(direction){
+			_orientation = direction;
+		},
 		//Get the step
 		get: function() {
 			return _step;
@@ -270,6 +277,9 @@ var makeModel = function(data) {
 		//Get the csv data 
 		data: function() {
 			return _data;
+		},
+		orientation: function(){
+			return _orientation;
 		},
 		//Get the story text 
 		text: function() {
@@ -362,18 +372,18 @@ var makeSVGView = function(model, data, svgID) {
 		//.classed('svg-content', true);
 		.attr('style', 'outline: thin solid red;');
 
-	// var _midlineV = _svg.append('line')
-	// 	.attr('x1', viewBoxSize.width * 0.5)
-	// 	.attr('y1', 0)
-	// 	.attr('x2', viewBoxSize.width * 0.5)
-	// 	.attr('y2', viewBoxSize.height)
-	// 	.attr('stroke', 'black');
-	// var _midlineH = _svg.append('line')
-	// 	.attr('x1', 0)
-	// 	.attr('y1', viewBoxSize.height * 0.5)
-	// 	.attr('x2', viewBoxSize.width)
-	// 	.attr('y2', viewBoxSize.height * 0.5)
-	// 	.attr('stroke', 'black');
+	var _midlineV = _svg.append('line')
+		.attr('x1', viewBoxSize.width * 0.5)
+		.attr('y1', 0)
+		.attr('x2', viewBoxSize.width * 0.5)
+		.attr('y2', viewBoxSize.height)
+		.attr('stroke', 'black');
+	var _midlineH = _svg.append('line')
+		.attr('x1', 0)
+		.attr('y1', viewBoxSize.height * 0.5)
+		.attr('x2', viewBoxSize.width)
+		.attr('y2', viewBoxSize.height * 0.5)
+		.attr('stroke', 'black');
 
 
 	var _cleanSVG = function() {
@@ -527,26 +537,9 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'caption svgtext')
 		.attr('id', 'mainRowCaptions')
 		.attr('font-weight', "bold");
-	// _mainRowCaptions.selectAll('tspan.personcaption')
-	// 	.data(d => {
-	// 		var text = model.personCaption();
-	// 		return text[step].text.split('\n');
-	// 	})
-	// 	.enter()
-	// 	.append('tspan')
-	// 	.attr('class', 'personcaption')
-	// 	.text(d => d)
-	// 	.attr('x', d => {
-	// 		var text = model.personCaption();
-	// 		return text[step].x;
-	// 	})
-	// 	.attr('y', function(d,i){
-	// 		var step = model.get();
-	// 		var text = model.personCaption();
-	// 		return text[step].y + (i*captionSize.fontSpace);
-	// 	})
-	// 	.attr('font-size', captionSize.fontSize);
-	_mainRowCaptions.text(function() {
+
+	_mainRowCaptions
+		.text(function() {
 			var step = model.get();
 			var text = model.mainRowCaptions();
 			return text[step].text;
@@ -555,13 +548,14 @@ var makeSVGView = function(model, data, svgID) {
 			var step = model.get();
 			var text = model.mainRowCaptions();
 			return text[step].x;
-		}) 
+		})
 		.attr('y', function(d,i){
 			var step = model.get();
 			var text = model.mainRowCaptions();
 			return text[step].y + (i*captionSize.fontSpace);
 		})
 		.style('font-size', captionSize.fontSize);
+
 	var _comparisonRowCaptions = peopleG.append('text')
 		.attr('class', 'svgtext caption')
 		.attr('id', 'comparisonRowCaptions')
@@ -666,6 +660,10 @@ var makeSVGView = function(model, data, svgID) {
 					else if ((isLabelActive) && (whichLabel == LABELCOST)) { _x = d.x6cost; _y = d.y6cost; }
 					else if ((isLabelActive) && (whichLabel == LABELEMERGENCY)) { _x = d.x6emergency; _y = d.y6emergency;}
 					else { _x = d.x6; _y = d.y6; }
+				
+					if (model.orientation() == 'PORTRAIT') {
+						_x = _x - 1;
+					}
 				}
 				if (step == 7) { _x = d.x7health; _y = d.y7health;}
 				return personPath( _x * personBox.width, _y * personBox.height);
@@ -678,10 +676,8 @@ var makeSVGView = function(model, data, svgID) {
 			.duration(duration)
 			.attr('opacity', 1);
 		
-		//d3.selectAll('.personcaption').remove();
-
 		var mainRowCaptions = d3.select("#mainRowCaptions")
-			.text(d => {
+			.text(function() {
 				var step = model.get();
 				var text = model.mainRowCaptions();
 				return text[step].text.split('\n');
@@ -877,9 +873,13 @@ var makeLabelView = function(model, labelID, svgID) {
 			.append('rect')
 			.attr('id', d => d.id)
 			.attr('class', 'labelClass')
-			.attr('x', svgMargin.left + labelBoxSize.width * 0.3)
+			.attr('x', function(d, i){
+				if (model.orientation() == 'LANDSCAPE') return svgMargin.left + labelBoxSize.width * 0.3;
+				return (i - 1) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width));
+			})
 			.attr('y', (d, i) => {
-				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
+				if (model.orientation() == 'LANDSCAPE')	return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
+				return (viewBoxSize.height - 2.5 * labelBoxSize.height);
 			})
 			.attr('width', labelBoxSize.width)
 			.attr('height', labelBoxSize.height)
@@ -905,9 +905,13 @@ var makeLabelView = function(model, labelID, svgID) {
 			.append('text')
 			.attr('id', d => d.id)
 			.attr('class', 'labelClass svgtext')
-			.attr('x', svgMargin.left + (0.8 * labelBoxSize.width) + labelBoxSize.padding)
+			.attr('x', (d, i) => {
+				if (model.orientation() == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width) + labelBoxSize.padding;
+				return (i - 1) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width));
+			})
 			.attr('y', (d, i) => {
-				return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
+				if (model.orientation() == 'LANDSCAPE') return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
+				return (viewBoxSize.height - 2.5 * labelBoxSize.height);
 			})
 			.attr('display', 'none')
 			.attr("cursor", "pointer")
@@ -922,7 +926,7 @@ var makeLabelView = function(model, labelID, svgID) {
 					.attr('fill', c => model.getLabelColor(c.id, false)); //base color
 			});
 
-			_labelLabel.selectAll('tspan.labelClass')
+			var tspanLabel = _labelLabel.selectAll('tspan.labelClass')
 				.data(d => d.text.split('\n'))
 				.enter()
 				.append('tspan')
@@ -930,8 +934,16 @@ var makeLabelView = function(model, labelID, svgID) {
 				.text(d => d)
 				.attr('id', function() {
 					return this.parentElement.id;
+				});
+				tspanLabel
+				.attr('x', function(d, i){
+					var index = this.id;
+					if (index == LABELCOST) index = -1;
+					if (index == LABELHEALTH) index = 0;
+					if (index == LABELEMERGENCY) index = 1;
+					if (model.orientation == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width);
+					return (index) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width)) + 0.5 * labelBoxSize.width;
 				})
-				.attr('x', svgMargin.left + (0.8 * labelBoxSize.width))
 				.attr('dy', labelBoxSize.fontsize)
 				.attr('text-anchor', 'middle')
 				.attr("cursor", "pointer")
@@ -1107,7 +1119,6 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 			}
 			else {
 				console.log("Error, please click");
-				
 				_observers.notify({
 					type: story.signals.error
 				});
@@ -1118,7 +1129,6 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 				type: story.signals.increment
 			});
 		}
-		
 	};
 	var _fireDecrementEvent = function() {
 		_observers.notify({
@@ -1189,6 +1199,11 @@ document.addEventListener("DOMContentLoaded", function(event){
 	d3.csv('data/patient-dot-data.csv').then(function(d){
 
 		story.model = makeModel(d);
+		if (screen.width > screen.height) {
+			story.model.setOrientation('LANDSCAPE');
+		} else {
+			story.model.setOrientation('PORTRAIT');
+		}
 		story.views.push(makeTopTextView(story.model, d, '#textView', '#mySVG'));
 		story.views.push(makeSVGView(story.model, d, '#mySVG'));
 		story.views.push(makeButtonView(story.model, d, 'backButton', 'nextButton', '#mySVG'));
