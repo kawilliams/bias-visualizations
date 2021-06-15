@@ -79,6 +79,9 @@ var makeModel = function(data) {
 	// To determine what coloring scheme to use
 	var _activeColor = LABELNONE;
 
+	//40x40 glyph
+	var _path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+	
 	var _data = data;
 
 	var _connectors = {
@@ -117,13 +120,7 @@ var makeModel = function(data) {
 		"But what we truly care about is predicting patient health, not predicting future care costs. Remember, we want to determine the best patients for our extra care program. How well did the algorithm predict actual health?",
 		"While care costs and health needs are correlated, they aren't the same. The difference in the two labels is not random with respect to socioeconomic and racial variables. Because of structural biases and differential treatment, the care costs for Black patients are lower than the care costs for similarly-ill White patients. Although race was not an input, these societal inequalities produced dramatically different algorithmic scores for equally-sick patients.",
 		"Why did this happen? The value we truly care about - which patients most need extra care - was not the same as what the algorithm was finding. We can fix this by changing our label from care costs to something that might be a closer approximation of actual health for all patients. Click on the different labels (the colored rectangles) to see how closely the predictions match the actual health.",
-		"\n\nResearchers conducted experiments on the patient data to see which of the three label choices - active chronic\n\
-		conditions, total care costs, emergency care cost - did the best job of (1) predicting the sickest patients, and\n\
-		(2) mitigating bias in label choice. All three labels notably perform the same at predicting the 97th percentile\n\
-		and above. However, there is a distinct variation across the three labels in the racial composition of the\n\
-		highest-risk group: the fraction of Black patients at or above these risk levels ranges from 14.1% for the total\n\
-		cost label to 26.7% for the chronic conditions label. This nearly twofold variation in composition of Black patients\n\
-		in the highest-risk groups...\n\nThe bias attributable to label choice has impacts in algorithms used in the health sector..."
+		"Researchers conducted experiments on the patient data to see which of the three label choices - active chronic conditions, total care costs, emergency care cost - did the best job of (1) predicting the sickest patients, and (2) mitigating bias in label choice. All three labels notably perform the same at predicting the 97th percentile and above. However, there is a distinct variation across the three labels in the racial composition of the highest-risk group: the fraction of Black patients at or above these risk levels ranges from 14.1% for the total cost label to 26.7% for the chronic conditions label. This nearly twofold variation in composition of Black patients in the highest-risk groups...\n\nThe bias attributable to label choice has impacts in algorithms used in the health sector..."
 	];
 
 	var _labels = [
@@ -142,25 +139,11 @@ var makeModel = function(data) {
 		{text: ['Pretty close!'], step: 3, label: LABELCOST},
 		{text: ['Not so good'], step: 4, label: LABELCOST},
 		{text: ["Much better!"], step: 6, label: LABELHEALTH},
-		{text: ["We predict a patient’s health in a given year by measuring the number of chronic conditions that ", 
-		"flare up that year. Because the care program operates to improve the management of chronic conditions, patients with the most doctor’s appointments and hospitalizations related to chronic ", 
-		"conditions could be a promising group to prioritize for this preventative intervention.", 
-		"This label produces accurate cost predictions, while also accurately predicting health with ",
-		"minimal bias."], step: 6, label: LABELHEALTH},
+		{text: ["We predict a patient’s health in a given year by measuring the number of chronic conditions that flare up that year. Because the care program operates to improve the management of chronic conditions, patients with the most doctor’s appointments and hospitalizations related to chronic conditions could be a promising group to prioritize for this preventative intervention. This label produces accurate cost predictions, while also accurately predicting health with minimal bias."], step: 6, label: LABELHEALTH},
 		{text: ["Not so good"], step: 6, label: LABELCOST},
-		{text: ["We score a patient based on the total cost of their care for a year, such as costs of in- and ",
-		"out-patient procedures, surgical costs, and insurance costs. From a statistical perspective, this ",
-		"value is useful (and used industry-wide) because it is correlated with health and it is a real-world ",
-		"number that is easy to calculate. While the care cost label accurately predicts costs, it does not do ",
-		"a great job of predicting health. This severely disadvantages Black patients when the variable we ",
-		"care about is health. "], step: 6, label: LABELCOST},
+		{text: ["We score a patient based on the total cost of their care for a year, such as costs of in- and out-patient procedures, surgical costs, and insurance costs. From a statistical perspective, this value is useful (and used industry-wide) because it is correlated with health and it is a real-world number that is easy to calculate. While the care cost label accurately predicts costs, it does not do a great job of predicting health. This severely disadvantages Black patients when the variable we care about is health. "], step: 6, label: LABELCOST},
 		{text: ["Not so good"], step: 6, label: LABELEMERGENCY},
-		{text: ["We predict only emergency medicine costs due to emergency visits and hospitalizations, rather ",
-		"than all other costs generated by care, to more closely represent catastrophic health events that ",
-		"come from lack of caring for chronic conditions. This label does a good job of predicting cost, and ",
-		"does better at lowering the amount of bias, but again, different populations use emergency care ",
-		"differently and this leads to significant bias still existing in our results."], step: 6, label: LABELEMERGENCY}
-		
+		{text: ["We predict only emergency medicine costs due to emergency visits and hospitalizations, rather than all other costs generated by care, to more closely represent catastrophic health events that come from lack of caring for chronic conditions. This label does a good job of predicting cost, and does better at lowering the amount of bias, but again, different populations use emergency care differently and this leads to significant bias still existing in our results."], step: 6, label: LABELEMERGENCY}
 	];
 
 	var _mainRowCaptions = [
@@ -274,6 +257,8 @@ var makeModel = function(data) {
 				viewBoxSize.height = 450;
 				topTextSize.widthCap = 53;
 				topTextSize.fontsize = '12px';
+				//60x60 path
+				_path = "c-1.97,0.56,-3.13,1.48,-3.67,2.85c-0.25,0.66,-0.29,1.59,-0.23,6.2c0,0,0.06,5.42,0.06,5.42c0,0,0.62,1.32,0.62,1.32c0.33,0.71,0.82,1.51,1.06,1.78c0.66,0.69,0.74,0.95,1.6,6.18c0.43,2.63,0.9,5.05,1.05,5.35c0.45,0.96,1.1,1.22,3.11,1.22c1.95,0,2.49,-0.19,2.98,-1.03c0.21,-0.34,0.64,-2.37,1.11,-5.16c0.92,-5.51,1.03,-5.96,1.63,-6.56c0.73,-0.72,1.37,-2.16,1.67,-3.7c0.37,-2.04,0.37,-9.37,-0.04,-10.72c-0.37,-1.26,-1.37,-2.27,-2.81,-2.85c-0.98,-0.38,-1.48,-0.43,-4.2,-0.49c-2.1,-0.04,-3.38,0.04,-3.94,0.19zm2.12,-13.75c-1.07,0.23,-1.82,0.64,-2.83,1.56c-2.59,2.4,-2.57,6.51,0.04,8.91c1.31,1.22,2.34,1.61,4.14,1.61c1.24,0,1.69,-0.09,2.55,-0.51c3.75,-1.8,4.71,-6.73,1.89,-9.73c-1.42,-1.54,-3.75,-2.27,-5.79,-1.84z";
 			}
 			
 		},
@@ -305,6 +290,9 @@ var makeModel = function(data) {
 		},
 		getErrorFlag: function() {
 			return _errorFlag;
+		},
+		getPath: function() {
+			return _path;
 		},
 		//Get the glyph color scheme
 		getColor: function(d) {
@@ -470,7 +458,10 @@ var makeSVGView = function(model, data, svgID) {
 
 	function personPath(startX, startY) {
 
-        var path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+        //var path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+        //50x50 person
+        // var path = "c-1.64,0.47,-2.61,1.24,-3.06,2.38c-0.21,0.54,-0.24,1.32,-0.19,5.17c0,0,0.05,4.51,0.05,4.51c0,0,0.51,1.1,0.51,1.1c0.28,0.59,0.69,1.26,0.89,1.48c0.55,0.58,0.61,0.8,1.33,5.16c0.36,2.18,0.75,4.2,0.88,4.45c0.37,0.8,0.92,1.02,2.59,1.02c1.63,0,2.08,-0.16,2.48,-0.86c0.18,-0.28,0.54,-1.97,0.93,-4.3c0.76,-4.59,0.86,-4.97,1.36,-5.47c0.61,-0.59,1.14,-1.8,1.39,-3.08c0.31,-1.7,0.31,-7.81,-0.04,-8.93c-0.31,-1.05,-1.14,-1.89,-2.34,-2.38c-0.81,-0.31,-1.23,-0.36,-3.5,-0.41c-1.75,-0.03,-2.81,0.04,-3.28,0.16zm1.77,-11.45c-0.89,0.18,-1.52,0.53,-2.36,1.29c-2.16,2,-2.14,5.43,0.03,7.43c1.09,1.01,1.95,1.34,3.45,1.34c1.03,0,1.41,-0.08,2.13,-0.42c3.12,-1.5,3.92,-5.61,1.57,-8.11c-1.18,-1.28,-3.12,-1.89,-4.82,-1.53z";
+        var path = model.getPath();
         var start = "M " + startX + " " + startY;
         path = start + " " + path; 
         return path;
@@ -1202,8 +1193,9 @@ var makeController = function(model) {
 	};
 }
 document.addEventListener("DOMContentLoaded", function(event){
-	
-	d3.csv('data/patient-dot-data.csv').then(function(d){
+	var patientData = 'data/patient-dot-data.csv';
+	if (screen.width < screen.height) patientData = 'data/mobile-dot-data.csv';
+	d3.csv(patientData).then(function(d){
 
 		story.model = makeModel(d);
 		if (screen.width > screen.height) {
