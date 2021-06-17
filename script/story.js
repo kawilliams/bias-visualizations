@@ -1,21 +1,153 @@
 /*bias-visualizations*/
-var svgMargin = ({top: 15, right: 10, bottom: 10, left: 10});
-var svgSize = {height: 100, width: 150}
-var viewBoxSize = {height: 300, width: 450};
+
+////// Desktop Dimensions //////
+if (screen.width > screen.height) {
+	var svgMargin = ({top: 15, right: 10, bottom: 10, left: 10});
+	var svgSize = {height: 100, width: 150}
+	var viewBoxSize = {height: 300, width: 450};
+	var personBox = {width: 15, height: 22};
+	var radiusW = 7;
+	var radiusH = 11;
+	var labelBoxSize = {height: 35, width: 80, padding: 2, fontsize: '10px'};
+	var topTextSize = {maxHeight: 4, fontsize: '10px', fontSpace: 14, widthCap: 98};
+	//40x40 glyph
+	var _path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+	var captionSize = {fontSize: '10px', fontSpace: 10};
+	var commentarySize = {fontSize: '10px', fontSpace: 14};
+	var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
+	var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
+
+	var _mainRowCaptions = [
+	{ text: "Patients", 
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace, 
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
+	{ text: "Patients", 
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace + personBox.width,  
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
+	{ text: "Predicted cost",
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontSpace,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
+	{ text: "Predicted cost",
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontSpace,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
+	{ text: "Predicted cost",
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontSpace,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
+	{ text: "\n",
+		x: svgMargin.left,
+		y: svgMargin.top },
+	{ text: "Predicted",
+		x: viewBoxSize.width * 0.5 - personBox.width * 6 - 5,
+		y: viewBoxSize.height * 0.5 - personBox.height * 1.5},
+	{ text: "\n",
+		x: 0,
+		y: 0
+	}
+	];
+	var _comparisonRowCaptions = [
+	{text: "\n",
+		x: svgMargin.left,
+		y: 0 },
+	{text: "\n",
+		x: svgMargin.left,
+		y: 0 },
+	{text: "\n",
+		x: svgMargin.left,
+		y: 0 },
+	{text: "Actual cost\n",
+		x: 0.5 * viewBoxSize.width - 2 * peopleCluster.width,
+		y: 4 + 2 * personBox.height },
+	{text: "Actual health\n",
+		x: 0.5 * viewBoxSize.width - 2 * peopleCluster.width,
+		y: 4 + 2 * personBox.height },
+	{text: "\n",
+		x: svgMargin.left,
+		y: 10 + 2 * personBox.height },
+	{text: "Actual\n",
+		x: -10,
+		y: 2 * personBox.height + 2 },
+	{ text: "\n",
+		x: 0,
+		y: 0 }
+	]
+}
+////// Mobile Dimensions //////
+else{
+	var svgMargin = ({top: 15, right: 10, bottom: 10, left: 10});
+	var svgSize = {height: 100, width: 150}
+	var viewBoxSize = {height: 450, width: 300};
+	var personBox = {width: 20, height: 30};
+	var radiusW = 11;
+	var radiusH = 15;
+	var labelBoxSize = {height: 35, width: 80, padding: 2, fontsize: '10px'};
+	var topTextSize = {maxHeight: 4, fontsize: '12px', fontSpace: 14, widthCap: 50};
+	//60x60 path
+	_path = "c-1.97,0.56,-3.13,1.48,-3.67,2.85c-0.25,0.66,-0.29,1.59,-0.23,6.2c0,0,0.06,5.42,0.06,5.42c0,0,0.62,1.32,0.62,1.32c0.33,0.71,0.82,1.51,1.06,1.78c0.66,0.69,0.74,0.95,1.6,6.18c0.43,2.63,0.9,5.05,1.05,5.35c0.45,0.96,1.1,1.22,3.11,1.22c1.95,0,2.49,-0.19,2.98,-1.03c0.21,-0.34,0.64,-2.37,1.11,-5.16c0.92,-5.51,1.03,-5.96,1.63,-6.56c0.73,-0.72,1.37,-2.16,1.67,-3.7c0.37,-2.04,0.37,-9.37,-0.04,-10.72c-0.37,-1.26,-1.37,-2.27,-2.81,-2.85c-0.98,-0.38,-1.48,-0.43,-4.2,-0.49c-2.1,-0.04,-3.38,0.04,-3.94,0.19zm2.12,-13.75c-1.07,0.23,-1.82,0.64,-2.83,1.56c-2.59,2.4,-2.57,6.51,0.04,8.91c1.31,1.22,2.34,1.61,4.14,1.61c1.24,0,1.69,-0.09,2.55,-0.51c3.75,-1.8,4.71,-6.73,1.89,-9.73c-1.42,-1.54,-3.75,-2.27,-5.79,-1.84z";
+	var captionSize = {fontSize: '10px', fontSpace: 10};
+	var commentarySize = {fontSize: '10px', fontSpace: 14};		
+	var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
+	var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
+
+	var _mainRowCaptions = [
+	{ text: "Patients", 
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace, 
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
+	{ text: "Patients", 
+		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace,  
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
+	{ text: "Predicted cost",
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 5 * captionSize.fontSpace,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
+	{ text: "Predicted cost",
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 5 * captionSize.fontSpace,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
+	{ text: "Predicted cost",
+		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 5 * captionSize.fontSpace,
+		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
+	{ text: "\n",
+		x: svgMargin.left,
+		y: svgMargin.top },
+	{ text: "Predicted",
+		x: viewBoxSize.width * 0.5 - personBox.width * 6 - 5,
+		y: viewBoxSize.height * 0.5 - personBox.height * 1.5},
+	{ text: "\n",
+		x: 0,
+		y: 0
+	}
+	];
+		var _comparisonRowCaptions = [
+	{text: "\n",
+		x: svgMargin.left,
+		y: 0 },
+	{text: "\n",
+		x: svgMargin.left,
+		y: 0 },
+	{text: "\n",
+		x: svgMargin.left,
+		y: 0 },
+	{text: "Actual cost\n",
+		x: -2 * personBox.width,
+		y: 4 + 2 * personBox.height },
+	{text: "Actual health\n",
+		x: -2 * personBox.width,
+		y: 4 + 2 * personBox.height },
+	{text: "\n",
+		x: svgMargin.left,
+		y: 10 + 2 * personBox.height },
+	{text: "Actual\n",
+		x: -10,
+		y: 2 * personBox.height + 2 },
+	{ text: "\n",
+		x: 0,
+		y: 0 }
+	]
+
+}
 
 
-var personBox = {width: 15, height: 22};
-var radiusW = 7;
-var radiusH = 11;
-var labelBoxSize = {height: 35, width: 80, padding: 2, fontsize: '10px'};
-var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 
-var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
-var topTextSize = {maxHeight: 4, fontsize: '10px', fontSpace: 14, widthCap: 98};
 var buttonSize = {height: 20, width: 40, fontsize: '10px'};
-var captionSize = {fontSize: '10px', fontSpace: 10};
-var commentarySize = {fontSize: '10px', fontSpace: 14};
 
 var padding = {text: 5};
 var duration = 750;
@@ -79,9 +211,6 @@ var makeModel = function(data) {
 	// To determine what coloring scheme to use
 	var _activeColor = LABELNONE;
 
-	//40x40 glyph
-	var _path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
-	
 	var _data = data;
 
 	var _connectors = {
@@ -146,60 +275,6 @@ var makeModel = function(data) {
 		{text: ["We predict only emergency medicine costs due to emergency visits and hospitalizations, rather than all other costs generated by care, to more closely represent catastrophic health events that come from lack of caring for chronic conditions. This label does a good job of predicting cost, and does better at lowering the amount of bias, but again, different populations use emergency care differently and this leads to significant bias still existing in our results."], step: 6, label: LABELEMERGENCY}
 	];
 
-	var _mainRowCaptions = [
-	{ text: "Patients", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace, 
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
-	{ text: "Patients", 
-		x: viewBoxSize.width * 0.5 - 2 * captionSize.fontSpace + personBox.width,  
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 - topTextSize.maxHeight - 15},
-	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontSpace,
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
-	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontSpace,
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
-	{ text: "Predicted cost",
-		x: (viewBoxSize.width - peopleCluster.width) * 0.5 - 8 * captionSize.fontSpace,
-		y: (viewBoxSize.height - peopleCluster.height) * 0.5 + radiusH},
-	{ text: "\n",
-		x: svgMargin.left,
-		y: svgMargin.top },
-	{ text: "Predicted",
-		x: viewBoxSize.width * 0.5 - personBox.width * 6 - 5,
-		y: viewBoxSize.height * 0.5 - personBox.height * 1.5},
-	{ text: "\n",
-		x: 0,
-		y: 0
-	}
-	];
-	
-	var _comparisonRowCaptions = [
-	{text: "\n",
-		x: svgMargin.left,
-		y: 0 },
-	{text: "\n",
-		x: svgMargin.left,
-		y: 0 },
-	{text: "\n",
-		x: svgMargin.left,
-		y: 0 },
-	{text: "Actual cost\n",
-		x: 0.5 * viewBoxSize.width - 2 * peopleCluster.width,
-		y: 4 + 2 * personBox.height },
-	{text: "Actual health\n",
-		x: 0.5 * viewBoxSize.width - 2 * peopleCluster.width,
-		y: 4 + 2 * personBox.height },
-	{text: "\n",
-		x: svgMargin.left,
-		y: 10 + 2 * personBox.height },
-	{text: "Actual\n",
-		x: -10,
-		y: 2 * personBox.height + 2 },
-	{ text: "\n",
-		x: 0,
-		y: 0 }
-	]
 
 
 
@@ -252,15 +327,6 @@ var makeModel = function(data) {
 		},
 		setOrientation: function(direction){
 			_orientation = direction;
-			if (direction == 'PORTRAIT') {
-				viewBoxSize.width = 300;
-				viewBoxSize.height = 450;
-				topTextSize.widthCap = 53;
-				topTextSize.fontsize = '12px';
-				//60x60 path
-				_path = "c-1.97,0.56,-3.13,1.48,-3.67,2.85c-0.25,0.66,-0.29,1.59,-0.23,6.2c0,0,0.06,5.42,0.06,5.42c0,0,0.62,1.32,0.62,1.32c0.33,0.71,0.82,1.51,1.06,1.78c0.66,0.69,0.74,0.95,1.6,6.18c0.43,2.63,0.9,5.05,1.05,5.35c0.45,0.96,1.1,1.22,3.11,1.22c1.95,0,2.49,-0.19,2.98,-1.03c0.21,-0.34,0.64,-2.37,1.11,-5.16c0.92,-5.51,1.03,-5.96,1.63,-6.56c0.73,-0.72,1.37,-2.16,1.67,-3.7c0.37,-2.04,0.37,-9.37,-0.04,-10.72c-0.37,-1.26,-1.37,-2.27,-2.81,-2.85c-0.98,-0.38,-1.48,-0.43,-4.2,-0.49c-2.1,-0.04,-3.38,0.04,-3.94,0.19zm2.12,-13.75c-1.07,0.23,-1.82,0.64,-2.83,1.56c-2.59,2.4,-2.57,6.51,0.04,8.91c1.31,1.22,2.34,1.61,4.14,1.61c1.24,0,1.69,-0.09,2.55,-0.51c3.75,-1.8,4.71,-6.73,1.89,-9.73c-1.42,-1.54,-3.75,-2.27,-5.79,-1.84z";
-			}
-			
 		},
 		//Get the step
 		get: function() {
@@ -563,7 +629,7 @@ var makeSVGView = function(model, data, svgID) {
 	var thresholdG = _svg.append('g')
 		.attr('class', 'allThreshold')
 		.attr('id', 'thresholdG')
-		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5) +',' + (viewBoxSize.height * 0.5 - thresholdShadeSize.height - personBox.height) + ')');
+		.attr('transform', 'translate('+ (viewBoxSize.width * 0.5 + personBox.width) +',' + (viewBoxSize.height * 0.5 - thresholdShadeSize.height - personBox.height) + ')');
 
 	var _thresholdShade = thresholdG.append('rect')
 			.attr('id', 'thresholdShade')
@@ -615,7 +681,7 @@ var makeSVGView = function(model, data, svgID) {
 					else { _x = d.x6; }
 				}
 				if (step == 7) { _x = d.x7health; }
-				return _x * personBox.width - radiusW;
+				return _x * personBox.width - radiusW + 3;
 			})
 		.attr('y', d => { 
 				var _y = d.y0;
@@ -664,7 +730,7 @@ var makeSVGView = function(model, data, svgID) {
 					}
 				}
 				if (step == 7) { _x = d.x7health; _y = d.y7health;}
-				return personPath( _x * personBox.width, _y * personBox.height);
+				return personPath( _x * personBox.width + 3, _y * personBox.height);
 			})
 			.style('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
@@ -940,7 +1006,7 @@ var makeLabelView = function(model, labelID, svgID) {
 					if (index == LABELHEALTH) index = 0;
 					if (index == LABELEMERGENCY) index = 1;
 					if (model.orientation == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width);
-					return (index) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width)) + 0.5 * labelBoxSize.width;
+					return (index + 1) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width)) + 0.5 * labelBoxSize.width;
 				})
 				.attr('dy', labelBoxSize.fontsize)
 				.attr('text-anchor', 'middle')
@@ -1141,7 +1207,7 @@ var makeButtonView = function(model, data, backID, nextID, svgID) {
 
 	return {
 		render: function() {
-			_forwardText.text("NEXT");
+			_forwardText.text("NEXT" + model.get());
 			_backwardText.text("BACK");
 		},
 		register: function(fxn) {
