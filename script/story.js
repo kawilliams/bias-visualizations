@@ -11,7 +11,9 @@ if (screen.width > screen.height) {
 	var labelBoxSize = {height: 35, width: 80, padding: 2, fontsize: '10px'};
 	var topTextSize = {maxHeight: 4, fontsize: '10px', fontSpace: 14, widthCap: 98};
 	//40x40 glyph
-	var _path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+	var normalPerson = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
+	var bigPerson = "c-1.58,0.45,-2.5,1.19,-2.94,2.29c-0.2,0.52,-0.23,1.27,-0.18,4.96c0,0,0.04,4.33,0.04,4.33c0,0,0.5,1.05,0.5,1.05c0.27,0.57,0.66,1.22,0.86,1.43c0.52,0.55,0.58,0.76,1.27,4.95c0.35,2.1,0.72,4.03,0.84,4.27c0.36,0.77,0.89,0.98,2.49,0.98c1.56,0,1.99,-0.15,2.39,-0.83c0.16,-0.27,0.51,-1.89,0.88,-4.12c0.73,-4.41,0.82,-4.77,1.3,-5.25c0.59,-0.57,1.1,-1.73,1.34,-2.95c0.3,-1.64,0.3,-7.51,-0.03,-8.59c-0.3,-1,-1.09,-1.81,-2.25,-2.28c-0.78,-0.3,-1.18,-0.34,-3.36,-0.39c-1.68,-0.03,-2.7,0.03,-3.15,0.15zm1.7,-10.99c-0.86,0.18,-1.46,0.51,-2.27,1.25c-2.07,1.91,-2.06,5.2,0.03,7.12c1.05,0.97,1.87,1.29,3.32,1.29c0.99,0,1.34,-0.08,2.04,-0.41c3,-1.44,3.76,-5.38,1.51,-7.78c-1.14,-1.23,-3,-1.82,-4.63,-1.47z";
+   
 	var captionSize = {fontSize: '10px', fontSpace: 10};
 	var commentarySize = {fontSize: '10px', fontSpace: 14};
 	var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
@@ -58,7 +60,7 @@ if (screen.width > screen.height) {
 		x: 0.5 * viewBoxSize.width - 2 * peopleCluster.width,
 		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
-		x: 0.5 * viewBoxSize.width - 2 * peopleCluster.width,
+		x: 0.5 * viewBoxSize.width - 3 * peopleCluster.width,
 		y: 4 + 2 * personBox.height },
 	{text: "\n",
 		x: svgMargin.left,
@@ -82,7 +84,8 @@ else{
 	var labelBoxSize = {height: 35, width: 80, padding: 2, fontsize: '10px'};
 	var topTextSize = {maxHeight: 4, fontsize: '12px', fontSpace: 14, widthCap: 50};
 	//60x60 path
-	_path = "c-1.97,0.56,-3.13,1.48,-3.67,2.85c-0.25,0.66,-0.29,1.59,-0.23,6.2c0,0,0.06,5.42,0.06,5.42c0,0,0.62,1.32,0.62,1.32c0.33,0.71,0.82,1.51,1.06,1.78c0.66,0.69,0.74,0.95,1.6,6.18c0.43,2.63,0.9,5.05,1.05,5.35c0.45,0.96,1.1,1.22,3.11,1.22c1.95,0,2.49,-0.19,2.98,-1.03c0.21,-0.34,0.64,-2.37,1.11,-5.16c0.92,-5.51,1.03,-5.96,1.63,-6.56c0.73,-0.72,1.37,-2.16,1.67,-3.7c0.37,-2.04,0.37,-9.37,-0.04,-10.72c-0.37,-1.26,-1.37,-2.27,-2.81,-2.85c-0.98,-0.38,-1.48,-0.43,-4.2,-0.49c-2.1,-0.04,-3.38,0.04,-3.94,0.19zm2.12,-13.75c-1.07,0.23,-1.82,0.64,-2.83,1.56c-2.59,2.4,-2.57,6.51,0.04,8.91c1.31,1.22,2.34,1.61,4.14,1.61c1.24,0,1.69,-0.09,2.55,-0.51c3.75,-1.8,4.71,-6.73,1.89,-9.73c-1.42,-1.54,-3.75,-2.27,-5.79,-1.84z";
+	var normalPerson = "c-1.97,0.56,-3.13,1.48,-3.67,2.85c-0.25,0.66,-0.29,1.59,-0.23,6.2c0,0,0.06,5.42,0.06,5.42c0,0,0.62,1.32,0.62,1.32c0.33,0.71,0.82,1.51,1.06,1.78c0.66,0.69,0.74,0.95,1.6,6.18c0.43,2.63,0.9,5.05,1.05,5.35c0.45,0.96,1.1,1.22,3.11,1.22c1.95,0,2.49,-0.19,2.98,-1.03c0.21,-0.34,0.64,-2.37,1.11,-5.16c0.92,-5.51,1.03,-5.96,1.63,-6.56c0.73,-0.72,1.37,-2.16,1.67,-3.7c0.37,-2.04,0.37,-9.37,-0.04,-10.72c-0.37,-1.26,-1.37,-2.27,-2.81,-2.85c-0.98,-0.38,-1.48,-0.43,-4.2,-0.49c-2.1,-0.04,-3.38,0.04,-3.94,0.19zm2.12,-13.75c-1.07,0.23,-1.82,0.64,-2.83,1.56c-2.59,2.4,-2.57,6.51,0.04,8.91c1.31,1.22,2.34,1.61,4.14,1.61c1.24,0,1.69,-0.09,2.55,-0.51c3.75,-1.8,4.71,-6.73,1.89,-9.73c-1.42,-1.54,-3.75,-2.27,-5.79,-1.84z";
+	var bigPerson = "c-2.3,0.65,-3.65,1.72,-4.29,3.32c-0.28,0.77,-0.33,1.86,-0.26,7.24c0,0,0.07,6.32,0.07,6.32c0,0,0.72,1.54,0.72,1.54c0.39,0.83,0.96,1.77,1.24,2.07c0.77,0.81,0.86,1.12,1.86,7.22c0.51,3.07,1.05,5.89,1.23,6.24c0.52,1.11,1.29,1.42,3.63,1.42c2.28,0,2.91,-0.22,3.48,-1.2c0.24,-0.4,0.74,-2.76,1.29,-6.02c1.07,-6.43,1.2,-6.96,1.9,-7.66c0.86,-0.83,1.6,-2.51,1.95,-4.31c0.44,-2.38,0.44,-10.93,-0.05,-12.51c-0.43,-1.46,-1.59,-2.65,-3.28,-3.32c-1.13,-0.44,-1.72,-0.51,-4.9,-0.57c-2.45,-0.05,-3.93,0.04,-4.59,0.22zm2.47,-16.04c-1.24,0.26,-2.12,0.75,-3.3,1.82c-3.02,2.8,-3,7.59,0.04,10.39c1.53,1.42,2.74,1.88,4.84,1.88c1.44,0,1.97,-0.11,2.97,-0.59c4.38,-2.1,5.49,-7.85,2.21,-11.35c-1.66,-1.8,-4.37,-2.65,-6.76,-2.15z";
 	var captionSize = {fontSize: '10px', fontSpace: 10};
 	var commentarySize = {fontSize: '10px', fontSpace: 14};		
 	var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
@@ -129,7 +132,7 @@ else{
 		x: -2 * personBox.width,
 		y: 4 + 2 * personBox.height },
 	{text: "Actual health\n",
-		x: -2 * personBox.width,
+		x: -2 * personBox.width - 8,
 		y: 4 + 2 * personBox.height },
 	{text: "\n",
 		x: svgMargin.left,
@@ -202,7 +205,7 @@ var makeModel = function(data) {
 	var _observers = makeObservers();
 
 	// The storyboard step (0 - STEPCOUNT)
-	var _step = 0;
+	var _step = 3;
 
 	//The orientation of the vis
 	var _orientation = 'PORTRAIT';
@@ -212,6 +215,9 @@ var makeModel = function(data) {
 	var _activeColor = LABELNONE;
 
 	var _data = data;
+
+	var _path = normalPerson;
+	var _bigPerson = bigPerson;
 
 	var _connectors = {
 		predActCostInit: [], //length should be 9
@@ -265,8 +271,8 @@ var makeModel = function(data) {
 	var _errorFlag = false;
 
 	var _commentary = [
-		{text: ['Pretty close!'], step: 3, label: LABELCOST},
-		{text: ['Not so good'], step: 4, label: LABELCOST},
+		{text: ["Pretty close!"], step: 3, label: LABELCOST},
+		{text: ["Not so good"], step: 4, label: LABELCOST},
 		{text: ["Much better!"], step: 6, label: LABELHEALTH},
 		{text: ["We predict a patient’s health in a given year by measuring the number of chronic conditions that flare up that year. Because the care program operates to improve the management of chronic conditions, patients with the most doctor’s appointments and hospitalizations related to chronic conditions could be a promising group to prioritize for this preventative intervention. This label produces accurate cost predictions, while also accurately predicting health with minimal bias."], step: 6, label: LABELHEALTH},
 		{text: ["Not so good"], step: 6, label: LABELCOST},
@@ -359,6 +365,9 @@ var makeModel = function(data) {
 		},
 		getPath: function() {
 			return _path;
+		},
+		getBigPerson: function(){
+			return _bigPerson;
 		},
 		//Get the glyph color scheme
 		getColor: function(d) {
@@ -456,7 +465,8 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('class', 'allPeople')
 		.attr('id', 'peopleG');
 	// Move the patients to the right side
-	peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + svgMargin.left - 0.5 * radiusW - 1) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');
+	if (model.orientation() == 'LANDSCAPE') { peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + svgMargin.left) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');}
+	else { peopleG.attr('transform', 'translate('+ ((viewBoxSize.width - peopleCluster.width) * 0.5 + svgMargin.left - 3) +',' + ((viewBoxSize.height - peopleCluster.height) * 0.5 + topTextSize.maxHeight) + ')');}
 
 	var step = model.get(); 
 
@@ -472,10 +482,12 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y2', d => d.y0 * personBox.height) //and connects to the shadow head on transition
 		.attr('opacity', 1); 
 
+	if (model.orientation() == 'PORTRAIT') _connectorLines.attr('transform', 'translate(2,0)');
+
 	var makeBig = function(event) {
-		var bigPerson = "c-1.58,0.45,-2.5,1.19,-2.94,2.29c-0.2,0.52,-0.23,1.27,-0.18,4.96c0,0,0.04,4.33,0.04,4.33c0,0,0.5,1.05,0.5,1.05c0.27,0.57,0.66,1.22,0.86,1.43c0.52,0.55,0.58,0.76,1.27,4.95c0.35,2.1,0.72,4.03,0.84,4.27c0.36,0.77,0.89,0.98,2.49,0.98c1.56,0,1.99,-0.15,2.39,-0.83c0.16,-0.27,0.51,-1.89,0.88,-4.12c0.73,-4.41,0.82,-4.77,1.3,-5.25c0.59,-0.57,1.1,-1.73,1.34,-2.95c0.3,-1.64,0.3,-7.51,-0.03,-8.59c-0.3,-1,-1.09,-1.81,-2.25,-2.28c-0.78,-0.3,-1.18,-0.34,-3.36,-0.39c-1.68,-0.03,-2.7,0.03,-3.15,0.15zm1.7,-10.99c-0.86,0.18,-1.46,0.51,-2.27,1.25c-2.07,1.91,-2.06,5.2,0.03,7.12c1.05,0.97,1.87,1.29,3.32,1.29c0.99,0,1.34,-0.08,2.04,-0.41c3,-1.44,3.76,-5.38,1.51,-7.78c-1.14,-1.23,-3,-1.82,-4.63,-1.47z";
-		var normalPerson = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
-        
+		var bigPerson = model.getBigPerson();
+		var normalPerson = model.getPath();
+
 		var d = d3.select(this).datum();
 		var step = model.get();
 
@@ -505,12 +517,12 @@ var makeSVGView = function(model, data, svgID) {
         var normalPath = start + " " + normalPerson;
   
 		d3.select(this)
-		.transition()
-		.ease(d3.easeBounce)
-		.attr("d", bigPath)
-		.transition()
-		.ease(d3.easeBounce)
-		.attr("d", normalPath);
+			.transition()
+			.ease(d3.easeBounce)
+			.attr("d", bigPath)
+			.transition()
+			.ease(d3.easeBounce)
+			.attr("d", normalPath);
 	}
 
 	var showPatientId = function(event) {
@@ -524,9 +536,6 @@ var makeSVGView = function(model, data, svgID) {
 
 	function personPath(startX, startY) {
 
-        //var path = "c-1.31,0.38,-2.09,0.99,-2.45,1.9c-0.16,0.44,-0.19,1.07,-0.15,4.14c0,0,0.04,3.61,0.04,3.61c0,0,0.41,0.88,0.41,0.88c0.22,0.47,0.55,1.01,0.71,1.18c0.44,0.47,0.49,0.64,1.06,4.13c0.29,1.75,0.61,3.36,0.7,3.56c0.3,0.64,0.74,0.81,2.08,0.81c1.3,0,1.66,-0.12,1.99,-0.68c0.14,-0.23,0.42,-1.58,0.73,-3.44c0.62,-3.68,0.69,-3.98,1.09,-4.38c0.49,-0.47,0.91,-1.43,1.12,-2.46c0.25,-1.36,0.25,-6.25,-0.03,-7.15c-0.25,-0.84,-0.91,-1.51,-1.87,-1.9c-0.65,-0.25,-0.99,-0.29,-2.81,-0.32c-1.39,-0.03,-2.24,0.02,-2.62,0.12zm1.41,-9.16c-0.71,0.15,-1.21,0.42,-1.88,1.04c-1.73,1.6,-1.72,4.33,0.02,5.93c0.88,0.82,1.56,1.08,2.76,1.08c0.83,0,1.13,-0.06,1.7,-0.34c2.5,-1.2,3.14,-4.49,1.27,-6.48c-0.95,-1.03,-2.5,-1.52,-3.87,-1.23z";
-        //50x50 person
-        // var path = "c-1.64,0.47,-2.61,1.24,-3.06,2.38c-0.21,0.54,-0.24,1.32,-0.19,5.17c0,0,0.05,4.51,0.05,4.51c0,0,0.51,1.1,0.51,1.1c0.28,0.59,0.69,1.26,0.89,1.48c0.55,0.58,0.61,0.8,1.33,5.16c0.36,2.18,0.75,4.2,0.88,4.45c0.37,0.8,0.92,1.02,2.59,1.02c1.63,0,2.08,-0.16,2.48,-0.86c0.18,-0.28,0.54,-1.97,0.93,-4.3c0.76,-4.59,0.86,-4.97,1.36,-5.47c0.61,-0.59,1.14,-1.8,1.39,-3.08c0.31,-1.7,0.31,-7.81,-0.04,-8.93c-0.31,-1.05,-1.14,-1.89,-2.34,-2.38c-0.81,-0.31,-1.23,-0.36,-3.5,-0.41c-1.75,-0.03,-2.81,0.04,-3.28,0.16zm1.77,-11.45c-0.89,0.18,-1.52,0.53,-2.36,1.29c-2.16,2,-2.14,5.43,0.03,7.43c1.09,1.01,1.95,1.34,3.45,1.34c1.03,0,1.41,-0.08,2.13,-0.42c3.12,-1.5,3.92,-5.61,1.57,-8.11c-1.18,-1.28,-3.12,-1.89,-4.82,-1.53z";
         var path = model.getPath();
         var start = "M " + startX + " " + startY;
         path = start + " " + path; 
@@ -566,7 +575,7 @@ var makeSVGView = function(model, data, svgID) {
 	var _raceKey = d3.select(svgID).append('g').attr('class', 'racekey');
 	var _raceKeyRect = _raceKey.append('rect').attr('class', 'racekey')
 		.attr('x', viewBoxSize.width / 2 - 20)
-		.attr('y', viewBoxSize.height/2 + radiusH + 5)
+		.attr('y', (model.orientation() == 'PORTRAIT') ? viewBoxSize.height/2 + radiusH : viewBoxSize.height/2 + radiusH + 5)
 		.attr('width', 40)
 		.attr('height', 25)
 		.attr('fill', 'none')
@@ -681,7 +690,7 @@ var makeSVGView = function(model, data, svgID) {
 					else { _x = d.x6; }
 				}
 				if (step == 7) { _x = d.x7health; }
-				return _x * personBox.width - radiusW + 3;
+				return _x * personBox.width - radiusW;
 			})
 		.attr('y', d => { 
 				var _y = d.y0;
@@ -730,7 +739,7 @@ var makeSVGView = function(model, data, svgID) {
 					}
 				}
 				if (step == 7) { _x = d.x7health; _y = d.y7health;}
-				return personPath( _x * personBox.width + 3, _y * personBox.height);
+				return personPath( _x * personBox.width, _y * personBox.height);
 			})
 			.style('fill', d => model.getColor(d))
 			.style('stroke', (step == 5) ? 'black' : 'none');
@@ -971,7 +980,7 @@ var makeLabelView = function(model, labelID, svgID) {
 			.attr('class', 'labelClass svgtext')
 			.attr('x', (d, i) => {
 				if (model.orientation() == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width) + labelBoxSize.padding;
-				return (i - 1) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width));
+				return (i) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width));
 			})
 			.attr('y', (d, i) => {
 				if (model.orientation() == 'LANDSCAPE') return i * (labelBoxSize.height + labelBoxSize.padding) + (viewBoxSize.height * 0.5 - 1.5 * labelBoxSize.height);
@@ -1005,8 +1014,8 @@ var makeLabelView = function(model, labelID, svgID) {
 					if (index == LABELCOST) index = -1;
 					if (index == LABELHEALTH) index = 0;
 					if (index == LABELEMERGENCY) index = 1;
-					if (model.orientation == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width);
-					return (index + 1) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width)) + 0.5 * labelBoxSize.width;
+					if (model.orientation() == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width);
+					return (index) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width)) + 0.5 * labelBoxSize.width;
 				})
 				.attr('dy', labelBoxSize.fontsize)
 				.attr('text-anchor', 'middle')
