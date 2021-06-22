@@ -205,7 +205,7 @@ var makeModel = function(data) {
 	var _observers = makeObservers();
 
 	// The storyboard step (0 - STEPCOUNT)
-	var _step = 3;
+	var _step = 0;
 
 	//The orientation of the vis
 	var _orientation = 'PORTRAIT';
@@ -956,7 +956,7 @@ var makeLabelView = function(model, labelID, svgID) {
 			})
 			.attr('width', labelBoxSize.width)
 			.attr('height', labelBoxSize.height)
-			.attr('fill', d => model.getLabelColor(d.id, false)) //green
+			.attr('fill', d => model.getLabelColor(d.id, false)) 
 			.attr('rx', 2)
 			.style('filter', function(){
 				if (model.getClickedCostLabel()) return 'url(#drop-shadow)';
@@ -1011,9 +1011,16 @@ var makeLabelView = function(model, labelID, svgID) {
 				tspanLabel
 				.attr('x', function(d, i){
 					var index = this.id;
-					if (index == LABELCOST) index = -1;
-					if (index == LABELHEALTH) index = 0;
-					if (index == LABELEMERGENCY) index = 1;
+					if (model.orientation() == 'LANDSCAPE') {
+						if (index == LABELCOST) index = -1;
+						if (index == LABELHEALTH) index = 0;
+						if (index == LABELEMERGENCY) index = 1;
+					} else {
+						if (index == LABELCOST) index = 0;
+						if (index == LABELHEALTH) index = -1;
+						if (index == LABELEMERGENCY) index = 1;
+					}
+					
 					if (model.orientation() == 'LANDSCAPE') return svgMargin.left + (0.8 * labelBoxSize.width);
 					return (index) * (labelBoxSize.width + labelBoxSize.padding) + (0.5 * (viewBoxSize.width - labelBoxSize.width)) + 0.5 * labelBoxSize.width;
 				})
