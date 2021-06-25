@@ -29,7 +29,7 @@ if (screen.width > screen.height) {
 	var bigPerson = "c-1.58,0.45,-2.5,1.19,-2.94,2.29c-0.2,0.52,-0.23,1.27,-0.18,4.96c0,0,0.04,4.33,0.04,4.33c0,0,0.5,1.05,0.5,1.05c0.27,0.57,0.66,1.22,0.86,1.43c0.52,0.55,0.58,0.76,1.27,4.95c0.35,2.1,0.72,4.03,0.84,4.27c0.36,0.77,0.89,0.98,2.49,0.98c1.56,0,1.99,-0.15,2.39,-0.83c0.16,-0.27,0.51,-1.89,0.88,-4.12c0.73,-4.41,0.82,-4.77,1.3,-5.25c0.59,-0.57,1.1,-1.73,1.34,-2.95c0.3,-1.64,0.3,-7.51,-0.03,-8.59c-0.3,-1,-1.09,-1.81,-2.25,-2.28c-0.78,-0.3,-1.18,-0.34,-3.36,-0.39c-1.68,-0.03,-2.7,0.03,-3.15,0.15zm1.7,-10.99c-0.86,0.18,-1.46,0.51,-2.27,1.25c-2.07,1.91,-2.06,5.2,0.03,7.12c1.05,0.97,1.87,1.29,3.32,1.29c0.99,0,1.34,-0.08,2.04,-0.41c3,-1.44,3.76,-5.38,1.51,-7.78c-1.14,-1.23,-3,-1.82,-4.63,-1.47z";
    
 	var captionSize = {fontSize: '10px', fontSpace: 10};
-	var commentarySize = {fontSize: '10px', fontSpace: 14};
+	var commentarySize = {fontSize: '10px', fontSpace: 14, widthCap: 98};
 	var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 	var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
 
@@ -151,7 +151,7 @@ else{
 	var normalPerson = "c-1.97,0.56,-3.13,1.48,-3.67,2.85c-0.25,0.66,-0.29,1.59,-0.23,6.2c0,0,0.06,5.42,0.06,5.42c0,0,0.62,1.32,0.62,1.32c0.33,0.71,0.82,1.51,1.06,1.78c0.66,0.69,0.74,0.95,1.6,6.18c0.43,2.63,0.9,5.05,1.05,5.35c0.45,0.96,1.1,1.22,3.11,1.22c1.95,0,2.49,-0.19,2.98,-1.03c0.21,-0.34,0.64,-2.37,1.11,-5.16c0.92,-5.51,1.03,-5.96,1.63,-6.56c0.73,-0.72,1.37,-2.16,1.67,-3.7c0.37,-2.04,0.37,-9.37,-0.04,-10.72c-0.37,-1.26,-1.37,-2.27,-2.81,-2.85c-0.98,-0.38,-1.48,-0.43,-4.2,-0.49c-2.1,-0.04,-3.38,0.04,-3.94,0.19zm2.12,-13.75c-1.07,0.23,-1.82,0.64,-2.83,1.56c-2.59,2.4,-2.57,6.51,0.04,8.91c1.31,1.22,2.34,1.61,4.14,1.61c1.24,0,1.69,-0.09,2.55,-0.51c3.75,-1.8,4.71,-6.73,1.89,-9.73c-1.42,-1.54,-3.75,-2.27,-5.79,-1.84z";
 	var bigPerson = "c-2.3,0.65,-3.65,1.72,-4.29,3.32c-0.28,0.77,-0.33,1.86,-0.26,7.24c0,0,0.07,6.32,0.07,6.32c0,0,0.72,1.54,0.72,1.54c0.39,0.83,0.96,1.77,1.24,2.07c0.77,0.81,0.86,1.12,1.86,7.22c0.51,3.07,1.05,5.89,1.23,6.24c0.52,1.11,1.29,1.42,3.63,1.42c2.28,0,2.91,-0.22,3.48,-1.2c0.24,-0.4,0.74,-2.76,1.29,-6.02c1.07,-6.43,1.2,-6.96,1.9,-7.66c0.86,-0.83,1.6,-2.51,1.95,-4.31c0.44,-2.38,0.44,-10.93,-0.05,-12.51c-0.43,-1.46,-1.59,-2.65,-3.28,-3.32c-1.13,-0.44,-1.72,-0.51,-4.9,-0.57c-2.45,-0.05,-3.93,0.04,-4.59,0.22zm2.47,-16.04c-1.24,0.26,-2.12,0.75,-3.3,1.82c-3.02,2.8,-3,7.59,0.04,10.39c1.53,1.42,2.74,1.88,4.84,1.88c1.44,0,1.97,-0.11,2.97,-0.59c4.38,-2.1,5.49,-7.85,2.21,-11.35c-1.66,-1.8,-4.37,-2.65,-6.76,-2.15z";
 	var captionSize = {fontSize: '10px', fontSpace: 10};
-	var commentarySize = {fontSize: '10px', fontSpace: 14};	
+	var commentarySize = {fontSize: '10px', fontSpace: 14, widthCap: 60};	
 
 	var thresholdShadeSize = {height: 2 * personBox.height, width: 5 * personBox.width };
 	var peopleCluster = {height: 4 * personBox.height, width: 10 * personBox.width};
@@ -214,19 +214,19 @@ else{
 		  step: 3, 
 		  label: LABELCOST, 
 		  x: peopleCluster.width - 10,
-		  y: viewBoxSize.height * 0.5 + 2 * personBox.height
+		  y: viewBoxSize.height * 0.5 + 2 * personBox.height - 5
 		},
 		{text: ["Not so good"], 
 		  step: 4, 
 		  label: LABELCOST,
 		  x: peopleCluster.width - 10,
-		  y: viewBoxSize.height * 0.5 + 2 * personBox.height
+		  y: viewBoxSize.height * 0.5 + 2 * personBox.height - 5
 		},
 		{text: ["Much better!"], 
 		  step: 6, 
 		  label: LABELHEALTH,
 		  x: peopleCluster.width - 10,
-		  y: viewBoxSize.height * 0.5 + 2 * personBox.height
+		  y: viewBoxSize.height * 0.5 + 2 * personBox.height - 5
 		},
 		{text: ["We predict a patient’s health in a given year by measuring the number of chronic conditions that flare up that year. Because the care program operates to improve the management of chronic conditions, patients with the most doctor’s appointments and hospitalizations related to chronic conditions could be a promising group to prioritize for this preventative intervention. This label produces accurate cost predictions, while also accurately predicting health with minimal bias."],
 		  step: 6, 
@@ -238,7 +238,7 @@ else{
 		  step: 6, 
 		  label: LABELCOST,
 		  x: peopleCluster.width - 10,
-		  y: viewBoxSize.height * 0.5 + 2 * personBox.height
+		  y: viewBoxSize.height * 0.5 + 2 * personBox.height - 5
 		},
 		{text: ["We score a patient based on the total cost of their care for a year, such as costs of in- and out-patient procedures, surgical costs, and insurance costs. From a statistical perspective, this value is useful (and used industry-wide) because it is correlated with health and it is a real-world number that is easy to calculate. While the care cost label accurately predicts costs, it does not do a great job of predicting health. This severely disadvantages Black patients when the variable we care about is health. "], 
 		  step: 6, 
@@ -250,7 +250,7 @@ else{
 		  step: 6, 
 		  label: LABELEMERGENCY,
 		  x: peopleCluster.width - 10,
-		  y: viewBoxSize.height * 0.5 + 2 * personBox.height
+		  y: viewBoxSize.height * 0.5 + 2 * personBox.height - 5
 		},
 		{text: ["We predict only emergency medicine costs due to emergency visits and hospitalizations, rather than all other costs generated by care, to more closely represent catastrophic health events that come from lack of caring for chronic conditions. This label does a good job of predicting cost, and does better at lowering the amount of bias, but again, different populations use emergency care differently and this leads to significant bias still existing in our results."], 
 		  step: 6, 
@@ -650,7 +650,7 @@ var makeSVGView = function(model, data, svgID) {
 		.attr('y', d => d.y0 * personBox.height - radiusH)
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
-		.style('font-size', 10);
+		.style('font-size', '10px');
 
 	var peopleShadows = peopleG.selectAll('.shadows')
 		.attr('r', 0);
@@ -1177,7 +1177,7 @@ var makeCommentaryView = function(model, data, svgID) {
 		.attr('class', 'commentary svgtext')
 		.attr('display', 'none');
 	_commentary.selectAll('tspan.commentary')
-		.data(d => wrapText(d.text[0], topTextSize.widthCap))
+		.data(d => wrapText(d.text[0], commentarySize.widthCap))
 		.enter()
 		.append('tspan')
 		.attr('class', 'commentary')
