@@ -804,7 +804,7 @@ var makeSVGView = function(model, data, svgID) {
 			})
 		.text(d => (d.id < 10) ? "Patient " + d.id : "")
 		.attr('opacity', 0)
-		.style('font-size', 3);
+		.style('font-size', '10px');
 
 		var people = _svg.selectAll('path.allPeople')
 			.transition()
@@ -939,6 +939,21 @@ var makeSVGView = function(model, data, svgID) {
 				.transition()
 				.duration(duration)
 				.attr('opacity',1);
+			if ((step == 5) && (model.orientation() == 'PORTRAIT')){
+				_svg.select("#thresholdShade")
+					.transition()
+					.attr('x', -personBox.width);
+				_svg.selectAll('.threshold')
+					.attr('x', -1 * personBox.width);				
+			} else if (model.orientation() == 'PORTRAIT') {
+				_svg.select("#thresholdShade")
+					.transition()
+					.attr('x', 0);
+				_svg.selectAll('.threshold')
+					.attr('x', 0);
+					
+					
+			}
 		} 
 		else {
 			_svg.selectAll('.threshold') 
@@ -1212,8 +1227,6 @@ var makeCommentaryView = function(model, data, svgID) {
 				if (((step == 4) || (step == 3)) && (d.step == step)) {
 					return 'inline';
 				}
-				console.log(d);
-				console.log(isLabelActive, d.step, step, d.label, label);
 				if ((isLabelActive) && (d.step == step) && (d.label == label)) {
 					return 'inline';
 				}
